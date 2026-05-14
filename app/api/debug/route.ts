@@ -51,6 +51,12 @@ export async function GET() {
     club: { clubName: club.clubName, logoUrl: club.logoUrl },
     hasWebsiteConfig: !!config,
     navCount: config?.navigation?.length ?? 0,
+    theme: config?.theme ?? null,
+    headerConfig: config?.headerConfig ?? null,
+    footerConfig: config?.footerConfig ?? null,
+    socialLinks: config?.socialLinks ?? [],
+    socialDisplay: config?.socialDisplay ?? null,
+    socialIconStyle: config?.socialIconStyle ?? null,
     page: page ? { slug: page.slug, title: page.title, blockCount: page.blocks?.length, blocks: blockSummary } : null,
   });
 }
