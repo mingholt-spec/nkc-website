@@ -15,7 +15,7 @@ interface Props { page: WebsitePage }
 
 export default function PageRenderer({ page }: Props) {
   if (page.mode === 'html' && page.htmlContent) {
-    return <div dangerouslySetInnerHTML={{ __html: page.htmlContent }} />;
+    return <div dangerouslySetInnerHTML={{ __html: page.htmlContent ?? '' }} />;
   }
 
   return (

@@ -6,7 +6,7 @@ export default function TextBlock({ block }: Props) {
       <div
         className="prose prose-zinc max-w-none"
         style={{ textAlign: block.style?.textAlign }}
-        dangerouslySetInnerHTML={{ __html: block.content }}
+        dangerouslySetInnerHTML={{ __html: block.content ?? '' }}
       />
     </div>
   );

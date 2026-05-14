@@ -50,7 +50,7 @@ export default function BlogPost({ post }: Props) {
       {/* Content */}
       <div
         className="prose prose-zinc max-w-none prose-headings:font-bold prose-a:text-red-600"
-        dangerouslySetInnerHTML={{ __html: post.content }}
+        dangerouslySetInnerHTML={{ __html: post.content ?? '' }}
       />
 
       {/* Tags */}
