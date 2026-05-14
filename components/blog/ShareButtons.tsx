@@ -83,11 +83,8 @@ export default function ShareButtons({ title, primaryColor = '#e50401', backHref
           <button
             onClick={handleCopy}
             aria-label="Kopiera länk"
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-            style={{
-              backgroundColor: copied ? `${primaryColor}20` : undefined,
-              color: copied ? primaryColor : undefined,
-            }}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${copied ? '' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'}`}
+            style={copied ? { backgroundColor: `${primaryColor}20`, color: primaryColor } : undefined}
           >
             {copied ? (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">

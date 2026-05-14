@@ -19,7 +19,20 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-raleway, var(--font-outfit)), system-ui, sans-serif;
 }
 
-/* Pointer cursor for all interactive elements — must use !important to beat @layer base */
-button, [role="button"], summary, label[for], select, a[href] {
-  cursor: pointer !important;
+/* In Tailwind v4, !important unlayered loses to !important layered — put cursor fix in @layer base */
+@layer base {
+  button, [role="button"], a[href], label[for], select, summary {
+    cursor: pointer;
+  }
+}
+
+/* Dark mode overrides for AI-generated HTML block CSS variables */
+.dark [class*="ai-"] {
+  --ai-bg: #18181b;
+  --ai-text-primary: #fafafa;
+  --ai-text-secondary: #71717a;
+  --ai-border: rgba(255, 255, 255, 0.08);
+  --ai-card-bg: #27272a;
+  --ai-card-border: rgba(255, 255, 255, 0.08);
+  --ai-input-bg: #27272a;
 }
