@@ -89,7 +89,7 @@ export type PageBlockCta = {
 
 export type PageBlockHtml = {
   id: string; type: 'html'; name?: string;
-  content: string;
+  code: string;
   style?: BlockStyleOptions; spacing?: BlockSpacing;
 };
 

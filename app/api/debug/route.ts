@@ -9,8 +9,8 @@ export async function GET() {
     index: i,
     type: b.type,
     id: b.id,
-    contentType: typeof (b as Record<string, unknown>).content,
-    contentPreview: String((b as Record<string, unknown>).content ?? '').slice(0, 100),
+    codeType: typeof (b as Record<string, unknown>).code,
+    codePreview: String((b as Record<string, unknown>).code ?? '').slice(0, 100),
   }));
 
   return NextResponse.json({
