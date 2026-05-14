@@ -11,7 +11,7 @@ export default function TextBlock({ block }: Props) {
   return (
     <div className={`px-6 py-4 ${alignClass}`}>
       <div
-        className="prose prose-zinc max-w-none"
+        className="prose prose-zinc dark:prose-invert max-w-none"
         style={{ fontFamily: 'var(--font-raleway, var(--font-inter)), system-ui, sans-serif' }}
         dangerouslySetInnerHTML={{ __html: html }}
       />

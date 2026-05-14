@@ -79,7 +79,7 @@ export default function PublicLayoutClient({ club, config, pages, children }: Pr
         onToggleLanguage={toggleLanguage}
         resolvedColors={resolvedColors}
       />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1" style={{ backgroundColor: resolvedColors.bg, color: resolvedColors.text }}>{children}</main>
       <SiteFooter
         club={club}
         config={config}
