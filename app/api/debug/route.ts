@@ -14,10 +14,27 @@ export async function GET() {
       extra.columnsIsArray = Array.isArray(cols);
       extra.columnsLength = Array.isArray(cols) ? cols.length : null;
       extra.columnsPreview = Array.isArray(cols)
-        ? (cols as unknown[][]).map((col, ci) => Array.isArray(col)
-            ? col.map((cb: unknown) => ({ type: (cb as PageBlock).type, id: (cb as PageBlock).id }))
-            : { ci, notArray: true, type: typeof col }
-          )
+        ? (cols as unknown[]).map((col, ci) => {
+            if (Array.isArray(col)) {
+              return col.map((cb: unknown) => ({ type: (cb as PageBlock).type, id: (cb as PageBlock).id }));
+            }
+            // col is an object — show its keys and first entry
+            const obj = col as Record<string, unknown>;
+            const keys = Object.keys(obj);
+            const firstKey = keys[0];
+            const firstVal = firstKey ? obj[firstKey] : null;
+            return {
+              ci,
+              notArray: true,
+              type: typeof col,
+              keys,
+              firstKeyType: typeof firstVal,
+              firstKeyIsArray: Array.isArray(firstVal),
+              firstKeyPreview: Array.isArray(firstVal)
+                ? (firstVal as unknown[]).map((b: unknown) => ({ type: (b as PageBlock).type }))
+                : String(firstVal).slice(0, 80),
+            };
+          })
         : typeof cols;
     }
     return {
