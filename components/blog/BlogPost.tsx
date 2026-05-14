@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { NewsPost } from '@/lib/types';
+import ShareButtons from './ShareButtons';
 
 interface Props { post: NewsPost }
 
@@ -61,6 +62,12 @@ export default function BlogPost({ post }: Props) {
           ))}
         </div>
       )}
+
+      <ShareButtons
+        title={post.title}
+        backHref="/blogg"
+        backLabel="Tillbaka till bloggen"
+      />
     </article>
   );
 }
