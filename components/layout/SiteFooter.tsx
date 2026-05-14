@@ -90,43 +90,46 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {footer?.text && (
-            <p className="text-sm" style={{ color: `${txtColor}99`, fontFamily: theme?.bodyFont }}>
-              {footer.text}
-            </p>
-          )}
-
-          {footer?.links && footer.links.length > 0 && (
-            <nav className="flex items-center gap-4 flex-wrap">
-              {footer.links.map((link, idx) => (
-                <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer"
-                  className="text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-opacity"
-                  style={{ color: txtColor, fontFamily: theme?.bodyFont }}>
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-          )}
-
-          {socialLinks.length > 0 && (
-            <div className="flex items-center gap-3">
-              {socialLinks.filter(l => l.url).map((link) => {
-                const icon = SOCIAL_ICONS[link.platform];
-                if (!icon) return null;
-                const brand = useColor ? BRAND_COLORS[link.platform] : null;
-                return (
-                  <a key={link.platform} href={link.url} target="_blank" rel="noopener noreferrer"
-                    aria-label={link.platform}
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:opacity-80"
-                    style={{ backgroundColor: brand ? brand.bg : `${txtColor}10`, color: brand ? brand.fg : txtColor }}>
-                    <svg className="w-4 h-4" fill="currentColor" viewBox={icon.viewBox}><path d={icon.path} /></svg>
+        {/* Social + links row */}
+        {(socialLinks.length > 0 || (footer?.links && footer.links.length > 0)) && (
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+            {footer?.links && footer.links.length > 0 && (
+              <nav className="flex items-center gap-4 flex-wrap justify-center md:justify-start">
+                {footer.links.map((link, idx) => (
+                  <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer"
+                    className="text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-opacity"
+                    style={{ color: txtColor, fontFamily: theme?.bodyFont }}>
+                    {link.label}
                   </a>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                ))}
+              </nav>
+            )}
+
+            {socialLinks.length > 0 && (
+              <div className="flex items-center gap-3">
+                {socialLinks.filter(l => l.url).map((link) => {
+                  const icon = SOCIAL_ICONS[link.platform];
+                  if (!icon) return null;
+                  const brand = useColor ? BRAND_COLORS[link.platform] : null;
+                  return (
+                    <a key={link.platform} href={link.url} target="_blank" rel="noopener noreferrer"
+                      aria-label={link.platform}
+                      className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:opacity-80"
+                      style={{ backgroundColor: brand ? brand.bg : `${txtColor}10`, color: brand ? brand.fg : txtColor }}>
+                      <svg className="w-4 h-4" fill="currentColor" viewBox={icon.viewBox}><path d={icon.path} /></svg>
+                    </a>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {footer?.text && (
+          <p className="text-sm mb-6 text-center md:text-left" style={{ color: `${txtColor}99`, fontFamily: theme?.bodyFont }}>
+            {footer.text}
+          </p>
+        )}
 
         {footer?.showPoweredBy !== false && (
           <div className="mt-6 pt-6 border-t text-center" style={{ borderColor: `${txtColor}10` }}>

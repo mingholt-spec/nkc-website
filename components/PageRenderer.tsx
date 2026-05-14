@@ -10,6 +10,7 @@ import ColumnsBlock from './blocks/ColumnsBlock';
 import SpacerBlock from './blocks/SpacerBlock';
 import DividerBlock from './blocks/DividerBlock';
 import CtaBlock from './blocks/CtaBlock';
+import BlogBlock from './blocks/BlogBlock';
 
 interface Props { page: WebsitePage }
 
@@ -40,8 +41,8 @@ export function BlockRenderer({ block }: { block: PageBlock }) {
     case 'spacer':   return <SpacerBlock block={block} />;
     case 'divider':  return <DividerBlock block={block} />;
     case 'cta':      return <CtaBlock block={block} />;
-    case 'form':     return null; // Forms rendered client-side
-    case 'blog':     return null; // Blog block server-rendered separately
+    case 'blog':     return <BlogBlock block={block} />;
+    case 'form':     return null;
     default:         return null;
   }
 }
