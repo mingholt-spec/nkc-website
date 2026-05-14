@@ -78,8 +78,21 @@ export const getBlogPosts = cache(async (limitCount = 50): Promise<NewsPost[]> =
       .orderBy('publishedAt', 'desc')
       .limit(limitCount)
       .get();
-    return snap.docs.map(d => docToNewsPost(d.id, d.data() as Record<string, unknown>));
-  } catch { return []; }
+    if (!snap.empty) return snap.docs.map(d => docToNewsPost(d.id, d.data() as Record<string, unknown>));
+    // Fallback: some posts may not have publishedAt — try createdAt
+    const fallback = await db.collection('news')
+      .where('isPublished', '==', true)
+      .orderBy('createdAt', 'desc')
+      .limit(limitCount)
+      .get();
+    return fallback.docs.map(d => docToNewsPost(d.id, d.data() as Record<string, unknown>));
+  } catch {
+    // Composite index may be missing — last resort: fetch without ordering
+    try {
+      const snap = await db!.collection('news').where('isPublished', '==', true).limit(limitCount).get();
+      return snap.docs.map(d => docToNewsPost(d.id, d.data() as Record<string, unknown>));
+    } catch { return []; }
+  }
 });
 
 export const getBlogPostBySlug = cache(async (slug: string): Promise<NewsPost | null> => {
