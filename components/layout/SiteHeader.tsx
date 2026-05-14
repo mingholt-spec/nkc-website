@@ -215,7 +215,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
   };
 
   const DarkToggle = ({ ariaLabel }: { ariaLabel: string }) => (
-    <button onClick={onToggleDark} className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110"
+    <button onClick={onToggleDark} className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
       style={{ color: txtColor, backgroundColor: `${txtColor}10` }} aria-label={ariaLabel}>
       {isDark ? (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
@@ -283,11 +283,11 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
           <div className="w-px h-6" style={{ backgroundColor: `${txtColor}20` }} />
           <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5">
             <button onClick={() => language !== 'sv' && onToggleLanguage()} title="Svenska"
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'sv' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
+              className={`cursor-pointer flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'sv' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
               <span className="text-sm leading-none">🇸🇪</span>
             </button>
             <button onClick={() => language !== 'en' && onToggleLanguage()} title="English"
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
+              className={`cursor-pointer flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
               <span className="text-sm leading-none">🇬🇧</span>
             </button>
           </div>
@@ -370,12 +370,12 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
             <div className="flex justify-center pt-3">
               <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5">
                 <button onClick={() => language !== 'sv' && onToggleLanguage()} title="Svenska"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'sv' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
+                  className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'sv' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
                   <span className="text-sm leading-none">🇸🇪</span>
                   <span>SV</span>
                 </button>
                 <button onClick={() => language !== 'en' && onToggleLanguage()} title="English"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
+                  className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
                   <span className="text-sm leading-none">🇬🇧</span>
                   <span>EN</span>
                 </button>

@@ -30,7 +30,7 @@ export default function ColumnsBlock({ block }: Props) {
   const gapClass = gapMap[block.gap ?? 'md'] ?? 'gap-8';
 
   return (
-    <div className={`mx-auto max-w-6xl px-6 py-10 grid ${colClass} ${gapClass} items-start`}>
+    <div className={`mx-auto max-w-6xl px-6 py-10 grid ${colClass} ${gapClass} items-center`}>
       {cols.map((col, i) => {
         const blocks = getColBlocks(col);
         return (
