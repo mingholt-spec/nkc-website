@@ -1,0 +1,13 @@
+[debug] [2026-05-14T16:39:18.368Z] ----------------------------------------------------------------------
+[debug] [2026-05-14T16:39:18.370Z] Command:       /usr/local/bin/node /usr/local/bin/firebase apphosting:rollouts:create nkc-website --project bjj-manager-pro --git-branch main --force
+[debug] [2026-05-14T16:39:18.370Z] CLI Version:   15.6.0
+[debug] [2026-05-14T16:39:18.370Z] Platform:      darwin
+[debug] [2026-05-14T16:39:18.370Z] Node Version:  v24.11.0
+[debug] [2026-05-14T16:39:18.370Z] Time:          Thu May 14 2026 18:39:18 GMT+0200 (centraleuropeisk sommartid)
+[debug] [2026-05-14T16:39:18.370Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-05-14T16:39:18.396Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-14T16:39:18.396Z] > authorizing via signed-in user (m.ingholt@gmail.com)
+[debug] [2026-05-14T16:39:18.397Z] Checked if tokens are valid: true, expires at: 1778777890164
+[debug] [2026-05-14T16:39:18.397Z] Checked if tokens are valid: true, expires at: 1778777890164
+[debug] [2026-05-14T16:39:18.397Z] >>> [apiv2][query] GET https://firebaseapphosting.googleapis.com/v1beta/projects/bjj-manager-pro/locations/-/backends 

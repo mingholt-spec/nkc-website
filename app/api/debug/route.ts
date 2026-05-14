@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getHomepage } from '@/lib/data';
+import { getHomepage, getClubConfig, getWebsiteConfig } from '@/lib/data';
 
 // Temporary debug endpoint — remove before going live on nkc.nu
 export async function GET() {
-  const page = await getHomepage();
-  if (!page) return NextResponse.json({ error: 'No homepage found' });
+  const [page, club, config] = await Promise.all([getHomepage(), getClubConfig(), getWebsiteConfig()]);
 
-  const blockSummary = (page.blocks ?? []).map((b, i) => ({
+  const blockSummary = (page?.blocks ?? []).map((b, i) => ({
     index: i,
     type: b.type,
     id: b.id,
@@ -14,5 +13,10 @@ export async function GET() {
     contentPreview: String((b as Record<string, unknown>).content ?? '').slice(0, 100),
   }));
 
-  return NextResponse.json({ slug: page.slug, title: page.title, blockCount: page.blocks?.length, blocks: blockSummary });
+  return NextResponse.json({
+    club: { clubName: club.clubName, logoUrl: club.logoUrl },
+    hasWebsiteConfig: !!config,
+    navCount: config?.navigation?.length ?? 0,
+    page: page ? { slug: page.slug, title: page.title, blockCount: page.blocks?.length, blocks: blockSummary } : null,
+  });
 }

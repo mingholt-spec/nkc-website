@@ -47,7 +47,7 @@ function docToNewsPost(id: string, data: Record<string, unknown>): NewsPost {
 export const getClubConfig = cache(async (): Promise<ClubConfig> => {
   if (!db) return {};
   try {
-    const snap = await db.collection('club_config').doc('main').get();
+    const snap = await db.collection('config').doc('club').get();
     return (snap.data() ?? {}) as ClubConfig;
   } catch { return {}; }
 });
@@ -55,7 +55,7 @@ export const getClubConfig = cache(async (): Promise<ClubConfig> => {
 export const getWebsiteConfig = cache(async (): Promise<WebsiteConfig | null> => {
   if (!db) return null;
   try {
-    const snap = await db.collection('website_config').doc('main').get();
+    const snap = await db.collection('config').doc('website').get();
     return snap.exists ? (snap.data() as WebsiteConfig) : null;
   } catch { return null; }
 });
