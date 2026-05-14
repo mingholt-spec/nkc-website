@@ -1,5 +1,10 @@
 import type { PageBlockHtml } from '@/lib/types';
+import { safeStr } from '@/lib/utils';
+
 interface Props { block: PageBlockHtml }
+
 export default function HtmlBlock({ block }: Props) {
-  return <div dangerouslySetInnerHTML={{ __html: block.content ?? '' }} />;
+  const html = safeStr(block.content);
+  if (!html) return null;
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
 }
