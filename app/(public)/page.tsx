@@ -20,6 +20,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const page = await getHomepage();
-  if (!page) notFound();
+  if (!page) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
+        <h1 className="text-3xl font-bold text-zinc-800">Välkommen</h1>
+        <p className="mt-3 text-zinc-500">Webbplatsen är under uppbyggnad.</p>
+      </div>
+    );
+  }
   return <PageRenderer page={page} />;
 }

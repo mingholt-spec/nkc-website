@@ -117,12 +117,21 @@ export const getPageBySlug = cache(async (slug: string): Promise<WebsitePage | n
 export const getHomepage = cache(async (): Promise<WebsitePage | null> => {
   if (!db) return null;
   try {
+    // First try isHomepage flag
     const snap = await db.collection('website_pages')
       .where('isHomepage', '==', true)
       .where('isPublished', '==', true)
       .limit(1)
       .get();
-    return snap.empty ? null : ({ id: snap.docs[0].id, ...snap.docs[0].data() } as WebsitePage);
+    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() } as WebsitePage;
+
+    // Fallback: first published page ordered by sortOrder
+    const fallback = await db.collection('website_pages')
+      .where('isPublished', '==', true)
+      .orderBy('sortOrder', 'asc')
+      .limit(1)
+      .get();
+    return fallback.empty ? null : ({ id: fallback.docs[0].id, ...fallback.docs[0].data() } as WebsitePage);
   } catch { return null; }
 });
 
