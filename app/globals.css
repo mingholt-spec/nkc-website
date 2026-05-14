@@ -11,15 +11,15 @@
 }
 
 body {
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-raleway, var(--font-inter)), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-family: var(--font-raleway, var(--font-outfit)), system-ui, sans-serif;
 }
 
-/* Correct cursor for all interactive elements */
-button, [role="button"], summary, label[for], select {
-  cursor: pointer;
+/* Pointer cursor for all interactive elements — must use !important to beat @layer base */
+button, [role="button"], summary, label[for], select, a[href] {
+  cursor: pointer !important;
 }
