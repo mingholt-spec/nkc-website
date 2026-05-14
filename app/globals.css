@@ -7,6 +7,7 @@
 @theme inline {
   --font-sans: var(--font-inter);
   --font-display: var(--font-outfit);
+  --font-raleway: var(--font-raleway);
 }
 
 body {
@@ -16,4 +17,9 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-outfit), system-ui, sans-serif;
+}
+
+/* Correct cursor for all interactive elements */
+button, [role="button"], summary, label[for], select {
+  cursor: pointer;
 }

@@ -53,9 +53,9 @@ export type PageBlockText = {
 
 export type PageBlockImage = {
   id: string; type: 'image'; name?: string;
-  url: string; alt?: string; caption?: string;
-  width?: 'full' | 'wide' | 'medium' | 'narrow';
-  align?: 'left' | 'center' | 'right';
+  src: string; alt?: string; caption?: string;
+  width?: string;
+  rounded?: boolean; shadow?: boolean;
   style?: BlockStyleOptions; spacing?: BlockSpacing;
 };
 
