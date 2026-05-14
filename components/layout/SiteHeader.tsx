@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function SiteHeader({ club, config }: Props) {
-  const nav = config?.navigation ?? [];
+  const nav = Array.isArray(config?.navigation) ? config.navigation : [];
   const logoUrl = config?.headerConfig?.logoUrl ?? club.logoUrl;
   const showName = config?.headerConfig?.showClubName !== false;
   const primaryColor = config?.theme?.primaryColor ?? '#dc2626';

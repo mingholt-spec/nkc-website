@@ -34,7 +34,7 @@ export default function EventPage({ campaign }: Props) {
       {mode === 'html' && htmlContent ? (
         <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
       ) : (
-        contentBlocks?.map((block: PageBlock) => <BlockRenderer key={block.id} block={block} />)
+        Array.isArray(contentBlocks) && contentBlocks.map((block: PageBlock) => <BlockRenderer key={block.id} block={block} />)
       )}
 
       {/* Event details */}

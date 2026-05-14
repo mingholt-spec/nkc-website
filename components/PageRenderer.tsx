@@ -20,7 +20,7 @@ export default function PageRenderer({ page }: Props) {
 
   return (
     <div>
-      {(page.blocks ?? []).map(block => (
+      {Array.isArray(page.blocks) && page.blocks.map(block => (
         <BlockRenderer key={block.id} block={block} />
       ))}
     </div>
