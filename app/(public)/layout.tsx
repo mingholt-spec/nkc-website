@@ -1,6 +1,5 @@
 import { getClubConfig, getWebsiteConfig, getWebsitePages } from '@/lib/data';
-import SiteHeader from '@/components/layout/SiteHeader';
-import SiteFooter from '@/components/layout/SiteFooter';
+import PublicLayoutClient from '@/components/layout/PublicLayoutClient';
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const [club, config, pages] = await Promise.all([
@@ -10,10 +9,8 @@ export default async function PublicLayout({ children }: { children: React.React
   ]);
 
   return (
-    <>
-      <SiteHeader club={club} config={config} pages={pages} />
-      <main className="flex-1">{children}</main>
-      <SiteFooter club={club} config={config} />
-    </>
+    <PublicLayoutClient club={club} config={config} pages={pages}>
+      {children}
+    </PublicLayoutClient>
   );
 }
