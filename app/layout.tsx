@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: name, template: `%s | ${name}` },
     description: config?.seoDefaults?.description ?? '',
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: false },
   };
 }
 
