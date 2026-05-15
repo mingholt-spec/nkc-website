@@ -66,7 +66,12 @@ function pageHref(page: WebsitePage) {
 const MIGRATION_HOSTS = ['nkc.nu', 'www.nkc.nu'];
 
 function isExternalHref(href: string): boolean {
-  return href.startsWith('http://') || href.startsWith('https://');
+  if (!href.startsWith('http://') && !href.startsWith('https://')) return false;
+  try {
+    return !MIGRATION_HOSTS.includes(new URL(href).hostname);
+  } catch {
+    return false;
+  }
 }
 
 function resolveHref(item: NavigationItem, pages: WebsitePage[]) {
