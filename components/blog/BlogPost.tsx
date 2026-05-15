@@ -13,10 +13,10 @@ export default function BlogPost({ post }: Props) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
       {/* Breadcrumb */}
-      <nav className="text-sm text-zinc-400 mb-6">
-        <Link href="/blogg" className="hover:text-zinc-700">Blogg</Link>
+      <nav className="text-sm text-zinc-400 dark:text-zinc-500 mb-6">
+        <Link href="/blogg" className="hover:text-zinc-700 dark:hover:text-zinc-300">Blogg</Link>
         {post.category && (
-          <> <span>/</span> <span className="text-zinc-500">{post.category}</span></>
+          <> <span>/</span> <span className="text-zinc-500 dark:text-zinc-400">{post.category}</span></>
         )}
       </nav>
 
@@ -25,9 +25,9 @@ export default function BlogPost({ post }: Props) {
         {post.category && (
           <span className="text-xs font-semibold uppercase tracking-wide text-red-600">{post.category}</span>
         )}
-        <h1 className="mt-2 text-4xl font-bold text-zinc-900 leading-tight">{post.title}</h1>
-        {post.excerpt && <p className="mt-3 text-xl text-zinc-500">{post.excerpt}</p>}
-        <div className="mt-4 flex items-center gap-4 text-sm text-zinc-400">
+        <h1 className="mt-2 text-4xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{post.title}</h1>
+        {post.excerpt && <p className="mt-3 text-xl text-zinc-500 dark:text-zinc-400">{post.excerpt}</p>}
+        <div className="mt-4 flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500">
           {post.author && <span>Av {post.author}</span>}
           {publishDate && <time dateTime={post.publishedAt}>{publishDate}</time>}
         </div>
@@ -35,7 +35,7 @@ export default function BlogPost({ post }: Props) {
 
       {/* Cover image */}
       {post.coverImage && (
-        <div className="relative aspect-video rounded-xl overflow-hidden mb-10 bg-zinc-100">
+        <div className="relative aspect-video rounded-xl overflow-hidden mb-10 bg-zinc-100 dark:bg-zinc-800">
           <Image
             src={post.coverImage}
             alt={post.title}
@@ -50,7 +50,7 @@ export default function BlogPost({ post }: Props) {
 
       {/* Content */}
       <div
-        className="prose prose-zinc max-w-none prose-headings:font-bold prose-a:text-red-600"
+        className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-red-600"
         dangerouslySetInnerHTML={{ __html: post.content ?? '' }}
       />
 
@@ -58,7 +58,7 @@ export default function BlogPost({ post }: Props) {
       {post.tags && post.tags.length > 0 && (
         <div className="mt-10 flex flex-wrap gap-2">
           {post.tags.map(tag => (
-            <span key={tag} className="px-3 py-1 rounded-full bg-zinc-100 text-sm text-zinc-600">{tag}</span>
+            <span key={tag} className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm text-zinc-600 dark:text-zinc-300">{tag}</span>
           ))}
         </div>
       )}
