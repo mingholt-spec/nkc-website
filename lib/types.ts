@@ -234,10 +234,25 @@ export interface ClubConfig {
   country?: string;
 }
 
+export interface CampaignFormField {
+  id: string;
+  type: 'text' | 'email' | 'phone' | 'guardianInfo';
+  name: string;
+  label: string;
+  required: boolean;
+}
+
+export interface CampaignScheduleDay {
+  date: string;
+  time: string;
+  endTime?: string;
+}
+
 export interface Campaign {
   id: string; name: string; slug: string;
   goal: 'event' | 'leadCapture';
   tags?: string[]; accentColor?: string; shareImage?: string;
+  registrationCount?: number;
   pageConfig: {
     title: string; description: string;
     headerImage?: string; instructor?: string;
@@ -246,11 +261,11 @@ export interface Campaign {
   };
   contentBlocks?: PageBlock[];
   formLayout?: 'stacked' | 'sidebar';
-  formConfig: FormBlock[];
+  formConfig: CampaignFormField[];
   eventDetails?: {
     price: number; maxAttendees: number;
     startDate: string; endDate?: string;
-    schedule: unknown[]; classId: string;
+    schedule: CampaignScheduleDay[]; classId: string;
     paymentLink?: string; stripePriceId?: string;
   };
   guestInstructorInviteId?: string;
