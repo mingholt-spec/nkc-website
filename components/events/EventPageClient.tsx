@@ -20,6 +20,21 @@ function useDarkMode() {
   return { isDark, toggle };
 }
 
+function useLanguage() {
+  const [language, setLang] = useState<'sv' | 'en'>('sv');
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('flowroll_lang');
+      if (saved === 'sv' || saved === 'en') setLang(saved);
+    } catch {}
+  }, []);
+  const setLanguage = (lang: 'sv' | 'en') => {
+    setLang(lang);
+    try { localStorage.setItem('flowroll_lang', lang); } catch {}
+  };
+  return { language, setLanguage };
+}
+
 interface Props {
   campaign: Campaign;
   children: React.ReactNode; // rendered content blocks from server
@@ -47,6 +62,7 @@ export default function EventPageClient({ campaign, children }: Props) {
   const { pageConfig, formConfig, eventDetails } = campaign;
   const accent = campaign.accentColor ?? null;
   const { isDark, toggle: toggleDark } = useDarkMode();
+  const { language, setLanguage } = useLanguage();
 
   const [gdprAccepted, setGdprAccepted] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
@@ -230,8 +246,18 @@ export default function EventPageClient({ campaign, children }: Props) {
           <div className="w-full h-full bg-zinc-900" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-        {/* Dark mode toggle */}
-        <div className="absolute top-4 right-4 z-20">
+        {/* Top-right controls: language + dark mode */}
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          <div className="flex items-center bg-black/40 backdrop-blur-sm rounded-lg p-0.5 gap-0.5">
+            <button onClick={() => setLanguage('sv')} title="Svenska"
+              className={`flex items-center px-2 py-1 rounded-md text-sm transition-all duration-150 ${language === 'sv' ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}>
+              🇸🇪
+            </button>
+            <button onClick={() => setLanguage('en')} title="English"
+              className={`flex items-center px-2 py-1 rounded-md text-sm transition-all duration-150 ${language === 'en' ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}>
+              🇬🇧
+            </button>
+          </div>
           <button
             onClick={toggleDark}
             className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 transition-all"
