@@ -63,8 +63,19 @@ function pageHref(page: WebsitePage) {
   return page.isHomepage ? '/' : `/${page.slug}`;
 }
 
+const MIGRATION_HOSTS = ['nkc.nu', 'www.nkc.nu'];
+
 function resolveHref(item: NavigationItem, pages: WebsitePage[]) {
-  if (item.isExternal && item.externalUrl) return item.externalUrl;
+  if (item.isExternal && item.externalUrl) {
+    // During migration: convert nkc.nu links to internal paths on this site
+    try {
+      const url = new URL(item.externalUrl);
+      if (MIGRATION_HOSTS.includes(url.hostname)) {
+        return url.pathname + url.search + url.hash || '/';
+      }
+    } catch {}
+    return item.externalUrl;
+  }
   if (item.pageId) {
     const page = pages.find(p => p.id === item.pageId);
     if (page) {

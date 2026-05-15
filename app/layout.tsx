@@ -1,16 +1,23 @@
 import type { Metadata } from 'next';
 import { Inter, Outfit, Raleway } from 'next/font/google';
+import { getClubConfig, getWebsiteConfig } from '@/lib/data';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit', display: 'swap', weight: ['700', '800'] });
 const raleway = Raleway({ subsets: ['latin', 'latin-ext'], variable: '--font-raleway', display: 'swap', weight: ['400', '500', '600', '700', '800', '900'] });
 
-export const metadata: Metadata = {
-  title: { default: 'NKC', template: '%s | NKC' },
-  description: '',
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
+  const name = club.clubName ?? 'NKC';
+  const logoUrl = config?.headerConfig?.logoUrl;
+  return {
+    title: { default: name, template: `%s | ${name}` },
+    description: config?.seoDefaults?.description ?? '',
+    robots: { index: true, follow: true },
+    icons: logoUrl ? { icon: logoUrl, apple: logoUrl } : undefined,
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
