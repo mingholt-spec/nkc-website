@@ -293,12 +293,12 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
           </div>
 
           <div className="flex items-center gap-2">
-            <a href="/app"
+            <a href="https://bjj-manager-pro.web.app" target="_blank" rel="noopener noreferrer"
               className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:opacity-80"
               style={{ color: txtColor }}>
               {t.login}
             </a>
-            <a href="/app"
+            <a href="https://bjj-manager-pro.web.app" target="_blank" rel="noopener noreferrer"
               className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 rounded-lg"
               style={{ color: '#fff', backgroundColor: primaryColor }}>
               {t.becomeMember}
@@ -356,12 +356,12 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
 
           <div className={`px-4 ${(nav.length > 0 || socialLinks.length > 0) ? 'pt-4 mt-3 border-t' : ''}`} style={{ borderColor: `${txtColor}15` }}>
             <div className="flex gap-2">
-              <a href="/app"
+              <a href="https://bjj-manager-pro.web.app" target="_blank" rel="noopener noreferrer"
                 className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all rounded-lg text-center"
                 style={{ color: txtColor, backgroundColor: `${txtColor}08` }}>
                 {t.login}
               </a>
-              <a href="/app"
+              <a href="https://bjj-manager-pro.web.app" target="_blank" rel="noopener noreferrer"
                 className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
                 style={{ color: '#fff', backgroundColor: primaryColor }}>
                 {t.becomeMember}
