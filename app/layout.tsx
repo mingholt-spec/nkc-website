@@ -20,9 +20,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
   const faviconUrl = club.faviconUrl ?? config?.headerConfig?.logoUrl;
+  const theme = config?.theme;
+
+  // Set theme colors as CSS variables on <html> at server render time.
+  // This lets CSS respond to the .dark class instantly — no React-state-driven flash.
+  const cssVars = {
+    '--site-bg':       theme?.backgroundColor  ?? '#ffffff',
+    '--site-bg-dark':  theme?.darkBackground   ?? '#18181b',
+    '--site-text':     theme?.textColor        ?? '#3f3f46',
+    '--site-text-dark':theme?.darkTextColor    ?? '#fafafa',
+  } as React.CSSProperties;
 
   return (
-    <html lang="sv" className={`${inter.variable} ${outfit.variable} ${raleway.variable}`}>
+    <html lang="sv" className={`${inter.variable} ${outfit.variable} ${raleway.variable}`} style={cssVars}>
       <head>
         {faviconUrl && <link rel="icon" href={faviconUrl} />}
         {faviconUrl && <link rel="apple-touch-icon" href={faviconUrl} />}

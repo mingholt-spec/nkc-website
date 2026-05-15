@@ -197,10 +197,9 @@ export default function EventPageClient({ campaign, children }: Props) {
   );
 
   const contentBg = hasHtmlBlocks ? '' : 'bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden';
-  const pageBg = hasHtmlBlocks ? 'bg-black' : 'bg-zinc-50 dark:bg-black';
 
   return (
-    <div className={`${pageBg} min-h-screen`}>
+    <div>
 
       {/* HERO */}
       <header className="relative h-[40vh] sm:h-[50vh] md:h-[65vh] min-h-[350px] md:min-h-[500px]">
@@ -293,7 +292,7 @@ export default function EventPageClient({ campaign, children }: Props) {
           </div>
         </main>
       ) : (
-        <main className={`relative z-10 ${hasHtmlBlocks ? '' : 'max-w-4xl mx-auto px-4 sm:px-8 py-6 md:py-10'}`}>
+        <main className={`relative z-10 ${hasHtmlBlocks ? 'bg-black' : 'max-w-4xl mx-auto px-4 sm:px-8 py-6 md:py-10'}`}>
           {hasHtmlBlocks ? (
             <>
               <div className="campaign-blocks" style={{ position: 'relative', zIndex: 0 }}>
