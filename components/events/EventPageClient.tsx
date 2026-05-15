@@ -3,6 +3,23 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Campaign, CampaignScheduleDay } from '@/lib/types';
 
+function useDarkMode() {
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'));
+  }, []);
+  const toggle = useCallback(() => {
+    setIsDark(prev => {
+      const next = !prev;
+      if (next) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+      try { localStorage.setItem('flowroll_theme', next ? 'dark' : 'light'); } catch {}
+      return next;
+    });
+  }, []);
+  return { isDark, toggle };
+}
+
 interface Props {
   campaign: Campaign;
   children: React.ReactNode; // rendered content blocks from server
@@ -29,6 +46,7 @@ const sidebarInputClasses = 'w-full p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950 b
 export default function EventPageClient({ campaign, children }: Props) {
   const { pageConfig, formConfig, eventDetails } = campaign;
   const accent = campaign.accentColor ?? null;
+  const { isDark, toggle: toggleDark } = useDarkMode();
 
   const [gdprAccepted, setGdprAccepted] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
@@ -119,7 +137,7 @@ export default function EventPageClient({ campaign, children }: Props) {
   // ── Registration form ──
   const renderForm = (compact: boolean) => (
     <form onSubmit={handleSubmit}>
-      <h2 className={`${compact ? 'text-lg' : 'text-2xl'} font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4`}>
+      <h2 className={`${compact ? 'text-lg' : 'text-2xl'} font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4 font-display`}>
         Anmälan
       </h2>
       <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
@@ -165,7 +183,10 @@ export default function EventPageClient({ campaign, children }: Props) {
         type="submit"
         disabled={isSoldOut || !gdprAccepted}
         className={`w-full mt-4 text-white font-black ${compact ? 'py-4 rounded-xl text-[10px]' : 'py-5 rounded-2xl text-xs'} uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50 transition-all`}
-        style={{ backgroundColor: isSoldOut ? '#a1a1aa' : (accent ?? '#e50401') }}
+        style={{
+          backgroundColor: isSoldOut ? '#a1a1aa' : (accent ?? '#e50401'),
+          boxShadow: !isSoldOut ? `0 0 24px ${(accent ?? '#e50401')}30` : undefined,
+        }}
       >
         {isSoldOut ? 'Fullbokat' : isPaid ? `Betala & anmäl — ${price} kr` : 'Skicka anmälan'}
       </button>
@@ -199,7 +220,7 @@ export default function EventPageClient({ campaign, children }: Props) {
   const contentBg = hasHtmlBlocks ? '' : 'bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden';
 
   return (
-    <div>
+    <div className={`${hasHtmlBlocks ? 'bg-black dark:bg-black' : 'bg-zinc-50 dark:bg-black'} min-h-screen font-sans`}>
 
       {/* HERO */}
       <header className="relative h-[40vh] sm:h-[50vh] md:h-[65vh] min-h-[350px] md:min-h-[500px]">
@@ -209,8 +230,22 @@ export default function EventPageClient({ campaign, children }: Props) {
           <div className="w-full h-full bg-zinc-900" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+        {/* Dark mode toggle */}
+        <div className="absolute top-4 right-4 z-20">
+          <button
+            onClick={toggleDark}
+            className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 transition-all"
+            aria-label={isDark ? 'Ljust läge' : 'Mörkt läge'}
+          >
+            {isDark ? (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+            )}
+          </button>
+        </div>
         <div className="absolute bottom-10 md:bottom-20 left-0 right-0 px-6 sm:px-10 max-w-6xl mx-auto">
-          <h1 className={`${TITLE_SIZE_CLASSES[pageConfig.titleSize ?? 'xl']} font-black tracking-tighter uppercase leading-[0.85] text-white mb-4`}>
+          <h1 className={`${TITLE_SIZE_CLASSES[pageConfig.titleSize ?? 'xl']} font-black tracking-tighter uppercase leading-[0.85] font-display text-white mb-4`}>
             {pageConfig.title}
           </h1>
           {pageConfig.instructor && (

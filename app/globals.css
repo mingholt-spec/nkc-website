@@ -13,13 +13,13 @@
 body {
   font-family: var(--font-raleway, var(--font-inter)), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-color: var(--site-bg, #ffffff);
-  color: var(--site-text, #3f3f46);
 }
-.dark body {
-  background-color: var(--site-bg-dark, #18181b);
-  color: var(--site-text-dark, #fafafa);
-}
+
+/* Site-level background/text — driven by CSS vars set server-side, respond to .dark instantly */
+.site-bg   { background-color: var(--site-bg,       #ffffff); }
+.site-text { color:            var(--site-text,      #3f3f46); }
+.dark .site-bg   { background-color: var(--site-bg-dark,  #18181b); }
+.dark .site-text { color:            var(--site-text-dark, #fafafa); }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-raleway, var(--font-outfit)), system-ui, sans-serif;
@@ -29,5 +29,11 @@ h1, h2, h3, h4, h5, h6 {
 @layer base {
   button, [role="button"], a[href], label[for], select, summary {
     cursor: pointer !important;
+  }
+}
+
+@layer utilities {
+  .shadow-glow {
+    box-shadow: 0 0 24px rgba(229, 4, 1, 0.18);
   }
 }
