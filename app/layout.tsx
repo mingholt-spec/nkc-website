@@ -18,14 +18,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const config = await getWebsiteConfig();
-  const logoUrl = config?.headerConfig?.logoUrl;
+  const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
+  const faviconUrl = club.faviconUrl ?? config?.headerConfig?.logoUrl;
 
   return (
     <html lang="sv" className={`${inter.variable} ${outfit.variable} ${raleway.variable}`}>
       <head>
-        {logoUrl && <link rel="icon" href={logoUrl} />}
-        {logoUrl && <link rel="apple-touch-icon" href={logoUrl} />}
+        {faviconUrl && <link rel="icon" href={faviconUrl} />}
+        {faviconUrl && <link rel="apple-touch-icon" href={faviconUrl} />}
         {/* Prevent flash of wrong theme on load */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('flowroll_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();` }} />
       </head>
