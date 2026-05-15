@@ -65,6 +65,10 @@ function pageHref(page: WebsitePage) {
 
 const MIGRATION_HOSTS = ['nkc.nu', 'www.nkc.nu'];
 
+function isExternalHref(href: string): boolean {
+  return href.startsWith('http://') || href.startsWith('https://');
+}
+
 function resolveHref(item: NavigationItem, pages: WebsitePage[]) {
   if (item.isExternal && item.externalUrl) {
     // During migration: convert nkc.nu links to internal paths on this site
@@ -128,8 +132,8 @@ function DesktopDropdown({ item, pages, currentSlug, txtColor, bgColor, primaryC
           {children.map(child => {
             const childActive = child.pageId ? pages.find(p => p.id === child.pageId)?.slug === currentSlug : false;
             return (
-              <a key={child.id} href={resolveHref(child, pages)} target={child.isExternal ? '_blank' : undefined} rel={child.isExternal ? 'noopener noreferrer' : undefined}
-                onClick={e => { if (child.anchorBlockId && !child.isExternal) { e.preventDefault(); document.getElementById(`block-${child.anchorBlockId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }}
+              <a key={child.id} href={resolveHref(child, pages)} target={isExternalHref(resolveHref(child, pages)) ? '_blank' : undefined} rel={isExternalHref(resolveHref(child, pages)) ? 'noopener noreferrer' : undefined}
+                onClick={e => { if (child.anchorBlockId && !isExternalHref(resolveHref(child, pages))) { e.preventDefault(); document.getElementById(`block-${child.anchorBlockId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }}
                 className="block px-4 py-2.5 text-xs font-bold uppercase tracking-widest transition-all hover:opacity-70"
                 style={{ color: childActive ? primaryColor : txtColor, backgroundColor: childActive ? `${primaryColor}08` : 'transparent', fontFamily: bodyFont }}>
                 {getLabel(child, language)}
@@ -168,8 +172,8 @@ function MobileAccordion({ item, pages, currentSlug, txtColor, primaryColor, rad
           {children.map(child => {
             const childActive = child.pageId ? pages.find(p => p.id === child.pageId)?.slug === currentSlug : false;
             return (
-              <a key={child.id} href={resolveHref(child, pages)} target={child.isExternal ? '_blank' : undefined} rel={child.isExternal ? 'noopener noreferrer' : undefined}
-                onClick={e => { if (child.anchorBlockId && !child.isExternal) { e.preventDefault(); onNavigate(); document.getElementById(`block-${child.anchorBlockId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }}
+              <a key={child.id} href={resolveHref(child, pages)} target={isExternalHref(resolveHref(child, pages)) ? '_blank' : undefined} rel={isExternalHref(resolveHref(child, pages)) ? 'noopener noreferrer' : undefined}
+                onClick={e => { if (child.anchorBlockId && !isExternalHref(resolveHref(child, pages))) { e.preventDefault(); onNavigate(); document.getElementById(`block-${child.anchorBlockId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }}
                 className="block px-4 py-2.5 text-sm font-bold uppercase tracking-widest transition-all"
                 style={{ color: childActive ? primaryColor : txtColor, borderRadius: radius, backgroundColor: childActive ? `${primaryColor}10` : 'transparent', fontFamily: bodyFont }}>
                 {getLabel(child, language)}
@@ -265,9 +269,9 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
                 }
                 const active = isActive(item);
                 return (
-                  <a key={item.id} href={resolveHref(item, pages)} target={item.isExternal ? '_blank' : undefined}
-                    rel={item.isExternal ? 'noopener noreferrer' : undefined}
-                    onClick={e => { if (item.anchorBlockId && !item.isExternal) { e.preventDefault(); document.getElementById(`block-${item.anchorBlockId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }}
+                  <a key={item.id} href={resolveHref(item, pages)} target={isExternalHref(resolveHref(item, pages)) ? '_blank' : undefined}
+                    rel={isExternalHref(resolveHref(item, pages)) ? 'noopener noreferrer' : undefined}
+                    onClick={e => { if (item.anchorBlockId && !isExternalHref(resolveHref(item, pages))) { e.preventDefault(); document.getElementById(`block-${item.anchorBlockId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }}
                     className="px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all"
                     style={{ color: active ? primaryColor : txtColor, borderRadius: radius, backgroundColor: active ? `${primaryColor}10` : 'transparent', fontFamily: bodyFont }}>
                     {getLabel(item, language)}
@@ -346,9 +350,9 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
                 }
                 const active = isActive(item);
                 return (
-                  <a key={item.id} href={resolveHref(item, pages)} target={item.isExternal ? '_blank' : undefined}
-                    rel={item.isExternal ? 'noopener noreferrer' : undefined}
-                    onClick={e => { if (item.anchorBlockId && !item.isExternal) { e.preventDefault(); setMobileOpen(false); document.getElementById(`block-${item.anchorBlockId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } else { setMobileOpen(false); } }}
+                  <a key={item.id} href={resolveHref(item, pages)} target={isExternalHref(resolveHref(item, pages)) ? '_blank' : undefined}
+                    rel={isExternalHref(resolveHref(item, pages)) ? 'noopener noreferrer' : undefined}
+                    onClick={e => { if (item.anchorBlockId && !isExternalHref(resolveHref(item, pages))) { e.preventDefault(); setMobileOpen(false); document.getElementById(`block-${item.anchorBlockId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } else { setMobileOpen(false); } }}
                     className="px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all"
                     style={{ color: active ? primaryColor : txtColor, borderRadius: radius, backgroundColor: active ? `${primaryColor}10` : 'transparent', fontFamily: bodyFont }}>
                     {getLabel(item, language)}
