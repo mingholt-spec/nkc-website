@@ -66,6 +66,9 @@ export default function EventPageClient({ campaign, children }: Props) {
 
   const [gdprAccepted, setGdprAccepted] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const formRef = useRef<HTMLDivElement>(null);
 
   const isSidebar = campaign.formLayout === 'sidebar';
@@ -95,9 +98,31 @@ export default function EventPageClient({ campaign, children }: Props) {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    window.location.href = `https://bjj-manager-pro.web.app/event/${campaign.slug}`;
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const data = Object.fromEntries(new FormData(e.currentTarget));
+      const body: Record<string, string> = {
+        campaignId: campaign.id,
+        campaignName: pageConfig.title,
+      };
+      for (const [key, value] of Object.entries(data)) {
+        if (typeof value === 'string') body[key] = value;
+      }
+      const res = await fetch('/api/event/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error('server error');
+      setSubmitted(true);
+    } catch {
+      setSubmitError('Något gick fel. Försök igen eller kontakta oss direkt.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // ── Schedule card ──
@@ -151,7 +176,17 @@ export default function EventPageClient({ campaign, children }: Props) {
   };
 
   // ── Registration form ──
-  const renderForm = (compact: boolean) => (
+  const renderForm = (compact: boolean) => submitted ? (
+    <div className="py-6 text-center space-y-3">
+      <div className="w-12 h-12 mx-auto rounded-full flex items-center justify-center" style={{ backgroundColor: `${accent ?? '#e50401'}20` }}>
+        <svg className="w-6 h-6" style={{ color: accent ?? '#e50401' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <p className="font-black text-zinc-900 dark:text-white uppercase tracking-tight">Anmälan mottagen!</p>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">Vi hör av oss till dig inom kort.</p>
+    </div>
+  ) : (
     <form onSubmit={handleSubmit}>
       <h2 className={`${compact ? 'text-lg' : 'text-2xl'} font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4 font-display`}>
         Anmälan
@@ -195,16 +230,19 @@ export default function EventPageClient({ campaign, children }: Props) {
         </span>
       </label>
 
+      {submitError && (
+        <p className="mt-3 text-xs text-red-500 font-bold">{submitError}</p>
+      )}
       <button
         type="submit"
-        disabled={isSoldOut || !gdprAccepted}
+        disabled={isSoldOut || !gdprAccepted || submitting}
         className={`w-full mt-4 text-white font-black ${compact ? 'py-4 rounded-xl text-[10px]' : 'py-5 rounded-2xl text-xs'} uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50 transition-all`}
         style={{
           backgroundColor: isSoldOut ? '#a1a1aa' : (accent ?? '#e50401'),
           boxShadow: !isSoldOut ? `0 0 24px ${(accent ?? '#e50401')}30` : undefined,
         }}
       >
-        {isSoldOut ? 'Fullbokat' : isPaid ? `Betala & anmäl — ${price} kr` : 'Skicka anmälan'}
+        {submitting ? 'Skickar...' : isSoldOut ? 'Fullbokat' : isPaid ? `Betala & anmäl — ${price} kr` : 'Skicka anmälan'}
       </button>
     </form>
   );

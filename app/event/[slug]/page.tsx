@@ -18,12 +18,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImage = campaign.shareImage ?? campaign.pageConfig.headerImage;
 
   return {
-    title: `${title} | ${clubName}`,
+    title,  // template in root layout adds "| clubName" automatically
     description,
+    robots: { index: true, follow: true },
+    alternates: { canonical: `https://www.nkc.nu/event/${slug}` },
     openGraph: {
       title,
       description,
       type: 'website',
+      url: `https://www.nkc.nu/event/${slug}`,
       ...(ogImage ? { images: [ogImage] } : {}),
     },
     twitter: { card: 'summary_large_image', title, description },
