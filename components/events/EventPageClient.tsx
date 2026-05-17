@@ -379,13 +379,13 @@ export default function EventPageClient({ campaign, children }: Props) {
               <div className={contentBg}>{children}</div>
               {/* Mobile form */}
               <div ref={formRef} className="lg:hidden mt-8" style={{ position: 'relative', zIndex: 1 }}>
-                <FormCard compact />
+                {FormCard({ compact: true })}
               </div>
             </div>
             {/* Right: sticky form (desktop) */}
             <div className={`hidden lg:block w-[360px] flex-shrink-0 ${hasHtmlBlocks ? 'pr-8 pt-6' : ''}`} style={{ position: 'relative', zIndex: 1 }}>
               <div className="sticky top-6">
-                <FormCard compact />
+                {FormCard({ compact: true })}
               </div>
             </div>
           </div>
