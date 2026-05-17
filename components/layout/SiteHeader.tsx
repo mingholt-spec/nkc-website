@@ -210,6 +210,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
   const pathname = usePathname();
 
   useEffect(() => {
+    if (!auth) { setIsLoggedIn(false); return; }
     const unsub = onAuthStateChanged(auth, user => setIsLoggedIn(!!user));
     return () => unsub();
   }, []);
