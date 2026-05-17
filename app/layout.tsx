@@ -22,8 +22,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const faviconUrl = club.faviconUrl ?? config?.headerConfig?.logoUrl;
   const theme = config?.theme;
 
-  // Set theme colors as CSS variables on <html> at server render time.
-  // This lets CSS respond to the .dark class instantly — no React-state-driven flash.
   const cssVars = {
     '--site-bg':       theme?.backgroundColor  ?? '#ffffff',
     '--site-bg-dark':  theme?.darkBackground   ?? '#18181b',

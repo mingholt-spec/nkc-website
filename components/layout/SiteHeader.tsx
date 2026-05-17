@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/lib/firebase-client';
 import type { NavigationItem, WebsiteConfig, WebsitePage, ClubConfig, SocialLink } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
 
@@ -204,7 +206,13 @@ interface Props {
 
 export default function SiteHeader({ club, config, pages, isDark, onToggleDark, language, onToggleLanguage, resolvedColors }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, user => setIsLoggedIn(!!user));
+    return () => unsub();
+  }, []);
 
   const currentSlug = pathname === '/' ? '' : pathname.replace(/^\//, '').split('/')[0];
   const t = T[language];
@@ -246,7 +254,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
   );
 
   return (
-    <header className={`w-full z-50 ${header?.sticky !== false ? 'sticky top-0' : ''}`} style={{ backgroundColor: bgColor }}>
+    <header className={`w-full z-50 site-bg ${header?.sticky !== false ? 'sticky top-0' : ''}`}>
       <div className="mx-auto flex items-center justify-between px-6 py-4" style={{ maxWidth }}>
         {/* Logo + club name */}
         <a href="/" className="flex items-center gap-3">
@@ -312,18 +320,26 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <a href="https://bjj-manager-pro.web.app" target="_blank" rel="noopener noreferrer"
-              className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:opacity-80"
-              style={{ color: txtColor }}>
-              {t.login}
-            </a>
-            <a href="https://bjj-manager-pro.web.app" target="_blank" rel="noopener noreferrer"
+          {isLoggedIn === null ? null : isLoggedIn ? (
+            <a href="/portal/app"
               className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 rounded-lg"
               style={{ color: '#fff', backgroundColor: primaryColor }}>
-              {t.becomeMember}
+              {t.myAccount}
             </a>
-          </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <a href="/portal/app"
+                className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:opacity-80"
+                style={{ color: txtColor }}>
+                {t.login}
+              </a>
+              <a href="/portal/app"
+                className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 rounded-lg"
+                style={{ color: '#fff', backgroundColor: primaryColor }}>
+                {t.becomeMember}
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Mobile: dark toggle + hamburger */}
@@ -376,16 +392,26 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
 
           <div className={`px-4 ${(nav.length > 0 || socialLinks.length > 0) ? 'pt-4 mt-3 border-t' : ''}`} style={{ borderColor: `${txtColor}15` }}>
             <div className="flex gap-2">
-              <a href="https://bjj-manager-pro.web.app" target="_blank" rel="noopener noreferrer"
-                className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all rounded-lg text-center"
-                style={{ color: txtColor, backgroundColor: `${txtColor}08` }}>
-                {t.login}
-              </a>
-              <a href="https://bjj-manager-pro.web.app" target="_blank" rel="noopener noreferrer"
-                className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
-                style={{ color: '#fff', backgroundColor: primaryColor }}>
-                {t.becomeMember}
-              </a>
+              {isLoggedIn ? (
+                <a href="/portal/app"
+                  className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
+                  style={{ color: '#fff', backgroundColor: primaryColor }}>
+                  {t.myAccount}
+                </a>
+              ) : (
+                <>
+                  <a href="/portal/app"
+                    className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all rounded-lg text-center"
+                    style={{ color: txtColor, backgroundColor: `${txtColor}08` }}>
+                    {t.login}
+                  </a>
+                  <a href="/portal/app"
+                    className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
+                    style={{ color: '#fff', backgroundColor: primaryColor }}>
+                    {t.becomeMember}
+                  </a>
+                </>
+              )}
             </div>
             <div className="flex justify-center pt-3">
               <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5">

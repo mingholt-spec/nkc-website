@@ -31,7 +31,6 @@ interface Props {
 export default function SiteFooter({ club, config, resolvedColors }: Props) {
   const footer = config?.footerConfig;
   const theme = config?.theme;
-  const bgColor = resolvedColors.bg;
   const txtColor = resolvedColors.text;
   const useColor = config?.socialIconStyle === 'color';
 
@@ -45,7 +44,7 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
   if (!hasContent) return null;
 
   return (
-    <footer className="border-t mt-auto" style={{ borderColor: `${txtColor}15`, backgroundColor: bgColor }}>
+    <footer className="border-t mt-auto site-bg" style={{ borderColor: `${txtColor}15` }}>
       <div className="mx-auto px-6 py-10" style={{ maxWidth: theme?.maxWidth || '1280px' }}>
         {/* Club info */}
         {hasClubInfo && (
