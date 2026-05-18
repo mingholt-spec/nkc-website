@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import SiteHeader from './SiteHeader';
 import SiteFooter from './SiteFooter';
 import type { ClubConfig, WebsiteConfig, WebsitePage } from '@/lib/types';
+import { LanguageContext } from '@/lib/language-context';
 
 interface Props {
   club: ClubConfig;
@@ -68,7 +69,7 @@ export default function PublicLayoutClient({ club, config, pages, children }: Pr
     : { bg: theme?.backgroundColor || '#ffffff', text: theme?.textColor || '#3f3f46' };
 
   return (
-    <>
+    <LanguageContext.Provider value={language}>
       <SiteHeader
         club={club}
         config={config}
@@ -85,6 +86,6 @@ export default function PublicLayoutClient({ club, config, pages, children }: Pr
         config={config}
         resolvedColors={resolvedColors}
       />
-    </>
+    </LanguageContext.Provider>
   );
 }

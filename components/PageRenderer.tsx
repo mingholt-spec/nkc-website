@@ -1,4 +1,6 @@
+'use client';
 import type { WebsitePage, PageBlock } from '@/lib/types';
+import { useLanguage } from '@/lib/language-context';
 import HeroBlock from './blocks/HeroBlock';
 import TextBlock from './blocks/TextBlock';
 import HeadingBlock from './blocks/HeadingBlock';
@@ -10,20 +12,21 @@ import ColumnsBlock from './blocks/ColumnsBlock';
 import SpacerBlock from './blocks/SpacerBlock';
 import DividerBlock from './blocks/DividerBlock';
 import CtaBlock from './blocks/CtaBlock';
-import BlogBlock from './blocks/BlogBlock';
 
 interface Props { page: WebsitePage }
 
 export default function PageRenderer({ page }: Props) {
-  if (page.mode === 'html' && page.htmlContent) {
-    return <div dangerouslySetInnerHTML={{ __html: page.htmlContent ?? '' }} />;
+  const lang = useLanguage();
+
+  if (page.mode === 'html') {
+    const html = (lang === 'en' && page.htmlContentEn) ? page.htmlContentEn : (page.htmlContent ?? '');
+    return <div dangerouslySetInnerHTML={{ __html: html }} />;
   }
 
+  const blocks = (lang === 'en' && page.blocksEn?.length) ? page.blocksEn : (page.blocks ?? []);
   return (
     <div>
-      {Array.isArray(page.blocks) && page.blocks.map(block => (
-        <BlockRenderer key={block.id} block={block} />
-      ))}
+      {blocks.map(block => <BlockRenderer key={block.id} block={block} />)}
     </div>
   );
 }
@@ -41,7 +44,7 @@ export function BlockRenderer({ block }: { block: PageBlock }) {
     case 'spacer':   return <SpacerBlock block={block} />;
     case 'divider':  return <DividerBlock block={block} />;
     case 'cta':      return <CtaBlock block={block} />;
-    case 'blog':     return <BlogBlock block={block} />;
+    case 'blog':     return null; // server-only async component, cannot render client-side
     case 'form':     return null;
     default:         return null;
   }

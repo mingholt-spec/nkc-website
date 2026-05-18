@@ -1,20 +1,34 @@
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { NewsPost } from '@/lib/types';
 import ShareButtons from './ShareButtons';
+import { useLanguage } from '@/lib/language-context';
 
 interface Props { post: NewsPost }
 
+const T = {
+  sv: { by: 'Av', back: 'Tillbaka till bloggen', blog: 'Blogg', share: 'Dela' },
+  en: { by: 'By', back: 'Back to blog', blog: 'Blog', share: 'Share' },
+};
+
 export default function BlogPost({ post }: Props) {
+  const lang = useLanguage();
+  const t = T[lang];
+  const title = (lang === 'en' && post.titleEn) ? post.titleEn : post.title;
+  const content = (lang === 'en' && post.contentEn) ? post.contentEn : (post.content ?? '');
+  const excerpt = (lang === 'en' && post.excerptEn) ? post.excerptEn : post.excerpt;
+  const locale = lang === 'en' ? 'en-GB' : 'sv-SE';
+
   const publishDate = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(post.publishedAt).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
       {/* Breadcrumb */}
       <nav className="text-sm text-zinc-400 dark:text-zinc-500 mb-6">
-        <Link href="/blogg" className="hover:text-zinc-700 dark:hover:text-zinc-300">Blogg</Link>
+        <Link href="/blogg" className="hover:text-zinc-700 dark:hover:text-zinc-300">{t.blog}</Link>
         {post.category && (
           <> <span>/</span> <span className="text-zinc-500 dark:text-zinc-400">{post.category}</span></>
         )}
@@ -25,10 +39,10 @@ export default function BlogPost({ post }: Props) {
         {post.category && (
           <span className="text-xs font-semibold uppercase tracking-wide text-red-600">{post.category}</span>
         )}
-        <h1 className="mt-2 text-4xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{post.title}</h1>
-        {post.excerpt && <p className="mt-3 text-xl text-zinc-500 dark:text-zinc-400">{post.excerpt}</p>}
+        <h1 className="mt-2 text-4xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{title}</h1>
+        {excerpt && <p className="mt-3 text-xl text-zinc-500 dark:text-zinc-400">{excerpt}</p>}
         <div className="mt-4 flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500">
-          {post.author && <span>Av {post.author}</span>}
+          {post.author && <span>{t.by} {post.author}</span>}
           {publishDate && <time dateTime={post.publishedAt}>{publishDate}</time>}
         </div>
       </header>
@@ -51,7 +65,7 @@ export default function BlogPost({ post }: Props) {
       {/* Content */}
       <div
         className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-red-600"
-        dangerouslySetInnerHTML={{ __html: post.content ?? '' }}
+        dangerouslySetInnerHTML={{ __html: content }}
       />
 
       {/* Tags */}
@@ -64,9 +78,9 @@ export default function BlogPost({ post }: Props) {
       )}
 
       <ShareButtons
-        title={post.title}
+        title={title}
         backHref="/blogg"
-        backLabel="Tillbaka till bloggen"
+        backLabel={t.back}
       />
     </article>
   );

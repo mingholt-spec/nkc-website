@@ -2,12 +2,54 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Campaign, CampaignScheduleDay } from '@/lib/types';
+import { useLanguage } from '@/lib/language-context';
+import { BlockRenderer } from '@/components/PageRenderer';
 
 
 interface Props {
   campaign: Campaign;
-  children: React.ReactNode; // rendered content blocks from server
 }
+
+const T = {
+  sv: {
+    schedule: 'Schema',
+    soldOut: 'Fullbokat',
+    fewSpotsLeft: 'Få platser kvar!',
+    spotsLeft: (n: number) => `${n} platser kvar`,
+    price: 'Pris',
+    guardianInfo: 'Målsmans uppgifter',
+    registrationHeading: 'Anmälan',
+    registrationReceived: 'Anmälan mottagen!',
+    weWillBeInTouch: 'Vi hör av oss till dig inom kort.',
+    gdprText: 'Jag godkänner att mina uppgifter sparas och behandlas i enlighet med GDPR för hantering av min anmälan.',
+    sending: 'Skickar...',
+    payAndRegister: (price: number) => `Betala & anmäl — ${price} kr`,
+    register: 'Skicka anmälan',
+    registerNow: 'Anmäl dig nu',
+    somethingWentWrong: 'Något gick fel. Försök igen eller kontakta oss direkt.',
+    with: 'Med',
+    share: 'Dela',
+  },
+  en: {
+    schedule: 'Schedule',
+    soldOut: 'Sold out',
+    fewSpotsLeft: 'Few spots left!',
+    spotsLeft: (n: number) => `${n} spots left`,
+    price: 'Price',
+    guardianInfo: "Guardian's details",
+    registrationHeading: 'Sign up',
+    registrationReceived: 'Registration received!',
+    weWillBeInTouch: "We'll be in touch shortly.",
+    gdprText: 'I agree that my details are stored and processed in accordance with GDPR for handling my registration.',
+    sending: 'Sending...',
+    payAndRegister: (price: number) => `Pay & register — ${price} kr`,
+    register: 'Register',
+    registerNow: 'Register now',
+    somethingWentWrong: 'Something went wrong. Please try again or contact us directly.',
+    with: 'With',
+    share: 'Share',
+  },
+};
 
 const TITLE_SIZE_CLASSES: Record<string, string> = {
   xs:  'text-xl sm:text-2xl md:text-3xl lg:text-4xl',
@@ -18,8 +60,8 @@ const TITLE_SIZE_CLASSES: Record<string, string> = {
   '2xl': 'text-5xl sm:text-7xl md:text-[9rem] lg:text-[12rem]',
 };
 
-function formatDateShort(dateStr: string): string {
-  return new Date(`${dateStr}T00:00:00`).toLocaleDateString('sv-SE', {
+function formatDateShort(dateStr: string, locale: string): string {
+  return new Date(`${dateStr}T00:00:00`).toLocaleDateString(locale, {
     weekday: 'short', day: 'numeric', month: 'short',
   });
 }
@@ -27,9 +69,16 @@ function formatDateShort(dateStr: string): string {
 const inputClasses = 'w-full p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-bold text-sm focus:ring-2 outline-none transition-all placeholder-zinc-400';
 const sidebarInputClasses = 'w-full p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-bold text-sm focus:ring-2 outline-none transition-all placeholder-zinc-400';
 
-export default function EventPageClient({ campaign, children }: Props) {
+export default function EventPageClient({ campaign }: Props) {
+  const lang = useLanguage();
+  const t = T[lang];
   const { pageConfig, formConfig, eventDetails } = campaign;
   const accent = campaign.accentColor ?? null;
+
+  const title = (lang === 'en' && campaign.pageConfig_titleEn) ? campaign.pageConfig_titleEn : pageConfig.title;
+  const description = (lang === 'en' && campaign.pageConfig_descriptionEn) ? campaign.pageConfig_descriptionEn : pageConfig.description;
+  const blocks = (lang === 'en' && campaign.contentBlocksEn?.length) ? campaign.contentBlocksEn : (campaign.contentBlocks ?? []);
+  const locale = lang === 'en' ? 'en-GB' : 'sv-SE';
 
   const [gdprAccepted, setGdprAccepted] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
@@ -86,7 +135,7 @@ export default function EventPageClient({ campaign, children }: Props) {
       if (!res.ok) throw new Error('server error');
       setSubmitted(true);
     } catch {
-      setSubmitError('Något gick fel. Försök igen eller kontakta oss direkt.');
+      setSubmitError(t.somethingWentWrong);
     } finally {
       setSubmitting(false);
     }
@@ -101,11 +150,11 @@ export default function EventPageClient({ campaign, children }: Props) {
           <svg className="w-4 h-4 shrink-0" style={{ color: accent ?? '#e50401' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Schema</span>
+          <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t.schedule}</span>
         </div>
         {schedule.map((day, i) => (
           <div key={i} className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-xl">
-            <span className="text-sm font-black text-zinc-900 dark:text-white">{formatDateShort(day.date)}</span>
+            <span className="text-sm font-black text-zinc-900 dark:text-white">{formatDateShort(day.date, locale)}</span>
             <span className="text-xs font-bold text-zinc-500">{day.time}{day.endTime ? ` – ${day.endTime}` : ''}</span>
           </div>
         ))}
@@ -117,7 +166,7 @@ export default function EventPageClient({ campaign, children }: Props) {
   const SocialProofBar = () => {
     if (maxAttendees <= 0) return null;
     if (isSoldOut) {
-      return <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Fullbokat</span>;
+      return <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{t.soldOut}</span>;
     }
     return (
       <div className="space-y-2">
@@ -127,7 +176,7 @@ export default function EventPageClient({ campaign, children }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <span className={`text-xs font-black uppercase tracking-wider ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
-              {isUrgent ? 'Få platser kvar!' : `${spotsLeft} platser kvar`}
+              {isUrgent ? t.fewSpotsLeft : t.spotsLeft(spotsLeft)}
             </span>
           </div>
           <span className="text-[10px] font-bold text-zinc-400">{registrationCount}/{maxAttendees}</span>
@@ -150,20 +199,20 @@ export default function EventPageClient({ campaign, children }: Props) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <p className="font-black text-zinc-900 dark:text-white uppercase tracking-tight">Anmälan mottagen!</p>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">Vi hör av oss till dig inom kort.</p>
+      <p className="font-black text-zinc-900 dark:text-white uppercase tracking-tight">{t.registrationReceived}</p>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">{t.weWillBeInTouch}</p>
     </div>
   ) : (
     <form onSubmit={handleSubmit}>
       <h2 className={`${compact ? 'text-lg' : 'text-2xl'} font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4 font-display`}>
-        Anmälan
+        {t.registrationHeading}
       </h2>
       <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
         {formConfig.map(field => (
           <div key={field.id} className={!compact && field.type === 'guardianInfo' ? 'sm:col-span-2' : ''}>
             {field.type === 'guardianInfo' ? (
               <div className="p-3 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-zinc-800 space-y-2">
-                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Målsmans uppgifter</p>
+                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">{t.guardianInfo}</p>
                 <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-3'} gap-2`}>
                   <input name="guardianName" placeholder="Namn" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
                   <input name="guardianEmail" type="email" placeholder="E-post" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
@@ -193,7 +242,7 @@ export default function EventPageClient({ campaign, children }: Props) {
           style={{ accentColor: accent ?? '#e50401' }}
         />
         <span className="text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
-          Jag godkänner att mina uppgifter sparas och behandlas i enlighet med GDPR för hantering av min anmälan.
+          {t.gdprText}
         </span>
       </label>
 
@@ -209,7 +258,7 @@ export default function EventPageClient({ campaign, children }: Props) {
           boxShadow: !isSoldOut ? `0 0 24px ${(accent ?? '#e50401')}30` : undefined,
         }}
       >
-        {submitting ? 'Skickar...' : isSoldOut ? 'Fullbokat' : isPaid ? `Betala & anmäl — ${price} kr` : 'Skicka anmälan'}
+        {submitting ? t.sending : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(price) : t.register}
       </button>
     </form>
   );
@@ -240,24 +289,30 @@ export default function EventPageClient({ campaign, children }: Props) {
 
   const contentBg = hasHtmlBlocks ? '' : 'bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden';
 
+  const renderedBlocks = blocks.length > 0
+    ? blocks.map(b => <BlockRenderer key={b.id} block={b} />)
+    : description
+      ? <p className="px-6 sm:px-10 pt-8 sm:pt-10 pb-6 text-zinc-600 dark:text-zinc-400 leading-relaxed text-base sm:text-lg font-medium">{description}</p>
+      : null;
+
   return (
     <div className={`${hasHtmlBlocks ? 'bg-black dark:bg-black' : 'bg-zinc-50 dark:bg-black'} min-h-screen font-sans`}>
 
       {/* HERO */}
       <header className="relative h-[40vh] sm:h-[50vh] md:h-[65vh] min-h-[350px] md:min-h-[500px]">
         {pageConfig.headerImage ? (
-          <img src={pageConfig.headerImage} alt={pageConfig.title} className="w-full h-full object-cover" decoding="async" />
+          <img src={pageConfig.headerImage} alt={title} className="w-full h-full object-cover" decoding="async" />
         ) : (
           <div className="w-full h-full bg-zinc-900" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
         <div className="absolute bottom-10 md:bottom-20 left-0 right-0 px-6 sm:px-10 max-w-6xl mx-auto">
           <h1 className={`${TITLE_SIZE_CLASSES[pageConfig.titleSize ?? 'xl']} font-black tracking-tighter uppercase leading-[0.85] font-display text-white mb-4`}>
-            {pageConfig.title}
+            {title}
           </h1>
           {pageConfig.instructor && (
             <p className="text-lg sm:text-2xl md:text-3xl font-black uppercase tracking-[0.2em] opacity-90" style={{ color: accent ?? '#e50401' }}>
-              Med {pageConfig.instructor}
+              {t.with} {pageConfig.instructor}
             </p>
           )}
         </div>
@@ -273,13 +328,13 @@ export default function EventPageClient({ campaign, children }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-wider">
-                  {formatDateShort(day.date)} {day.time}{day.endTime ? `–${day.endTime}` : ''}
+                  {formatDateShort(day.date, locale)} {day.time}{day.endTime ? `–${day.endTime}` : ''}
                 </span>
               </div>
             ))}
             {isPaid && (
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-zinc-400 uppercase tracking-widest">Pris</span>
+                <span className="text-xs font-black text-zinc-400 uppercase tracking-widest">{t.price}</span>
                 <span className="text-lg font-black tracking-tight" style={{ color: accent ?? '#e50401' }}>{price} kr</span>
               </div>
             )}
@@ -290,7 +345,7 @@ export default function EventPageClient({ campaign, children }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <span className={`text-xs font-black uppercase tracking-wider ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
-                    {isUrgent ? 'Få platser kvar!' : `${spotsLeft} platser kvar`}
+                    {isUrgent ? t.fewSpotsLeft : t.spotsLeft(spotsLeft)}
                   </span>
                 </div>
                 <div className="w-20 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
@@ -302,7 +357,7 @@ export default function EventPageClient({ campaign, children }: Props) {
               </div>
             )}
             {isSoldOut && (
-              <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Fullbokat</span>
+              <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{t.soldOut}</span>
             )}
           </div>
         </div>
@@ -310,7 +365,7 @@ export default function EventPageClient({ campaign, children }: Props) {
 
       {/* SHARE BUTTONS */}
       <div className={`${isSidebar ? 'max-w-6xl' : 'max-w-4xl'} mx-auto px-4 sm:px-8 pt-6 flex justify-center`}>
-        <ShareRow title={pageConfig.title} accent={accent ?? '#e50401'} />
+        <ShareRow title={title} accent={accent ?? '#e50401'} shareLabel={t.share} />
       </div>
 
       {/* MAIN CONTENT */}
@@ -319,7 +374,7 @@ export default function EventPageClient({ campaign, children }: Props) {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left: content blocks */}
             <div className="flex-1 min-w-0 overflow-hidden">
-              <div className={contentBg}>{children}</div>
+              <div className={contentBg}>{renderedBlocks}</div>
               {/* Mobile form */}
               <div ref={formRef} className="lg:hidden mt-8" style={{ position: 'relative', zIndex: 1 }}>
                 {FormCard({ compact: true })}
@@ -338,7 +393,7 @@ export default function EventPageClient({ campaign, children }: Props) {
           {hasHtmlBlocks ? (
             <>
               <div className="campaign-blocks" style={{ position: 'relative', zIndex: 0 }}>
-                {children}
+                {renderedBlocks}
               </div>
               <div ref={formRef} className="max-w-2xl mx-auto px-4 sm:px-8 py-10 md:py-16" style={{ position: 'relative', zIndex: 1 }}>
                 <div className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-6 sm:p-10" style={formCardStyle}>
@@ -348,7 +403,7 @@ export default function EventPageClient({ campaign, children }: Props) {
             </>
           ) : (
             <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-              {children}
+              {renderedBlocks}
               <div className="mx-6 sm:mx-10 border-t border-zinc-100 dark:border-zinc-800" />
               <div ref={formRef} className="px-6 sm:px-10 py-8 sm:py-10">
                 {hasSchedule && (
@@ -379,7 +434,7 @@ export default function EventPageClient({ campaign, children }: Props) {
               )}
               {maxAttendees > 0 && (
                 <span className={`text-[10px] font-black uppercase tracking-widest shrink-0 ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-400'}`}>
-                  {isUrgent ? 'Få platser kvar!' : `${spotsLeft} platser kvar`}
+                  {isUrgent ? t.fewSpotsLeft : t.spotsLeft(spotsLeft)}
                 </span>
               )}
             </div>
@@ -388,7 +443,7 @@ export default function EventPageClient({ campaign, children }: Props) {
               className="shrink-0 text-white font-black py-3 px-8 rounded-xl uppercase tracking-[0.2em] text-[10px] active:scale-95 transition-all"
               style={{ backgroundColor: accent ?? '#e50401' }}
             >
-              Anmäl dig nu
+              {t.registerNow}
             </button>
           </div>
         </div>
@@ -398,7 +453,7 @@ export default function EventPageClient({ campaign, children }: Props) {
 }
 
 // Share row — inline because it needs window.location
-function ShareRow({ title, accent }: { title: string; accent: string }) {
+function ShareRow({ title, accent, shareLabel }: { title: string; accent: string; shareLabel: string }) {
   const [url, setUrl] = useState('');
   const [copied, setCopied] = useState(false);
   useEffect(() => { setUrl(window.location.href); }, []);
@@ -420,7 +475,7 @@ function ShareRow({ title, accent }: { title: string; accent: string }) {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Dela</span>
+      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{shareLabel}</span>
       {TARGETS.map(btn => (
         <button key={btn.label} onClick={() => share(btn.getUrl)} aria-label={`Dela på ${btn.label}`}
           className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-zinc-200/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300">
