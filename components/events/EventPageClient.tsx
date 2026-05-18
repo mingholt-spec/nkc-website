@@ -3,37 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Campaign, CampaignScheduleDay } from '@/lib/types';
 
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(false);
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-  }, []);
-  const toggle = useCallback(() => {
-    setIsDark(prev => {
-      const next = !prev;
-      if (next) document.documentElement.classList.add('dark');
-      else document.documentElement.classList.remove('dark');
-      try { localStorage.setItem('flowroll_theme', next ? 'dark' : 'light'); } catch {}
-      return next;
-    });
-  }, []);
-  return { isDark, toggle };
-}
-
-function useLanguage() {
-  const [language, setLang] = useState<'sv' | 'en'>('sv');
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('flowroll_lang');
-      if (saved === 'sv' || saved === 'en') setLang(saved);
-    } catch {}
-  }, []);
-  const setLanguage = (lang: 'sv' | 'en') => {
-    setLang(lang);
-    try { localStorage.setItem('flowroll_lang', lang); } catch {}
-  };
-  return { language, setLanguage };
-}
 
 interface Props {
   campaign: Campaign;
@@ -61,8 +30,6 @@ const sidebarInputClasses = 'w-full p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950 b
 export default function EventPageClient({ campaign, children }: Props) {
   const { pageConfig, formConfig, eventDetails } = campaign;
   const accent = campaign.accentColor ?? null;
-  const { isDark, toggle: toggleDark } = useDarkMode();
-  const { language, setLanguage } = useLanguage();
 
   const [gdprAccepted, setGdprAccepted] = useState(false);
   const [showStickyCta, setShowStickyCta] = useState(false);
@@ -284,30 +251,6 @@ export default function EventPageClient({ campaign, children }: Props) {
           <div className="w-full h-full bg-zinc-900" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-        {/* Top-right controls: language + dark mode */}
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-          <div className="flex items-center bg-black/40 backdrop-blur-sm rounded-lg p-0.5 gap-0.5">
-            <button onClick={() => setLanguage('sv')} title="Svenska"
-              className={`flex items-center px-2 py-1 rounded-md text-sm transition-all duration-150 ${language === 'sv' ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}>
-              🇸🇪
-            </button>
-            <button onClick={() => setLanguage('en')} title="English"
-              className={`flex items-center px-2 py-1 rounded-md text-sm transition-all duration-150 ${language === 'en' ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}>
-              🇬🇧
-            </button>
-          </div>
-          <button
-            onClick={toggleDark}
-            className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 transition-all"
-            aria-label={isDark ? 'Ljust läge' : 'Mörkt läge'}
-          >
-            {isDark ? (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-            ) : (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-            )}
-          </button>
-        </div>
         <div className="absolute bottom-10 md:bottom-20 left-0 right-0 px-6 sm:px-10 max-w-6xl mx-auto">
           <h1 className={`${TITLE_SIZE_CLASSES[pageConfig.titleSize ?? 'xl']} font-black tracking-tighter uppercase leading-[0.85] font-display text-white mb-4`}>
             {pageConfig.title}
