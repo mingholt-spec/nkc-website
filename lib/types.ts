@@ -253,6 +253,8 @@ export interface Campaign {
   goal: 'event' | 'leadCapture';
   tags?: string[]; accentColor?: string; shareImage?: string;
   registrationCount?: number;
+  waitlistEnabled?: boolean;
+  waitlistCount?: number;
   pageConfig: {
     title: string; description: string;
     headerImage?: string; instructor?: string;

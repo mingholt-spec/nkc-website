@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { onSnapshot, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase-client';
 import type { Campaign, CampaignScheduleDay } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
 import { BlockRenderer } from '@/components/PageRenderer';
@@ -29,6 +31,13 @@ const T = {
     somethingWentWrong: 'Något gick fel. Försök igen eller kontakta oss direkt.',
     with: 'Med',
     share: 'Dela',
+    waitlistHeading: 'Väntelista',
+    waitlistSubtext: 'Eventet är fullbokat — anmäl dig till väntelistan.',
+    waitlistSuccess: 'Du är på väntelistan!',
+    waitlistSuccessText: 'Vi hör av oss om en plats öppnar sig.',
+    waitlistButton: 'Anmäl till väntelistan',
+    waitlistButtonSending: 'Anmäler...',
+    waitlistCount: (n: number) => `${n} ${n === 1 ? 'person' : 'personer'} på väntelistan`,
   },
   en: {
     schedule: 'Schedule',
@@ -48,6 +57,13 @@ const T = {
     somethingWentWrong: 'Something went wrong. Please try again or contact us directly.',
     with: 'With',
     share: 'Share',
+    waitlistHeading: 'Waitlist',
+    waitlistSubtext: 'Event is full — join the waitlist.',
+    waitlistSuccess: 'You are on the waitlist!',
+    waitlistSuccessText: "We'll reach out if a spot opens.",
+    waitlistButton: 'Join waitlist',
+    waitlistButtonSending: 'Joining...',
+    waitlistCount: (n: number) => `${n} ${n === 1 ? 'person' : 'people'} on waitlist`,
   },
 };
 
@@ -87,6 +103,29 @@ export default function EventPageClient({ campaign }: Props) {
   const [submitError, setSubmitError] = useState('');
   const formRef = useRef<HTMLDivElement>(null);
 
+  // Live counts from Firestore
+  const [liveRegistrationCount, setLiveRegistrationCount] = useState<number | null>(null);
+  const [liveWaitlistEnabled, setLiveWaitlistEnabled] = useState<boolean | null>(null);
+  const [liveWaitlistCount, setLiveWaitlistCount] = useState<number | null>(null);
+
+  // Waitlist form state
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [waitlistError, setWaitlistError] = useState('');
+  const [waitlistGdprAccepted, setWaitlistGdprAccepted] = useState(false);
+
+  useEffect(() => {
+    if (!db || !campaign.id) return;
+    const unsubscribe = onSnapshot(doc(db, 'campaigns', campaign.id), (snap) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      if (typeof data.registrationCount === 'number') setLiveRegistrationCount(data.registrationCount);
+      setLiveWaitlistEnabled(Boolean(data.waitlistEnabled));
+      if (typeof data.waitlistCount === 'number') setLiveWaitlistCount(data.waitlistCount);
+    });
+    return () => unsubscribe();
+  }, [campaign.id]);
+
   const isSidebar = campaign.formLayout === 'sidebar';
   const hasHtmlBlocks = campaign.contentBlocks?.some(b => b.type === 'html') ?? false;
   const schedule = (eventDetails?.schedule ?? []) as CampaignScheduleDay[];
@@ -94,7 +133,9 @@ export default function EventPageClient({ campaign }: Props) {
   const price = eventDetails?.price ?? 0;
   const isPaid = campaign.goal === 'event' && price > 0;
   const maxAttendees = eventDetails?.maxAttendees ?? 0;
-  const registrationCount = campaign.registrationCount ?? 0;
+  const registrationCount = liveRegistrationCount ?? campaign.registrationCount ?? 0;
+  const waitlistEnabled = liveWaitlistEnabled ?? campaign.waitlistEnabled ?? false;
+  const waitlistCount = liveWaitlistCount ?? campaign.waitlistCount ?? 0;
   const spotsLeft = maxAttendees > 0 ? maxAttendees - registrationCount : 0;
   const bookingPercent = maxAttendees > 0 ? Math.round((registrationCount / maxAttendees) * 100) : 0;
   const isUrgent = maxAttendees > 0 && bookingPercent >= 75;
@@ -166,7 +207,14 @@ export default function EventPageClient({ campaign }: Props) {
   const SocialProofBar = () => {
     if (maxAttendees <= 0) return null;
     if (isSoldOut) {
-      return <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{t.soldOut}</span>;
+      return (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{t.soldOut}</span>
+          {waitlistEnabled && waitlistCount > 0 && (
+            <span className="text-[10px] font-bold text-zinc-400">{t.waitlistCount(waitlistCount)}</span>
+          )}
+        </div>
+      );
     }
     return (
       <div className="space-y-2">
@@ -191,8 +239,93 @@ export default function EventPageClient({ campaign }: Props) {
     );
   };
 
+  // ── Waitlist form ──
+  const handleWaitlistSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setWaitlistSubmitting(true);
+    setWaitlistError('');
+    try {
+      const data = Object.fromEntries(new FormData(e.currentTarget));
+      const body: Record<string, string> = {
+        campaignId: campaign.id,
+        campaignName: pageConfig.title,
+      };
+      for (const [key, value] of Object.entries(data)) {
+        if (typeof value === 'string') body[key] = value;
+      }
+      const res = await fetch('/api/event/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error('server error');
+      setWaitlistSubmitted(true);
+    } catch {
+      setWaitlistError(t.somethingWentWrong);
+    } finally {
+      setWaitlistSubmitting(false);
+    }
+  };
+
+  const renderWaitlistForm = (compact: boolean) => waitlistSubmitted ? (
+    <div className="py-6 text-center space-y-3">
+      <div className="w-12 h-12 mx-auto rounded-full flex items-center justify-center bg-amber-100 dark:bg-amber-900/30">
+        <svg className="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <p className="font-black text-zinc-900 dark:text-white uppercase tracking-tight">{t.waitlistSuccess}</p>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">{t.waitlistSuccessText}</p>
+    </div>
+  ) : (
+    <form onSubmit={handleWaitlistSubmit}>
+      <div className="flex items-center gap-2 mb-1">
+        <svg className="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h2 className={`${compact ? 'text-lg' : 'text-2xl'} font-black text-zinc-900 dark:text-white uppercase tracking-tighter font-display`}>
+          {t.waitlistHeading}
+        </h2>
+      </div>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">{t.waitlistSubtext}</p>
+      <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
+        <input name="firstName" placeholder="Förnamn" required className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="lastName" placeholder="Efternamn" required className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="email" type="email" placeholder="E-post" required className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="phone" type="tel" placeholder="Telefon" className={compact ? sidebarInputClasses : inputClasses} />
+      </div>
+
+      <label className={`flex items-start gap-3 ${compact ? 'mt-3' : 'mt-4'} cursor-pointer`}>
+        <input
+          type="checkbox"
+          checked={waitlistGdprAccepted}
+          onChange={e => setWaitlistGdprAccepted(e.target.checked)}
+          required
+          className="mt-0.5 w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 shrink-0"
+          style={{ accentColor: '#f59e0b' }}
+        />
+        <span className="text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+          {t.gdprText}
+        </span>
+      </label>
+
+      {waitlistError && (
+        <p className="mt-3 text-xs text-red-500 font-bold">{waitlistError}</p>
+      )}
+      <button
+        type="submit"
+        disabled={!waitlistGdprAccepted || waitlistSubmitting}
+        className={`w-full mt-4 text-white font-black ${compact ? 'py-4 rounded-xl text-[10px]' : 'py-5 rounded-2xl text-xs'} uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50 transition-all bg-amber-500 hover:bg-amber-600`}
+      >
+        {waitlistSubmitting ? t.waitlistButtonSending : t.waitlistButton}
+      </button>
+    </form>
+  );
+
   // ── Registration form ──
-  const renderForm = (compact: boolean) => submitted ? (
+  const renderForm = (compact: boolean) => {
+    if (isSoldOut && waitlistEnabled) return renderWaitlistForm(compact);
+    return submitted ? (
     <div className="py-6 text-center space-y-3">
       <div className="w-12 h-12 mx-auto rounded-full flex items-center justify-center" style={{ backgroundColor: `${accent ?? '#e50401'}20` }}>
         <svg className="w-6 h-6" style={{ color: accent ?? '#e50401' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -261,7 +394,8 @@ export default function EventPageClient({ campaign }: Props) {
         {submitting ? t.sending : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(price) : t.register}
       </button>
     </form>
-  );
+    );
+  };
 
   const formCardStyle: React.CSSProperties = accent ? { borderTopColor: accent, borderTopWidth: '3px' } : {};
   const formCardClasses = hasHtmlBlocks
