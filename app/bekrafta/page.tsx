@@ -41,6 +41,28 @@ export default async function BekraftaPlatsPage({ searchParams }: Props) {
           message = `${firstName ? `Hej ${firstName}! ` : ''}Du är redan bokad på ${campaignName}. Vi ses där!`;
           success = true;
         } else {
+          // Read Resend config for from/replyTo
+          let fromStr: string | undefined;
+          let replyTo: string | undefined;
+          try {
+            const cfgSnap = await db.collection('config').doc('resend').get();
+            if (cfgSnap.exists) {
+              const cfg = cfgSnap.data() ?? {};
+              if (cfg.enabled && cfg.senderName && cfg.senderEmail) {
+                fromStr = `${cfg.senderName} <${cfg.senderEmail}>`;
+              }
+              if (cfg.replyToEmail) replyTo = cfg.replyToEmail as string;
+            }
+          } catch { /* best-effort */ }
+
+          const name = firstName || (lead.email as string) || '';
+          const confirmHtml = `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#18181b;padding:32px 24px">
+  <h2 style="font-size:24px;font-weight:900;margin:0 0 20px;letter-spacing:-0.5px">Din plats är bekräftad!</h2>
+  <p style="margin:0 0 12px;font-size:16px">Hej ${name},</p>
+  <p style="margin:0 0 16px;font-size:16px;line-height:1.6">Din plats på <strong>${campaignName}</strong> är nu bekräftad. Vi ser fram emot att träffa dig!</p>
+  <p style="margin:32px 0 0;color:#71717a;font-size:12px;line-height:1.5">Har du frågor? Svara på detta mejl så hjälper vi dig.</p>
+</div>`;
+
           const batch = db.batch();
           batch.update(leadDoc.ref, {
             status: 'booked',
@@ -53,6 +75,15 @@ export default async function BekraftaPlatsPage({ searchParams }: Props) {
               registrationCount: FieldValue.increment(1),
             });
           }
+          const mailRef = db.collection('mail_queue').doc();
+          batch.set(mailRef, {
+            to: [lead.email as string],
+            message: { subject: `Din plats är bekräftad — ${campaignName}`, html: confirmHtml },
+            ...(fromStr ? { from: fromStr } : {}),
+            ...(replyTo ? { replyTo } : {}),
+            source: 'waitlist_confirmed',
+            createdAt: new Date().toISOString(),
+          });
           await batch.commit();
 
           title = 'Platsen är bekräftad!';
