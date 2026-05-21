@@ -174,6 +174,15 @@ export default function EventPageClient({ campaign }: Props) {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error('server error');
+      const json = await res.json();
+      if (json.alreadyRegistered) {
+        setSubmitError('Du är redan anmäld till detta event.');
+        return;
+      }
+      if (json.alreadyWaitlisted) {
+        setSubmitError('Du står redan på väntelistan för detta event.');
+        return;
+      }
       setSubmitted(true);
     } catch {
       setSubmitError(t.somethingWentWrong);

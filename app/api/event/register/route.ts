@@ -20,6 +20,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Duplicate check: same email already registered (non-waitlisted) for this campaign
+    const dupSnap = await db.collection('leads')
+      .where('email', '==', email)
+      .where('campaignId', '==', campaignId)
+      .limit(1)
+      .get();
+    if (!dupSnap.empty) {
+      const existingStatus = dupSnap.docs[0].data().status as string;
+      if (existingStatus === 'waitlisted') {
+        return NextResponse.json({ alreadyWaitlisted: true });
+      }
+      return NextResponse.json({ alreadyRegistered: true });
+    }
+
     // Read campaign to get auto-tags
     let campaignTags: string[] = [];
     try {
