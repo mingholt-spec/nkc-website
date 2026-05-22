@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter, Outfit, Raleway } from 'next/font/google';
 import { getClubConfig, getWebsiteConfig } from '@/lib/data';
+import CookieConsent from '@/components/layout/CookieConsent';
+import GoogleAnalytics from '@/components/layout/GoogleAnalytics';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -37,7 +39,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Prevent flash of wrong theme on load */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('flowroll_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();` }} />
       </head>
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <body className="min-h-full flex flex-col antialiased">
+        {children}
+        <CookieConsent />
+        <GoogleAnalytics />
+      </body>
     </html>
   );
 }

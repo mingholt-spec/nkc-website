@@ -130,8 +130,8 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
           </p>
         )}
 
-        {footer?.showPoweredBy !== false && (
-          <div className="mt-6 pt-6 border-t text-center" style={{ borderColor: `${txtColor}10` }}>
+        <div className="mt-6 pt-6 border-t text-center flex flex-col items-center gap-2" style={{ borderColor: `${txtColor}10` }}>
+          {footer?.showPoweredBy !== false && (
             <p className="text-[10px] uppercase tracking-widest" style={{ color: `${txtColor}50`, fontFamily: theme?.bodyFont }}>
               Powered by{' '}
               <a href="https://bjj-manager-pro.web.app" className="hover:opacity-70"
@@ -139,8 +139,16 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
                 BJJ Manager Pro
               </a>
             </p>
-          </div>
-        )}
+          )}
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('nkc:open-consent'))}
+            className="text-[10px] uppercase tracking-widest hover:opacity-70 transition-opacity"
+            style={{ color: `${txtColor}35`, fontFamily: theme?.bodyFont }}
+          >
+            Cookie-inställningar
+          </button>
+        </div>
       </div>
     </footer>
   );
