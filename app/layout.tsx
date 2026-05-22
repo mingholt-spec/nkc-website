@@ -12,16 +12,16 @@ const raleway = Raleway({ subsets: ['latin', 'latin-ext'], variable: '--font-ral
 export async function generateMetadata(): Promise<Metadata> {
   const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
   const name = club.clubName ?? 'NKC';
+  const faviconUrl = club.faviconUrl ?? config?.headerConfig?.logoUrl;
   return {
     title: { default: name, template: `%s | ${name}` },
     description: config?.seoDefaults?.description ?? '',
-    robots: { index: false, follow: false },
+    ...(faviconUrl ? { icons: { icon: faviconUrl, apple: faviconUrl } } : {}),
   };
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
-  const faviconUrl = club.faviconUrl ?? config?.headerConfig?.logoUrl;
+  const [, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
   const theme = config?.theme;
 
   const cssVars = {
@@ -34,8 +34,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="sv" className={`${inter.variable} ${outfit.variable} ${raleway.variable}`} style={cssVars}>
       <head>
-        {faviconUrl && <link rel="icon" href={faviconUrl} />}
-        {faviconUrl && <link rel="apple-touch-icon" href={faviconUrl} />}
         {/* Prevent flash of wrong theme on load */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('flowroll_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();` }} />
       </head>

@@ -22,6 +22,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://www.nkc.nu/sitemap.xml',
+    sitemap: 'https://nkc.nu/sitemap.xml',
   };
 }
