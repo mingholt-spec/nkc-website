@@ -10,9 +10,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'storage.googleapis.com' },
     ],
   },
-  experimental: {
-    optimizePackageImports: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
-  },
   turbopack: {
     root: path.resolve(__dirname),
   },
