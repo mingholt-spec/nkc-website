@@ -7,7 +7,7 @@ import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit', display: 'swap' });
-const raleway = Raleway({ subsets: ['latin', 'latin-ext'], variable: '--font-raleway', display: 'swap', weight: ['400', '500', '600', '700', '800', '900'] });
+const raleway = Raleway({ subsets: ['latin'], variable: '--font-raleway', display: 'swap', weight: ['400', '500', '600', '700', '800', '900'] });
 
 export async function generateMetadata(): Promise<Metadata> {
   const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
@@ -32,8 +32,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   } as React.CSSProperties;
 
   return (
-    <html lang="sv" className={`${inter.variable} ${outfit.variable} ${raleway.variable}`} style={cssVars}>
+    <html lang="sv" className={`${inter.variable} ${outfit.variable} ${raleway.variable}`} style={cssVars} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
+        <link rel="preconnect" href="https://storage.googleapis.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         {/* Prevent flash of wrong theme on load */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('flowroll_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();` }} />
       </head>
