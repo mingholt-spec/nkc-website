@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { PageBlockHero } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
@@ -27,8 +28,19 @@ export default function HeroBlock({ block }: Props) {
   return (
     <section
       className={`relative flex flex-col justify-center ${height} px-6 py-16 overflow-hidden`}
-      style={{ backgroundColor: bgColor, backgroundImage: bgImage ? `url(${bgImage})` : undefined, backgroundSize: 'cover', backgroundPosition: bgPos }}
+      style={{ backgroundColor: bgColor }}
     >
+      {bgImage && (
+        <Image
+          src={bgImage}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+          style={{ objectPosition: bgPos }}
+        />
+      )}
       {bgImage && <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${overlay})` }} />}
       <div className={`relative z-10 mx-auto w-full max-w-4xl flex flex-col gap-4 ${align}`}>
         {title && (

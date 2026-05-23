@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import type { PageBlockImage } from '@/lib/types';
 
 interface Props { block: PageBlockImage }
@@ -17,11 +18,12 @@ export default function ImageBlock({ block }: Props) {
   return (
     <div className="px-6 py-6">
       <figure className="mx-auto" style={{ maxWidth: block.width || '100%' }}>
-        <img
+        <Image
           src={block.src}
           alt={block.alt || ''}
-          loading="lazy"
-          decoding="async"
+          width={1200}
+          height={800}
+          sizes="(max-width: 768px) 100vw, 800px"
           className={`w-full h-auto ${block.rounded !== false ? 'rounded-2xl' : ''} ${block.shadow !== false ? 'shadow-lg' : ''}`}
         />
         {block.caption && (
