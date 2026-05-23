@@ -132,7 +132,7 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
 
         <div className="mt-6 pt-6 border-t text-center flex flex-col items-center gap-2" style={{ borderColor: `${txtColor}10` }}>
           {footer?.showPoweredBy !== false && (
-            <p className="text-[10px] uppercase tracking-widest" style={{ color: `${txtColor}50`, fontFamily: theme?.bodyFont }}>
+            <p className="text-[10px] uppercase tracking-widest" style={{ color: `${txtColor}cc`, fontFamily: theme?.bodyFont }}>
               Powered by{' '}
               <a href="https://bjj-manager-pro.web.app" className="hover:opacity-70"
                 style={{ color: theme?.primaryColor || '#e50401' }}>
@@ -145,7 +145,7 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
             onClick={() => window.dispatchEvent(new CustomEvent('nkc:open-consent'))}
             aria-label="Hantera cookie-inställningar"
             className="text-[10px] uppercase tracking-widest hover:opacity-70 transition-opacity"
-            style={{ color: `${txtColor}65`, fontFamily: theme?.bodyFont }}
+            style={{ color: `${txtColor}cc`, fontFamily: theme?.bodyFont }}
           >
             Cookie-inställningar
           </button>

@@ -56,10 +56,10 @@ function PostCard({ post }: { post: NewsPost }) {
           {title}
         </h2>
         {excerpt && (
-          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3">{excerpt}</p>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300 line-clamp-3">{excerpt}</p>
         )}
         {post.publishedAt && (
-          <p className="mt-3 text-xs text-zinc-400 dark:text-zinc-500">
+          <p className="mt-3 text-xs text-zinc-600 dark:text-zinc-300">
             {new Date(post.publishedAt).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         )}

@@ -87,7 +87,7 @@ export default function ShareButtons({ title, primaryColor = '#e50401', backHref
               key={btn.label}
               onClick={() => share(btn.getUrl)}
               aria-label={`Dela på ${btn.label}`}
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+              className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
               style={{ backgroundColor: btnBg, color: txtColor }}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox={btn.viewBox}><path d={btn.path} /></svg>
@@ -96,7 +96,7 @@ export default function ShareButtons({ title, primaryColor = '#e50401', backHref
           <button
             onClick={handleCopy}
             aria-label="Kopiera länk"
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
             style={{
               backgroundColor: copied ? `${primaryColor}20` : btnBg,
               color: copied ? primaryColor : txtColor,

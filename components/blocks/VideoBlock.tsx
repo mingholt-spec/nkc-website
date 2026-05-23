@@ -22,7 +22,7 @@ export default function VideoBlock({ block }: Props) {
           <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900">
             <video src={block.url} controls autoPlay={block.autoplay} loop={block.loop} muted={block.muted} className="w-full h-full object-cover" />
           </div>
-          {block.caption && <p className="mt-2 text-sm text-zinc-400 text-center">{block.caption}</p>}
+          {block.caption && <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300 text-center">{block.caption}</p>}
         </>
       )}
     </div>

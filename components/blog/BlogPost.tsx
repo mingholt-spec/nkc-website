@@ -27,10 +27,10 @@ export default function BlogPost({ post }: Props) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12">
       {/* Breadcrumb */}
-      <nav className="text-sm text-zinc-400 dark:text-zinc-500 mb-6">
-        <Link href="/blogg" className="hover:text-zinc-700 dark:hover:text-zinc-300">{t.blog}</Link>
+      <nav className="text-sm text-zinc-600 dark:text-zinc-300 mb-6">
+        <Link href="/blogg" className="hover:text-zinc-900 dark:hover:text-white">{t.blog}</Link>
         {post.category && (
-          <> <span>/</span> <span className="text-zinc-500 dark:text-zinc-400">{post.category}</span></>
+          <> <span>/</span> <span className="text-zinc-600 dark:text-zinc-300">{post.category}</span></>
         )}
       </nav>
 
@@ -40,8 +40,8 @@ export default function BlogPost({ post }: Props) {
           <span className="text-xs font-semibold uppercase tracking-wide text-red-600">{post.category}</span>
         )}
         <h1 className="mt-2 text-4xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{title}</h1>
-        {excerpt && <p className="mt-3 text-xl text-zinc-500 dark:text-zinc-400">{excerpt}</p>}
-        <div className="mt-4 flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500">
+        {excerpt && <p className="mt-3 text-xl text-zinc-600 dark:text-zinc-300">{excerpt}</p>}
+        <div className="mt-4 flex items-center gap-4 text-sm text-zinc-600 dark:text-zinc-300">
           {post.author && <span>{t.by} {post.author}</span>}
           {publishDate && <time dateTime={post.publishedAt}>{publishDate}</time>}
         </div>

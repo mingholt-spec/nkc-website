@@ -266,7 +266,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
         {/* Logo + club name */}
         <a href="/" className="flex items-center gap-3" aria-label={clubName || 'Startsida'}>
           {logoUrl && (
-            <img src={logoUrl} alt={clubName} className="h-10 w-auto object-contain" />
+            <img src={logoUrl} alt={clubName} width={160} height={40} className="h-10 w-auto object-contain" />
           )}
           {showClubName && clubName && (
             <span className="text-lg font-black uppercase tracking-tight" style={{ fontFamily: headingFont, color: txtColor }}>
