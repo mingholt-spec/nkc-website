@@ -311,11 +311,11 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
 
           <div className="w-px h-6" style={{ backgroundColor: `${txtColor}20` }} />
           <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5">
-            <button onClick={() => language !== 'sv' && onToggleLanguage()} title="Svenska"
+            <button onClick={() => language !== 'sv' && onToggleLanguage()} title="Svenska" aria-label="Svenska"
               className={`cursor-pointer flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'sv' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
               <span className="text-sm leading-none">🇸🇪</span>
             </button>
-            <button onClick={() => language !== 'en' && onToggleLanguage()} title="English"
+            <button onClick={() => language !== 'en' && onToggleLanguage()} title="English" aria-label="English"
               className={`cursor-pointer flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
               <span className="text-sm leading-none">🇬🇧</span>
             </button>
@@ -346,7 +346,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
         {/* Mobile: dark toggle + hamburger */}
         <div className="flex items-center gap-2 md:hidden">
           {onToggleDark && <DarkToggle ariaLabel={isDark ? t.lightMode : t.darkMode} />}
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2" style={{ color: txtColor }}>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2" aria-label={mobileOpen ? 'Stäng meny' : 'Öppna meny'} aria-expanded={mobileOpen} style={{ color: txtColor }}>
             {mobileOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             ) : (

@@ -143,8 +143,9 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('nkc:open-consent'))}
+            aria-label="Hantera cookie-inställningar"
             className="text-[10px] uppercase tracking-widest hover:opacity-70 transition-opacity"
-            style={{ color: `${txtColor}35`, fontFamily: theme?.bodyFont }}
+            style={{ color: `${txtColor}65`, fontFamily: theme?.bodyFont }}
           >
             Cookie-inställningar
           </button>

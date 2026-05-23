@@ -114,6 +114,8 @@ export default function CookieConsent() {
                 <button
                   type="button"
                   onClick={() => setExpanded(expanded === cat.id ? null : cat.id)}
+                  aria-expanded={expanded === cat.id}
+                  aria-label={`${expanded === cat.id ? 'Stäng' : 'Öppna'} ${cat.title}`}
                   className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                 >
                   <div className="flex items-center gap-2">
