@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
 
     const now = FieldValue.serverTimestamp();
 
+    const todayStr = new Date().toISOString().slice(0, 10);
     const leadId = `${campaignId}_wl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     await db.collection('leads').doc(leadId).set({
       campaignId,
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
       phone: body.phone ?? '',
       eventHistory: [eventEntry],
       submittedAt: now,
+      createdAt: todayStr,
       gdprConsentDate: now,
       status: 'waitlisted',
       source: 'nkc-website',

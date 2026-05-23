@@ -30,7 +30,7 @@ export default async function BlogBlock({ block }: Props) {
         </h2>
       )}
       {posts.length === 0 ? (
-        <p className="text-sm text-zinc-400 dark:text-zinc-500 text-center py-8">Inga inlägg publicerade</p>
+        <p className="text-sm text-zinc-600 dark:text-zinc-300 text-center py-8">Inga inlägg publicerade</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map(post => {

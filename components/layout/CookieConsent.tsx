@@ -165,7 +165,7 @@ export default function CookieConsent() {
             <button
               type="button"
               onClick={acceptAll}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-amber-500 text-sm font-bold text-white hover:bg-amber-600 transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-amber-500 text-sm font-bold text-zinc-900 hover:bg-amber-600 transition-colors"
             >
               Acceptera alla
             </button>
@@ -181,7 +181,7 @@ export default function CookieConsent() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-zinc-900 dark:text-white mb-0.5">Vi använder cookies</p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+            <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
               Cookies används för att webbplatsen ska fungera, visa videor och mäta trafik med Google Analytics.
             </p>
           </div>
@@ -203,7 +203,7 @@ export default function CookieConsent() {
             <button
               type="button"
               onClick={acceptAll}
-              className="px-4 py-2 rounded-xl bg-amber-500 text-xs font-bold text-white hover:bg-amber-600 transition-colors whitespace-nowrap"
+              className="px-4 py-2 rounded-xl bg-amber-500 text-xs font-bold text-zinc-900 hover:bg-amber-600 transition-colors whitespace-nowrap"
             >
               Acceptera alla
             </button>

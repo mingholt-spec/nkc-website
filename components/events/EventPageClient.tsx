@@ -82,8 +82,8 @@ function formatDateShort(dateStr: string, locale: string): string {
   });
 }
 
-const inputClasses = 'w-full p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-bold text-sm focus:ring-2 outline-none transition-all placeholder-zinc-400';
-const sidebarInputClasses = 'w-full p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-bold text-sm focus:ring-2 outline-none transition-all placeholder-zinc-400';
+const inputClasses = 'w-full p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-bold text-sm focus:ring-2 outline-none transition-all placeholder-zinc-500 dark:placeholder-zinc-400';
+const sidebarInputClasses = 'w-full p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-bold text-sm focus:ring-2 outline-none transition-all placeholder-zinc-500 dark:placeholder-zinc-400';
 
 export default function EventPageClient({ campaign }: Props) {
   const lang = useLanguage();
@@ -200,12 +200,12 @@ export default function EventPageClient({ campaign }: Props) {
           <svg className="w-4 h-4 shrink-0" style={{ color: accent ?? '#e50401' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{t.schedule}</span>
+          <span className="text-[10px] font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest">{t.schedule}</span>
         </div>
         {schedule.map((day, i) => (
           <div key={i} className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-xl">
             <span className="text-sm font-black text-zinc-900 dark:text-white">{formatDateShort(day.date, locale)}</span>
-            <span className="text-xs font-bold text-zinc-500">{day.time}{day.endTime ? ` – ${day.endTime}` : ''}</span>
+            <span className="text-xs font-bold text-zinc-600 dark:text-zinc-300">{day.time}{day.endTime ? ` – ${day.endTime}` : ''}</span>
           </div>
         ))}
       </div>
@@ -220,7 +220,7 @@ export default function EventPageClient({ campaign }: Props) {
         <div className="flex flex-col gap-1">
           <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{t.soldOut}</span>
           {waitlistEnabled && waitlistCount > 0 && (
-            <span className="text-[10px] font-bold text-zinc-400">{t.waitlistCount(waitlistCount)}</span>
+            <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-300">{t.waitlistCount(waitlistCount)}</span>
           )}
         </div>
       );
@@ -229,14 +229,14 @@ export default function EventPageClient({ campaign }: Props) {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <svg className="w-4 h-4 text-zinc-600 dark:text-zinc-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <span className={`text-xs font-black uppercase tracking-wider ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
               {isUrgent ? t.fewSpotsLeft : t.spotsLeft(spotsLeft)}
             </span>
           </div>
-          <span className="text-[10px] font-bold text-zinc-400">{registrationCount}/{maxAttendees}</span>
+          <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-300">{registrationCount}/{maxAttendees}</span>
         </div>
         <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
           <div
@@ -284,7 +284,7 @@ export default function EventPageClient({ campaign }: Props) {
         </svg>
       </div>
       <p className="font-black text-zinc-900 dark:text-white uppercase tracking-tight">{t.waitlistSuccess}</p>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">{t.waitlistSuccessText}</p>
+      <p className="text-sm text-zinc-600 dark:text-zinc-300">{t.waitlistSuccessText}</p>
     </div>
   ) : (
     <form onSubmit={handleWaitlistSubmit}>
@@ -296,12 +296,12 @@ export default function EventPageClient({ campaign }: Props) {
           {t.waitlistHeading}
         </h2>
       </div>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">{t.waitlistSubtext}</p>
+      <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">{t.waitlistSubtext}</p>
       <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
-        <input name="firstName" placeholder="Förnamn" required className={compact ? sidebarInputClasses : inputClasses} />
-        <input name="lastName" placeholder="Efternamn" required className={compact ? sidebarInputClasses : inputClasses} />
-        <input name="email" type="email" placeholder="E-post" required className={compact ? sidebarInputClasses : inputClasses} />
-        <input name="phone" type="tel" placeholder="Telefon" className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="firstName" placeholder="Förnamn" aria-label="Förnamn" required className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="lastName" placeholder="Efternamn" aria-label="Efternamn" required className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="email" type="email" placeholder="E-post" aria-label="E-post" required className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="phone" type="tel" placeholder="Telefon" aria-label="Telefon" className={compact ? sidebarInputClasses : inputClasses} />
       </div>
 
       <label className={`flex items-start gap-3 ${compact ? 'mt-3' : 'mt-4'} cursor-pointer`}>
@@ -313,7 +313,7 @@ export default function EventPageClient({ campaign }: Props) {
           className="mt-0.5 w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 shrink-0"
           style={{ accentColor: '#f59e0b' }}
         />
-        <span className="text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+        <span className="text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-300">
           {t.gdprText}
         </span>
       </label>
@@ -324,7 +324,7 @@ export default function EventPageClient({ campaign }: Props) {
       <button
         type="submit"
         disabled={!waitlistGdprAccepted || waitlistSubmitting}
-        className={`w-full mt-4 text-white font-black ${compact ? 'py-4 rounded-xl text-[10px]' : 'py-5 rounded-2xl text-xs'} uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50 transition-all bg-amber-500 hover:bg-amber-600`}
+        className={`w-full mt-4 text-zinc-900 font-black ${compact ? 'py-4 rounded-xl text-[10px]' : 'py-5 rounded-2xl text-xs'} uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50 transition-all bg-amber-500 hover:bg-amber-600`}
       >
         {waitlistSubmitting ? t.waitlistButtonSending : t.waitlistButton}
       </button>
@@ -342,7 +342,7 @@ export default function EventPageClient({ campaign }: Props) {
         </svg>
       </div>
       <p className="font-black text-zinc-900 dark:text-white uppercase tracking-tight">{t.registrationReceived}</p>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">{t.weWillBeInTouch}</p>
+      <p className="text-sm text-zinc-600 dark:text-zinc-300">{t.weWillBeInTouch}</p>
     </div>
   ) : (
     <form onSubmit={handleSubmit}>
@@ -354,11 +354,11 @@ export default function EventPageClient({ campaign }: Props) {
           <div key={field.id} className={!compact && field.type === 'guardianInfo' ? 'sm:col-span-2' : ''}>
             {field.type === 'guardianInfo' ? (
               <div className="p-3 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-zinc-800 space-y-2">
-                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">{t.guardianInfo}</p>
+                <p className="text-[9px] font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest mb-1">{t.guardianInfo}</p>
                 <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-3'} gap-2`}>
-                  <input name="guardianName" placeholder="Namn" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
-                  <input name="guardianEmail" type="email" placeholder="E-post" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
-                  <input name="guardianPhone" type="tel" placeholder="Telefon" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
+                  <input name="guardianName" placeholder="Namn" aria-label="Målsmans namn" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
+                  <input name="guardianEmail" type="email" placeholder="E-post" aria-label="Målsmans e-post" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
+                  <input name="guardianPhone" type="tel" placeholder="Telefon" aria-label="Målsmans telefon" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
                 </div>
               </div>
             ) : (
@@ -366,6 +366,7 @@ export default function EventPageClient({ campaign }: Props) {
                 type={field.type === 'phone' ? 'tel' : field.type}
                 name={field.name}
                 placeholder={field.label}
+                aria-label={field.label}
                 required={field.required}
                 className={compact ? sidebarInputClasses : inputClasses}
               />
@@ -383,7 +384,7 @@ export default function EventPageClient({ campaign }: Props) {
           className="mt-0.5 w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 shrink-0"
           style={{ accentColor: accent ?? '#e50401' }}
         />
-        <span className="text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+        <span className="text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-300">
           {t.gdprText}
         </span>
       </label>
@@ -477,7 +478,7 @@ export default function EventPageClient({ campaign }: Props) {
             ))}
             {isPaid && (
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-zinc-400 uppercase tracking-widest">{t.price}</span>
+                <span className="text-xs font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest">{t.price}</span>
                 <span className="text-lg font-black tracking-tight" style={{ color: accent ?? '#e50401' }}>{price} kr</span>
               </div>
             )}
@@ -576,7 +577,7 @@ export default function EventPageClient({ campaign }: Props) {
                 <span className="text-lg font-black text-zinc-900 dark:text-white tracking-tight shrink-0">{price} kr</span>
               )}
               {maxAttendees > 0 && (
-                <span className={`text-[10px] font-black uppercase tracking-widest shrink-0 ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-400'}`}>
+                <span className={`text-[10px] font-black uppercase tracking-widest shrink-0 ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
                   {isUrgent ? t.fewSpotsLeft : t.spotsLeft(spotsLeft)}
                 </span>
               )}
@@ -618,15 +619,15 @@ function ShareRow({ title, accent, shareLabel }: { title: string; accent: string
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{shareLabel}</span>
+      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">{shareLabel}</span>
       {TARGETS.map(btn => (
         <button key={btn.label} onClick={() => share(btn.getUrl)} aria-label={`Dela på ${btn.label}`}
-          className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-zinc-200/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300">
+          className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-zinc-200/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300">
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d={btn.path} /></svg>
         </button>
       ))}
       <button onClick={copy} aria-label="Kopiera länk"
-        className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+        className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
         style={{ backgroundColor: copied ? `${accent}20` : 'rgba(161,161,170,0.2)', color: copied ? accent : '#71717a' }}>
         {copied
           ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>

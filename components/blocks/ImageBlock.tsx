@@ -27,7 +27,7 @@ export default function ImageBlock({ block }: Props) {
           className={`w-full h-auto ${block.rounded !== false ? 'rounded-2xl' : ''} ${block.shadow !== false ? 'shadow-lg' : ''}`}
         />
         {block.caption && (
-          <figcaption className="text-center text-sm mt-3 font-medium opacity-70">{block.caption}</figcaption>
+          <figcaption className="text-center text-sm mt-3 font-medium text-zinc-600 dark:text-zinc-300">{block.caption}</figcaption>
         )}
       </figure>
     </div>
