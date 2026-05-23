@@ -2,8 +2,6 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase-client';
 import type { NavigationItem, WebsiteConfig, WebsitePage, ClubConfig, SocialLink } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
 
@@ -43,7 +41,7 @@ function SocialIcons({ links, textColor, colorMode }: { links: SocialLink[]; tex
         const brand = colorMode ? BRAND_COLORS[link.platform] : null;
         return (
           <a key={link.platform} href={link.url} target="_blank" rel="noopener noreferrer" aria-label={icon.label}
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110"
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110"
             style={{ backgroundColor: brand ? brand.bg : `${textColor}20`, color: brand ? brand.fg : textColor }}>
             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox={icon.viewBox}><path d={icon.path} /></svg>
           </a>
@@ -210,9 +208,17 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!auth) { setIsLoggedIn(false); return; }
-    const unsub = onAuthStateChanged(auth, user => setIsLoggedIn(!!user));
-    return () => unsub();
+    let unsub: (() => void) | undefined;
+    let cancelled = false;
+    void Promise.all([
+      import('@/lib/firebase-client'),
+      import('firebase/auth'),
+    ]).then(([{ auth }, { onAuthStateChanged }]) => {
+      if (cancelled) return;
+      if (!auth) { setIsLoggedIn(false); return; }
+      unsub = onAuthStateChanged(auth, user => { if (!cancelled) setIsLoggedIn(!!user); });
+    });
+    return () => { cancelled = true; unsub?.(); };
   }, []);
 
   const currentSlug = pathname === '/' ? '' : pathname.replace(/^\//, '').split('/')[0];
@@ -244,7 +250,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
   };
 
   const DarkToggle = ({ ariaLabel }: { ariaLabel: string }) => (
-    <button onClick={onToggleDark} className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
+    <button onClick={onToggleDark} className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
       style={{ color: txtColor, backgroundColor: `${txtColor}10` }} aria-label={ariaLabel}>
       {isDark ? (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
@@ -258,7 +264,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
     <header className={`w-full z-50 site-bg ${header?.sticky !== false ? 'sticky top-0' : ''}`}>
       <div className="mx-auto flex items-center justify-between px-6 py-4" style={{ maxWidth }}>
         {/* Logo + club name */}
-        <a href="/" className="flex items-center gap-3">
+        <a href="/" className="flex items-center gap-3" aria-label={clubName || 'Startsida'}>
           {logoUrl && (
             <img src={logoUrl} alt={clubName} className="h-10 w-auto object-contain" />
           )}
@@ -312,11 +318,11 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
           <div className="w-px h-6" style={{ backgroundColor: `${txtColor}20` }} />
           <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5">
             <button onClick={() => language !== 'sv' && onToggleLanguage()} title="Svenska" aria-label="Svenska"
-              className={`cursor-pointer flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'sv' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
+              className={`cursor-pointer flex items-center gap-1 min-h-[44px] px-3 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'sv' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'}`}>
               <span className="text-sm leading-none">🇸🇪</span>
             </button>
             <button onClick={() => language !== 'en' && onToggleLanguage()} title="English" aria-label="English"
-              className={`cursor-pointer flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
+              className={`cursor-pointer flex items-center gap-1 min-h-[44px] px-3 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'}`}>
               <span className="text-sm leading-none">🇬🇧</span>
             </button>
           </div>
@@ -346,7 +352,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
         {/* Mobile: dark toggle + hamburger */}
         <div className="flex items-center gap-2 md:hidden">
           {onToggleDark && <DarkToggle ariaLabel={isDark ? t.lightMode : t.darkMode} />}
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2" aria-label={mobileOpen ? 'Stäng meny' : 'Öppna meny'} aria-expanded={mobileOpen} style={{ color: txtColor }}>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2.5" aria-label={mobileOpen ? 'Stäng meny' : 'Öppna meny'} aria-expanded={mobileOpen} style={{ color: txtColor }}>
             {mobileOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             ) : (
@@ -417,12 +423,12 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
             <div className="flex justify-center pt-3">
               <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5">
                 <button onClick={() => language !== 'sv' && onToggleLanguage()} title="Svenska"
-                  className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'sv' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
+                  className={`cursor-pointer flex items-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'sv' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'}`}>
                   <span className="text-sm leading-none">🇸🇪</span>
                   <span>SV</span>
                 </button>
                 <button onClick={() => language !== 'en' && onToggleLanguage()} title="English"
-                  className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}>
+                  className={`cursor-pointer flex items-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-semibold transition-all duration-150 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'}`}>
                   <span className="text-sm leading-none">🇬🇧</span>
                   <span>EN</span>
                 </button>

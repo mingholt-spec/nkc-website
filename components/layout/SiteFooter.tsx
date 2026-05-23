@@ -113,7 +113,7 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
                   return (
                     <a key={link.platform} href={link.url} target="_blank" rel="noopener noreferrer"
                       aria-label={link.platform}
-                      className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:opacity-80"
+                      className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:opacity-80"
                       style={{ backgroundColor: brand ? brand.bg : `${txtColor}10`, color: brand ? brand.fg : txtColor }}>
                       <svg className="w-4 h-4" fill="currentColor" viewBox={icon.viewBox}><path d={icon.path} /></svg>
                     </a>
