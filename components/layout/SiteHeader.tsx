@@ -318,7 +318,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
                 style={{ color: txtColor }}>
                 {t.login}
               </a>
-              <a href="/portal/app"
+              <a href="/portal/app?register=1"
                 className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 rounded-lg"
                 style={{ color: '#fff', backgroundColor: primaryColor }}>
                 {t.becomeMember}
@@ -381,7 +381,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
                 style={{ color: txtColor, backgroundColor: `${txtColor}08` }}>
                 {t.login}
               </a>
-              <a href="/portal/app"
+              <a href="/portal/app?register=1"
                 className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
                 style={{ color: '#fff', backgroundColor: primaryColor }}>
                 {t.becomeMember}
