@@ -4,7 +4,7 @@ import { getPageBySlug, getWebsitePages, getClubConfig, getWebsiteConfig } from 
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 type Props = { params: Promise<{ slug: string }> };
 

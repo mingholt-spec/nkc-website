@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { getCampaignBySlug } from '@/lib/data';
 import EventPage from '@/components/events/EventPage';
 
-export const revalidate = 300; // Events change often (registrations) — rebuild every 5 min
+export const dynamic = 'force-dynamic';
 
 type Props = { params: Promise<{ slug: string }> };
 

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { getBlogPostBySlug, getBlogPosts, getClubConfig, getWebsiteConfig } from '@/lib/data';
 import BlogPost from '@/components/blog/BlogPost';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 type Props = { params: Promise<{ category: string; slug: string }> };
 

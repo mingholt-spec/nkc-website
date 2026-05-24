@@ -4,7 +4,10 @@ import { getHomepage, getClubConfig, getWebsiteConfig } from '@/lib/data';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 
-export const revalidate = 3600; // ISR: rebuild at most every hour
+// Cloud Build lacks Firestore ADC — build-time fetch always returns null.
+// force-dynamic ensures rendering happens at request time in Cloud Run,
+// where the App Hosting service account has proper Firestore access.
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [page, club, config] = await Promise.all([getHomepage(), getClubConfig(), getWebsiteConfig()]);

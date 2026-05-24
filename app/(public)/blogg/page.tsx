@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getBlogPosts, getClubConfig, getWebsiteConfig } from '@/lib/data';
 import BlogList from '@/components/blog/BlogList';
 
-export const revalidate = 1800; // ISR: rebuild every 30 min
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
