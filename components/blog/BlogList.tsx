@@ -21,7 +21,7 @@ export default function BlogList({ posts }: Props) {
         {posts.map(post => <PostCard key={post.id} post={post} />)}
       </div>
       {posts.length === 0 && (
-        <p className="text-zinc-500 text-center py-20">{t.empty}</p>
+        <p className="text-zinc-600 dark:text-zinc-300 text-center py-20">{t.empty}</p>
       )}
     </div>
   );
