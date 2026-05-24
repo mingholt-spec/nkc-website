@@ -128,24 +128,14 @@ export const getPageBySlug = cache(async (slug: string): Promise<WebsitePage | n
 });
 
 export const getHomepage = cache(async (): Promise<WebsitePage | null> => {
-  if (!db) return null;
-  try {
-    // First try isHomepage flag
-    const snap = await db.collection('website_pages')
-      .where('isHomepage', '==', true)
-      .where('isPublished', '==', true)
-      .limit(1)
-      .get();
-    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() } as WebsitePage;
-
-    // Fallback: first published page ordered by sortOrder
-    const fallback = await db.collection('website_pages')
-      .where('isPublished', '==', true)
-      .orderBy('sortOrder', 'asc')
-      .limit(1)
-      .get();
-    return fallback.empty ? null : ({ id: fallback.docs[0].id, ...fallback.docs[0].data() } as WebsitePage);
-  } catch { return null; }
+  // Reuse getWebsitePages() which uses a single-field query (no composite index needed).
+  // Sorting and filtering in JavaScript avoids the Firestore composite index requirement
+  // for isPublished+sortOrder that previously caused a silent error and returned null.
+  const pages = await getWebsitePages();
+  if (!pages.length) return null;
+  const marked = pages.find(p => p.isHomepage);
+  if (marked) return marked;
+  return pages.slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))[0] ?? null;
 });
 
 // ── Campaigns / Events ──
