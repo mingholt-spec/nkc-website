@@ -204,22 +204,7 @@ interface Props {
 
 export default function SiteHeader({ club, config, pages, isDark, onToggleDark, language, onToggleLanguage, resolvedColors }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const pathname = usePathname();
-
-  useEffect(() => {
-    let unsub: (() => void) | undefined;
-    let cancelled = false;
-    void Promise.all([
-      import('@/lib/firebase-client'),
-      import('firebase/auth'),
-    ]).then(([{ auth }, { onAuthStateChanged }]) => {
-      if (cancelled) return;
-      if (!auth) { setIsLoggedIn(false); return; }
-      unsub = onAuthStateChanged(auth, user => { if (!cancelled) setIsLoggedIn(!!user); });
-    });
-    return () => { cancelled = true; unsub?.(); };
-  }, []);
 
   const currentSlug = pathname === '/' ? '' : pathname.replace(/^\//, '').split('/')[0];
   const t = T[language];
@@ -327,14 +312,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
             </button>
           </div>
 
-          {isLoggedIn === null ? null : isLoggedIn ? (
-            <a href="/portal/app"
-              className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 rounded-lg"
-              style={{ color: '#fff', backgroundColor: primaryColor }}>
-              {t.myAccount}
-            </a>
-          ) : (
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
               <a href="/portal/app"
                 className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:opacity-80"
                 style={{ color: txtColor }}>
@@ -346,7 +324,6 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
                 {t.becomeMember}
               </a>
             </div>
-          )}
         </div>
 
         {/* Mobile: dark toggle + hamburger */}
@@ -399,26 +376,16 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
 
           <div className={`px-4 ${(nav.length > 0 || socialLinks.length > 0) ? 'pt-4 mt-3 border-t' : ''}`} style={{ borderColor: `${txtColor}15` }}>
             <div className="flex gap-2">
-              {isLoggedIn ? (
-                <a href="/portal/app"
-                  className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
-                  style={{ color: '#fff', backgroundColor: primaryColor }}>
-                  {t.myAccount}
-                </a>
-              ) : (
-                <>
-                  <a href="/portal/app"
-                    className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all rounded-lg text-center"
-                    style={{ color: txtColor, backgroundColor: `${txtColor}08` }}>
-                    {t.login}
-                  </a>
-                  <a href="/portal/app"
-                    className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
-                    style={{ color: '#fff', backgroundColor: primaryColor }}>
-                    {t.becomeMember}
-                  </a>
-                </>
-              )}
+              <a href="/portal/app"
+                className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all rounded-lg text-center"
+                style={{ color: txtColor, backgroundColor: `${txtColor}08` }}>
+                {t.login}
+              </a>
+              <a href="/portal/app"
+                className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
+                style={{ color: '#fff', backgroundColor: primaryColor }}>
+                {t.becomeMember}
+              </a>
             </div>
             <div className="flex justify-center pt-3">
               <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5">
