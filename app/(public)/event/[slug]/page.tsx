@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { getCampaignBySlug } from '@/lib/data';
 import EventPage from '@/components/events/EventPage';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // Events uppdateras ofta (anmälningar)
 
 type Props = { params: Promise<{ slug: string }> };
 
