@@ -39,10 +39,11 @@ export default function PublicLayoutClient({ club, config, pages, children }: Pr
   }, [darkMode]);
 
   useEffect(() => {
+    const html = document.documentElement;
     if (isDark) {
-      document.documentElement.classList.add('dark');
+      if (!html.classList.contains('dark')) html.classList.add('dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      if (html.classList.contains('dark')) html.classList.remove('dark');
     }
   }, [isDark]);
 
