@@ -51,6 +51,8 @@ function addImageHints(html: string): string {
   return html.replace(/<img\b([^>]*?)(\s*\/?>)/gi, (_, attrs: string, tail: string) => {
     let a = attrs;
     if (!/\bdecoding\s*=/.test(a)) a += ' decoding="async"';
+    // alt="" is required for accessibility — empty string marks image as decorative
+    if (!/\balt\s*=/.test(a)) a += ' alt=""';
     // Reserve 16:9 space if no explicit dimensions — prevents CLS when image loads
     if (!/\bwidth\s*=/.test(a) && !/\bheight\s*=/.test(a)) a += ' width="1200" height="675"';
     return `<img${a}${tail}`;
