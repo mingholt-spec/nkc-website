@@ -8,7 +8,7 @@ import './globals.css';
 // Only load Raleway (the configured font). Inter/Outfit were unused fallbacks.
 // Weights: 400 body, 500 body-medium, 600 semibold, 700 bold, 900 black headers.
 // latin only — Swedish å/ä/ö are covered by latin subset, latin-ext is not needed.
-const raleway = Raleway({ subsets: ['latin'], variable: '--font-raleway', display: 'swap', weight: ['400', '500', '600', '700', '900'] });
+const raleway = Raleway({ subsets: ['latin'], variable: '--font-raleway', display: 'optional', weight: ['400', '500', '600', '700', '900'] });
 
 export async function generateMetadata(): Promise<Metadata> {
   const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
@@ -35,6 +35,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="sv" className={raleway.variable} style={cssVars} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
+        <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
         {/* Prevent flash of wrong theme on load */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('flowroll_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();` }} />
       </head>

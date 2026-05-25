@@ -47,13 +47,23 @@ ${selectors} {
   return html + darkStyle;
 }
 
+function addImageHints(html: string): string {
+  return html.replace(/<img\b([^>]*?)(\s*\/?>)/gi, (_, attrs: string, tail: string) => {
+    let a = attrs;
+    if (!/\bdecoding\s*=/.test(a)) a += ' decoding="async"';
+    // Reserve 16:9 space if no explicit dimensions — prevents CLS when image loads
+    if (!/\bwidth\s*=/.test(a) && !/\bheight\s*=/.test(a)) a += ' width="1200" height="675"';
+    return `<img${a}${tail}`;
+  });
+}
+
 interface Props { block: PageBlockHtml }
 
 export default function HtmlBlock({ block }: Props) {
   const html = safeStr(block.code);
   if (!html) return null;
   const scope = `hb-${block.id.replace(/[^a-zA-Z0-9]/g, '')}`;
-  const processed = injectDarkOverrides(scopeStyleTags(html, scope), scope);
+  const processed = addImageHints(injectDarkOverrides(scopeStyleTags(html, scope), scope));
   return (
     <div className={scope} dangerouslySetInnerHTML={{ __html: processed }} />
   );
