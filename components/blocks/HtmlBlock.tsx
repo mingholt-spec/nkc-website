@@ -15,11 +15,17 @@ function scopeGlobalSelectors(css: string, scope: string): string {
     .replace(/\b:root\s*(?=[,{])/g, `.${scope}`);
 }
 
+function stripExternalImports(css: string): string {
+  // Remove @import rules that load external resources (Google Fonts etc.)
+  // — these cause render-blocking network requests bypassing next/font self-hosting
+  return css.replace(/@import\s+url\s*\(\s*['"]?https?:\/\/[^)'"]+['"]?\s*\)\s*;?/gi, '');
+}
+
 function scopeStyleTags(html: string, scope: string): string {
   return html.replace(
     /<style\b([^>]*)>([\s\S]*?)<\/style>/gi,
     (_, attrs: string, css: string) =>
-      `<style${attrs}>${scopeGlobalSelectors(css, scope)}</style>`
+      `<style${attrs}>${scopeGlobalSelectors(stripExternalImports(css), scope)}</style>`
   );
 }
 

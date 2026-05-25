@@ -68,7 +68,7 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
             </div>
             <div className="flex flex-col items-center md:items-end gap-1">
               {club.phone && (
-                <a href={`tel:${club.phone}`} className="text-xs hover:opacity-70 transition-opacity flex items-center gap-1.5"
+                <a href={`tel:${club.phone}`} className="text-xs hover:opacity-70 transition-opacity flex items-center gap-1.5 min-h-[44px]"
                   style={{ color: `${txtColor}d9`, fontFamily: theme?.bodyFont }}>
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -77,7 +77,7 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
                 </a>
               )}
               {club.email && (
-                <a href={`mailto:${club.email}`} className="text-xs hover:opacity-70 transition-opacity flex items-center gap-1.5"
+                <a href={`mailto:${club.email}`} className="text-xs hover:opacity-70 transition-opacity flex items-center gap-1.5 min-h-[44px]"
                   style={{ color: `${txtColor}d9`, fontFamily: theme?.bodyFont }}>
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -94,7 +94,7 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
             {footer?.links && footer.links.length > 0 && (
               <nav className="flex items-center gap-4 flex-wrap justify-center md:justify-start">
-                {footer.links.map((link, idx) => (
+                {footer.links.filter(l => l.url && l.label).map((link, idx) => (
                   <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer"
                     className="text-xs font-bold uppercase tracking-widest hover:opacity-70 transition-opacity"
                     style={{ color: txtColor, fontFamily: theme?.bodyFont }}>

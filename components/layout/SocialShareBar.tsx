@@ -80,7 +80,7 @@ export default function SocialShareBar({ config, title }: Props) {
           <div className="flex items-center gap-3">
             <span
               className="text-[10px] font-black uppercase tracking-widest"
-              style={{ color: `${txtColor}60`, fontFamily: theme?.bodyFont }}
+              style={{ color: `${txtColor}d9`, fontFamily: theme?.bodyFont }}
             >
               Följ oss
             </span>
@@ -88,13 +88,14 @@ export default function SocialShareBar({ config, title }: Props) {
               const icon = SOCIAL_ICONS[link.platform];
               if (!icon) return null;
               const brand = useColor ? BRAND_COLORS[link.platform] : null;
+              const LABELS: Record<string, string> = { facebook: 'Facebook', instagram: 'Instagram', youtube: 'YouTube', tiktok: 'TikTok', x: 'X', linkedin: 'LinkedIn', whatsapp: 'WhatsApp' };
               return (
                 <a
                   key={link.platform}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={link.platform}
+                  aria-label={LABELS[link.platform] ?? link.platform}
                   className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:opacity-80"
                   style={{ backgroundColor: brand ? brand.bg : `${txtColor}10`, color: brand ? brand.fg : txtColor }}
                 >
@@ -109,7 +110,7 @@ export default function SocialShareBar({ config, title }: Props) {
         <div className="flex items-center gap-3">
           <span
             className="text-[10px] font-black uppercase tracking-widest"
-            style={{ color: `${txtColor}60`, fontFamily: theme?.bodyFont }}
+            style={{ color: `${txtColor}d9`, fontFamily: theme?.bodyFont }}
           >
             Dela
           </span>
