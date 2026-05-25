@@ -59,13 +59,44 @@ function addImageHints(html: string): string {
   });
 }
 
+/** Add aria-label to <a> tags that contain only icons/images and no visible text. */
+function fixUnnamedLinks(html: string): string {
+  return html.replace(/<a\b([^>]*?)>([\s\S]*?)<\/a>/gi, (match, attrs: string, content: string) => {
+    if (/\baria-label\s*=/i.test(attrs) || /\btitle\s*=/i.test(attrs)) return match;
+    const text = content.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/gi, ' ').trim();
+    if (text.length > 0) return match;
+    // No visible text — try img alt (non-empty) as label
+    const altMatch = content.match(/\balt\s*=\s*["']([^"']+)["']/i);
+    if (altMatch?.[1]?.trim()) return `<a${attrs} aria-label="${altMatch[1].trim()}">${content}</a>`;
+    // Fall back to last path segment from href
+    const hrefMatch = attrs.match(/\bhref\s*=\s*["']([^"']*)["']/i);
+    const path = (hrefMatch?.[1] ?? '').replace(/[#?].*/, '').split('/').filter(Boolean).pop() ?? '';
+    const label = path ? decodeURIComponent(path).replace(/[-_]/g, ' ') : 'Länk';
+    return `<a${attrs} aria-label="${label}">${content}</a>`;
+  });
+}
+
+/** Inject light-mode contrast overrides for AI-generated CSS variables. */
+function injectLightOverrides(html: string, scope: string): string {
+  const matches = [...html.matchAll(/\.(ai-[\w-]+)\s*\{/g)].map(m => m[1]);
+  const classes = [...new Set(matches)];
+  if (classes.length === 0) return html;
+  const selectors = classes.map(c => `:not(.dark) .${scope} .${c}`).join(',\n');
+  const lightStyle = `<style>
+${selectors} {
+  --ai-text-secondary: #52525b !important;
+}
+</style>`;
+  return html + lightStyle;
+}
+
 interface Props { block: PageBlockHtml }
 
 export default function HtmlBlock({ block }: Props) {
   const html = safeStr(block.code);
   if (!html) return null;
   const scope = `hb-${block.id.replace(/[^a-zA-Z0-9]/g, '')}`;
-  const processed = addImageHints(injectDarkOverrides(scopeStyleTags(html, scope), scope));
+  const processed = fixUnnamedLinks(addImageHints(injectLightOverrides(injectDarkOverrides(scopeStyleTags(html, scope), scope), scope)));
   return (
     <div className={scope} dangerouslySetInnerHTML={{ __html: processed }} />
   );
