@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import NextImage from 'next/image';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import type { NavigationItem, WebsiteConfig, WebsitePage, ClubConfig, SocialLink } from '@/lib/types';
@@ -256,7 +257,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
         {/* Logo + club name */}
         <a href="/" className="flex items-center gap-3" aria-label={clubName || 'Startsida'}>
           {logoUrl && (
-            <img src={logoUrl} alt={clubName} width={160} height={40} className="h-10 w-auto object-contain" />
+            <NextImage src={logoUrl} alt={clubName} width={160} height={40} className="h-10 w-auto object-contain" priority />
           )}
           {showClubName && clubName && (
             <span className="text-lg font-black uppercase tracking-tight" style={{ fontFamily: headingFont, color: txtColor }}>
