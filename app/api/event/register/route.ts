@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       }
     } catch { /* ignore — tags are best-effort */ }
 
-    const STANDARD = new Set(['campaignId', 'campaignName', 'firstName', 'lastName', 'email', 'phone', 'guardianName', 'guardianEmail', 'guardianPhone']);
+    const STANDARD = new Set(['campaignId', 'campaignName', 'firstName', 'lastName', 'email', 'phone', 'guardianName', 'guardianEmail', 'guardianPhone', 'gdprConsentDate', 'preOrders', 'status']);
     const customFields: Record<string, string> = {};
     for (const [key, value] of Object.entries(body)) {
       if (!STANDARD.has(key) && typeof value === 'string' && value.trim()) {
