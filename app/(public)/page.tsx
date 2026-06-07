@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getHomepage, getClubConfig, getWebsiteConfig } from '@/lib/data';
+import { getHomepage, getClubConfig, getWebsiteConfig, getBlogPosts } from '@/lib/data';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 
@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [page, config] = await Promise.all([getHomepage(), getWebsiteConfig()]);
+  const [page, config, blogPosts] = await Promise.all([getHomepage(), getWebsiteConfig(), getBlogPosts(10)]);
   if (!page) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
@@ -31,7 +31,7 @@ export default async function HomePage() {
   }
   return (
     <>
-      <PageRenderer page={page} />
+      <PageRenderer page={page} blogPosts={blogPosts} />
       <SocialShareBar config={config} title={page.metaTitle ?? page.title} />
     </>
   );
