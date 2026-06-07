@@ -4,7 +4,7 @@ import { getHomepage, getClubConfig, getWebsiteConfig } from '@/lib/data';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 
-export const revalidate = 1800; // ISR: re-render at most every 30 min
+export const revalidate = 60; // ISR: re-render within 60 s of a content change
 
 export async function generateMetadata(): Promise<Metadata> {
   const [page, club, config] = await Promise.all([getHomepage(), getClubConfig(), getWebsiteConfig()]);

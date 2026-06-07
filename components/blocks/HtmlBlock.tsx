@@ -84,6 +84,9 @@ function fixUnnamedLinks(html: string): string {
 
 /** Inject light-mode contrast overrides for AI-generated CSS variables. */
 function injectLightOverrides(html: string, scope: string): string {
+  // Blocks that already define --ai-text-secondary have their own color scheme
+  // (e.g. coloured/dark backgrounds) — don't override their intentional values.
+  if (html.includes('--ai-text-secondary')) return html;
   const matches = [...html.matchAll(/\.(ai-[\w-]+)\s*\{/g)].map(m => m[1]);
   const classes = [...new Set(matches)];
   if (classes.length === 0) return html;
