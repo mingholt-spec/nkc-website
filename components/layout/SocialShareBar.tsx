@@ -64,7 +64,9 @@ export default function SocialShareBar({ config, title }: Props) {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(getUrl());
+    const url = getUrl();
+    const text = title ? `${title}\n${url}` : url;
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
