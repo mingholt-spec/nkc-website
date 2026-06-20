@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { NewsPost } from '@/lib/types';
 import ShareButtons from './ShareButtons';
 import { useLanguage } from '@/lib/language-context';
+import { normalizeLinks } from '@/lib/utils';
 
 interface Props { post: NewsPost }
 
@@ -65,7 +66,7 @@ export default function BlogPost({ post }: Props) {
       {/* Content */}
       <div
         className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-red-600"
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{ __html: normalizeLinks(content) }}
       />
 
       {/* Tags */}

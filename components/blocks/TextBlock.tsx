@@ -1,5 +1,5 @@
 import type { PageBlockText } from '@/lib/types';
-import { safeStr } from '@/lib/utils';
+import { safeStr, normalizeLinks } from '@/lib/utils';
 
 interface Props { block: PageBlockText }
 
@@ -13,7 +13,7 @@ export default function TextBlock({ block }: Props) {
       <div
         className="prose prose-zinc dark:prose-invert max-w-none"
         style={{ fontFamily: 'var(--font-raleway, var(--font-inter)), system-ui, sans-serif' }}
-        dangerouslySetInnerHTML={{ __html: html }}
+        dangerouslySetInnerHTML={{ __html: normalizeLinks(html) }}
       />
     </div>
   );
