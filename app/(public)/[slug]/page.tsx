@@ -1,12 +1,15 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getPageBySlug, getWebsitePages, getClubConfig, getWebsiteConfig } from '@/lib/data';
+import { getPageBySlug, getPageBySlugPreview, getWebsitePages, getClubConfig, getWebsiteConfig } from '@/lib/data';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 
 export const revalidate = 3600;
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string>>;
+};
 
 export async function generateStaticParams() {
   try {
@@ -36,9 +39,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PublicPage({ params }: Props) {
+export default async function PublicPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const [page, config] = await Promise.all([getPageBySlug(slug), getWebsiteConfig()]);
+  const sp = searchParams ? await searchParams : {};
+  const isPreview = sp?.preview === '1';
+
+  const [page, config] = await Promise.all([
+    isPreview ? getPageBySlugPreview(slug) : getPageBySlug(slug),
+    getWebsiteConfig(),
+  ]);
   if (!page) notFound();
   return (
     <>

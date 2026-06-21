@@ -127,6 +127,19 @@ export const getPageBySlug = cache(async (slug: string): Promise<WebsitePage | n
   } catch { return null; }
 });
 
+// Used for admin preview of unpublished pages (?preview=1).
+// Does not filter by isPublished so drafts are visible.
+export async function getPageBySlugPreview(slug: string): Promise<WebsitePage | null> {
+  if (!db) return null;
+  try {
+    const snap = await db.collection('website_pages')
+      .where('slug', '==', slug)
+      .limit(1)
+      .get();
+    return snap.empty ? null : ({ id: snap.docs[0].id, ...snap.docs[0].data() } as WebsitePage);
+  } catch { return null; }
+}
+
 export const getHomepage = cache(async (): Promise<WebsitePage | null> => {
   // Reuse getWebsitePages() which uses a single-field query (no composite index needed).
   // Sorting and filtering in JavaScript avoids the Firestore composite index requirement

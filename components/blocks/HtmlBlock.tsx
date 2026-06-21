@@ -5,7 +5,10 @@ import type { PageBlockHtml } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
 
 // Injected into the iframe to report its scroll height so the parent can resize it.
-const RESIZE_SCRIPT = `<script>(function(){function r(){window.parent.postMessage({type:'html-block-height',h:Math.max(document.body.scrollHeight,document.documentElement.scrollHeight)},'*')}window.addEventListener('load',function(){r();setTimeout(r,600);setTimeout(r,1500)});if(window.ResizeObserver){new ResizeObserver(r).observe(document.body)}})()</script>`;
+// Timed snapshots only — no ResizeObserver — to prevent a 100vh feedback loop:
+// resizing the iframe changes the iframe viewport, which changes 100vh element
+// heights, which changes scrollHeight, triggering another resize ad infinitum.
+const RESIZE_SCRIPT = `<script>(function(){function r(){var h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);window.parent.postMessage({type:'html-block-height',h:h},'*')}window.addEventListener('load',function(){setTimeout(r,200);setTimeout(r,1000);setTimeout(r,3000)})})()</script>`;
 
 interface Props { block: PageBlockHtml }
 
@@ -16,10 +19,12 @@ export default function HtmlBlock({ block }: Props) {
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
-      // Only accept messages from this specific iframe, not other blocks on the page.
       if (e.source !== iframeRef.current?.contentWindow) return;
       if (e.data?.type === 'html-block-height' && typeof e.data.h === 'number') {
-        setHeight(Math.max(200, e.data.h));
+        setHeight(prev => {
+          const next = Math.max(200, Math.min(e.data.h as number, 15000));
+          return Math.abs(next - prev) < 10 ? prev : next;
+        });
       }
     };
     window.addEventListener('message', handler);
