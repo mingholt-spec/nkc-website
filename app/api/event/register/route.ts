@@ -34,12 +34,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ alreadyRegistered: true });
     }
 
-    // Read campaign to get auto-tags
+    // Read campaign to get auto-tags and registration deadline
     let campaignTags: string[] = [];
     try {
       const campSnap = await db.collection('campaigns').doc(campaignId).get();
       if (campSnap.exists) {
         campaignTags = campSnap.data()?.tags ?? [];
+        const closeDate = campSnap.data()?.eventDetails?.registrationCloseDate as string | undefined;
+        if (closeDate && new Date(closeDate) < new Date()) {
+          return NextResponse.json({ registrationClosed: true }, { status: 400 });
+        }
       }
     } catch { /* ignore — tags are best-effort */ }
 

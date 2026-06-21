@@ -269,6 +269,7 @@ export interface Campaign {
     startDate: string; endDate?: string;
     schedule: CampaignScheduleDay[]; classId: string;
     paymentLink?: string; stripePriceId?: string;
+    registrationCloseDate?: string;
   };
   guestInstructorInviteId?: string;
   guestProducts?: string[];

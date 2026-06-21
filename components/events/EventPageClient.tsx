@@ -15,6 +15,7 @@ interface Props {
 const T = {
   sv: {
     schedule: 'Schema',
+    registrationClosed: 'Anmälan stängd',
     soldOut: 'Fullbokat',
     fewSpotsLeft: 'Få platser kvar!',
     spotsLeft: (n: number) => `${n} platser kvar`,
@@ -41,6 +42,7 @@ const T = {
   },
   en: {
     schedule: 'Schedule',
+    registrationClosed: 'Registration closed',
     soldOut: 'Sold out',
     fewSpotsLeft: 'Few spots left!',
     spotsLeft: (n: number) => `${n} spots left`,
@@ -140,6 +142,8 @@ export default function EventPageClient({ campaign }: Props) {
   const bookingPercent = maxAttendees > 0 ? Math.round((registrationCount / maxAttendees) * 100) : 0;
   const isUrgent = maxAttendees > 0 && bookingPercent >= 75;
   const isSoldOut = maxAttendees > 0 && registrationCount >= maxAttendees;
+  const closeDate = eventDetails?.registrationCloseDate;
+  const isRegistrationClosed = !!closeDate && new Date(closeDate) < new Date();
 
   useEffect(() => {
     if (isSidebar || !formRef.current) return;
@@ -175,6 +179,10 @@ export default function EventPageClient({ campaign }: Props) {
       });
       if (!res.ok) throw new Error('server error');
       const json = await res.json();
+      if (json.registrationClosed) {
+        setSubmitError(t.registrationClosed);
+        return;
+      }
       if (json.alreadyRegistered) {
         setSubmitError('Du är redan anmäld till detta event.');
         return;
@@ -333,6 +341,12 @@ export default function EventPageClient({ campaign }: Props) {
 
   // ── Registration form ──
   const renderForm = (compact: boolean) => {
+    if (isRegistrationClosed) return (
+      <div className="py-6 text-center space-y-2">
+        <p className="font-black text-zinc-900 dark:text-white uppercase tracking-tight">{t.registrationClosed}</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">Anmälningstiden har gått ut.</p>
+      </div>
+    );
     if (isSoldOut && waitlistEnabled) return renderWaitlistForm(compact);
     return submitted ? (
     <div className="py-6 text-center space-y-3">
@@ -394,14 +408,14 @@ export default function EventPageClient({ campaign }: Props) {
       )}
       <button
         type="submit"
-        disabled={isSoldOut || !gdprAccepted || submitting}
+        disabled={isRegistrationClosed || isSoldOut || !gdprAccepted || submitting}
         className={`w-full mt-4 text-white font-black ${compact ? 'py-4 rounded-xl text-[10px]' : 'py-5 rounded-2xl text-xs'} uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50 transition-all`}
         style={{
-          backgroundColor: isSoldOut ? '#a1a1aa' : (accent ?? '#e50401'),
-          boxShadow: !isSoldOut ? `0 0 24px ${(accent ?? '#e50401')}30` : undefined,
+          backgroundColor: (isRegistrationClosed || isSoldOut) ? '#a1a1aa' : (accent ?? '#e50401'),
+          boxShadow: (!isRegistrationClosed && !isSoldOut) ? `0 0 24px ${(accent ?? '#e50401')}30` : undefined,
         }}
       >
-        {submitting ? t.sending : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(price) : t.register}
+        {submitting ? t.sending : isRegistrationClosed ? t.registrationClosed : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(price) : t.register}
       </button>
     </form>
     );
