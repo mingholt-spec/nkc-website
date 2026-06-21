@@ -4,8 +4,10 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import NextImage from 'next/image';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import type { NavigationItem, WebsiteConfig, WebsitePage, ClubConfig, SocialLink } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
+import { app } from '@/lib/firebase-client';
 
 // Lazy-load LoginModal + Firebase Auth — only fetched when user clicks "Logga in"
 const LoginModal = dynamic(() => import('./LoginModal'), { ssr: false });
@@ -210,7 +212,14 @@ interface Props {
 export default function SiteHeader({ club, config, pages, isDark, onToggleDark, language, onToggleLanguage, resolvedColors }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (!app) return;
+    const auth = getAuth(app);
+    return onAuthStateChanged(auth, (user) => setIsLoggedIn(!!user));
+  }, []);
 
   const currentSlug = pathname === '/' ? '' : pathname.replace(/^\//, '').split('/')[0];
   const t = T[language];
@@ -319,17 +328,27 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
           </div>
 
           <div className="flex items-center gap-2">
-              <button
-                onClick={() => setLoginOpen(true)}
-                className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:opacity-80"
-                style={{ color: txtColor }}>
-                {t.login}
-              </button>
-              <a href="/portal/app?register=1"
-                className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 rounded-lg"
-                style={{ color: '#fff', backgroundColor: primaryColor }}>
-                {t.becomeMember}
-              </a>
+              {isLoggedIn ? (
+                <a href="/portal/app"
+                  className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:opacity-80"
+                  style={{ color: txtColor }}>
+                  {t.myAccount}
+                </a>
+              ) : (
+                <button
+                  onClick={() => setLoginOpen(true)}
+                  className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:opacity-80"
+                  style={{ color: txtColor }}>
+                  {t.login}
+                </button>
+              )}
+              {!isLoggedIn && (
+                <a href="/portal/app?register=1"
+                  className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 rounded-lg"
+                  style={{ color: '#fff', backgroundColor: primaryColor }}>
+                  {t.becomeMember}
+                </a>
+              )}
             </div>
         </div>
 
@@ -383,17 +402,27 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
 
           <div className={`px-4 ${(nav.length > 0 || socialLinks.length > 0) ? 'pt-4 mt-3 border-t' : ''}`} style={{ borderColor: `${txtColor}15` }}>
             <div className="flex gap-2">
-              <button
-                onClick={() => { setMobileOpen(false); setLoginOpen(true); }}
-                className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all rounded-lg text-center"
-                style={{ color: txtColor, backgroundColor: `${txtColor}08` }}>
-                {t.login}
-              </button>
-              <a href="/portal/app?register=1"
-                className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
-                style={{ color: '#fff', backgroundColor: primaryColor }}>
-                {t.becomeMember}
-              </a>
+              {isLoggedIn ? (
+                <a href="/portal/app"
+                  className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all rounded-lg text-center"
+                  style={{ color: txtColor, backgroundColor: `${txtColor}08` }}>
+                  {t.myAccount}
+                </a>
+              ) : (
+                <button
+                  onClick={() => { setMobileOpen(false); setLoginOpen(true); }}
+                  className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all rounded-lg text-center"
+                  style={{ color: txtColor, backgroundColor: `${txtColor}08` }}>
+                  {t.login}
+                </button>
+              )}
+              {!isLoggedIn && (
+                <a href="/portal/app?register=1"
+                  className="flex-1 px-4 py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-95 rounded-lg text-center"
+                  style={{ color: '#fff', backgroundColor: primaryColor }}>
+                  {t.becomeMember}
+                </a>
+              )}
             </div>
             <div className="flex justify-center pt-3">
               <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5">
