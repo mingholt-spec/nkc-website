@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-const GA_ID = 'G-2756QCH7SC';
+const GA_ID = 'G-E891TN23DJ';
 
 export default function GoogleAnalytics() {
   useEffect(() => {
