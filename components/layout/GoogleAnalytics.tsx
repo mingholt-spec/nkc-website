@@ -26,6 +26,10 @@ export default function GoogleAnalytics() {
       window.dataLayer = window.dataLayer || [];
       window.gtag = function (...args: unknown[]) { window.dataLayer.push(args); };
       window.gtag('js', new Date());
+      // Google's Consent Mode defaults analytics_storage to 'denied' until told
+      // otherwise. We only reach this point after the user has already opted in
+      // via our own cookie banner, so explicitly grant it here.
+      window.gtag('consent', 'default', { analytics_storage: 'granted' });
       window.gtag('config', GA_ID, { anonymize_ip: true });
 
       const script = document.createElement('script');
