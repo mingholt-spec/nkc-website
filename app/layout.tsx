@@ -18,6 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: name, template: `%s | ${name}` },
     description: config?.seoDefaults?.description ?? '',
     ...(faviconUrl ? { icons: { icon: faviconUrl, apple: faviconUrl } } : {}),
+    verification: { google: 'karURF9fY6KtXVszrvgPG3ajA3aAeC5YBmyRGQ-N738' },
   };
 }
 
