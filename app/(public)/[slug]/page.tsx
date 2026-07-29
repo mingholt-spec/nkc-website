@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getPageBySlug, getPageBySlugPreview, getWebsitePages, getClubConfig, getWebsiteConfig } from '@/lib/data';
+import { getPageBySlug, getPageBySlugPreview, getWebsitePages, getWebsiteConfig } from '@/lib/data';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 
@@ -20,21 +20,20 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const [page, club, config] = await Promise.all([
+  const [page, config] = await Promise.all([
     getPageBySlug(slug),
-    getClubConfig(),
     getWebsiteConfig(),
   ]);
   if (!page) return {};
 
   const title = page.metaTitle ?? page.title;
   const description = page.metaDescription ?? config?.seoDefaults?.description ?? '';
-  const clubName = club.clubName ?? '';
   const ogImage = page.ogImage ?? config?.seoDefaults?.ogImage;
 
   return {
-    title: `${title} | ${clubName}`,
+    title,
     description,
+    alternates: { canonical: `https://www.nkc.nu/${slug}` },
     openGraph: { title, description, ...(ogImage ? { images: [ogImage] } : {}) },
   };
 }

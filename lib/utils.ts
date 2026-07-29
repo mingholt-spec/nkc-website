@@ -1,3 +1,18 @@
+/**
+ * Slugifies a blog category for use in URLs (lowercase, no å/ä/ö, no spaces).
+ * Must stay in sync with the identical function in bjj-premium/functions/src/index.ts
+ * (the `sitemap` Cloud Function) — both must produce the same URL for the same category,
+ * otherwise blog posts get two different URLs (internal links vs sitemap) with no
+ * canonical tag to reconcile them, which confuses Google's indexing.
+ */
+export function slugifyCategory(category: string): string {
+  return category.toLowerCase()
+    .replace(/[åä]/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 /** Safely convert any Firestore value to a string — prevents [object Object] rendering */
 export function safeStr(val: unknown, fallback = ''): string {
   if (typeof val === 'string') return val;

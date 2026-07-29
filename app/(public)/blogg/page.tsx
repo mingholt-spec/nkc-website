@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
-import { getBlogPosts, getClubConfig, getWebsiteConfig } from '@/lib/data';
+import { getBlogPosts, getWebsiteConfig } from '@/lib/data';
 import BlogList from '@/components/blog/BlogList';
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
-  const clubName = club.clubName ?? '';
+  const config = await getWebsiteConfig();
   return {
-    title: `Blogg | ${clubName}`,
+    title: 'Blogg',
     description: config?.seoDefaults?.description ?? '',
-    openGraph: { title: `Blogg | ${clubName}` },
+    alternates: { canonical: 'https://www.nkc.nu/blogg' },
+    openGraph: { title: 'Blogg' },
   };
 }
 

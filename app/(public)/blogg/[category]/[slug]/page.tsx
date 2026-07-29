@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getBlogPostBySlug, getBlogPosts, getClubConfig, getWebsiteConfig } from '@/lib/data';
+import { getBlogPostBySlug, getBlogPosts } from '@/lib/data';
+import { slugifyCategory } from '@/lib/utils';
 import BlogPost from '@/components/blog/BlogPost';
 
 export const revalidate = 3600;
@@ -12,22 +13,23 @@ export async function generateStaticParams() {
     const posts = await getBlogPosts(200);
     return posts
       .filter(p => p.slug && p.category)
-      .map(p => ({ category: p.category!, slug: p.slug! }));
+      .map(p => ({ category: slugifyCategory(p.category!), slug: p.slug! }));
   } catch { return []; }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const [post, club] = await Promise.all([getBlogPostBySlug(slug), getClubConfig()]);
+  const post = await getBlogPostBySlug(slug);
   if (!post) return {};
 
   const title = post.metaTitle ?? post.title;
   const description = post.metaDescription ?? post.excerpt ?? '';
-  const clubName = club.clubName ?? '';
+  const canonicalCategory = slugifyCategory(post.category ?? 'okategoriserat');
 
   return {
-    title: `${title} | ${clubName}`,
+    title,
     description,
+    alternates: { canonical: `https://www.nkc.nu/blogg/${canonicalCategory}/${slug}` },
     openGraph: {
       title,
       description,

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { NewsPost } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
+import { slugifyCategory } from '@/lib/utils';
 
 interface Props { posts: NewsPost[] }
 
@@ -30,7 +31,7 @@ export default function BlogList({ posts }: Props) {
 function PostCard({ post }: { post: NewsPost }) {
   const lang = useLanguage();
   const slug = post.slug ?? post.id;
-  const href = `/blogg/${post.category ?? 'okategoriserat'}/${slug}`;
+  const href = `/blogg/${slugifyCategory(post.category ?? 'okategoriserat')}/${slug}`;
   const title = (lang === 'en' && post.titleEn) ? post.titleEn : post.title;
   const excerpt = (lang === 'en' && post.excerptEn) ? post.excerptEn : post.excerpt;
   const locale = lang === 'en' ? 'en-GB' : 'sv-SE';
