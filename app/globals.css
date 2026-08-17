@@ -2,7 +2,10 @@
 @plugin "@tailwindcss/typography";
 
 /* Enable class-based dark mode: adds .dark class to <html> */
-@custom-variant dark (&:is(.dark *));
+/* :not(.force-light, .force-light *) lets a subtree (e.g. an event's registration
+   form) opt out of dark mode regardless of the site-wide toggle or a dark page
+   design around it — see EventPageClient's formTheme handling. */
+@custom-variant dark (&:is(.dark *):not(.force-light, .force-light *));
 
 @theme inline {
   --font-raleway: var(--font-raleway);

@@ -265,6 +265,9 @@ export interface Campaign {
   formLayout?: 'stacked' | 'sidebar';
   formConfig: CampaignFormField[];
   submitButtonText?: string;
+  /** 'light' forces the registration form to stay light even on a dark page design
+   *  or with the site's dark mode toggled on. 'auto' (default) follows the site theme. */
+  formTheme?: 'auto' | 'light';
   eventDetails?: {
     price: number; maxAttendees: number;
     startDate: string; endDate?: string;

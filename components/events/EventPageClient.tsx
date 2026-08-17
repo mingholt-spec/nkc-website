@@ -421,10 +421,19 @@ export default function EventPageClient({ campaign }: Props) {
     );
   };
 
-  const formCardStyle: React.CSSProperties = accent ? { borderTopColor: accent, borderTopWidth: '3px' } : {};
-  const formCardClasses = hasHtmlBlocks
-    ? 'rounded-2xl shadow-xl p-6 space-y-5 bg-zinc-900/80 backdrop-blur-xl border border-white/10'
-    : 'rounded-2xl shadow-xl p-6 space-y-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800';
+  // 'light' keeps the form readable on a dark AI-generated page design (or with the
+  // site's dark toggle on) by opting its whole subtree out of dark: styling — see the
+  // .force-light escape hatch in globals.css's @custom-variant dark.
+  const forceLightForm = campaign.formTheme === 'light';
+  const formCardStyle: React.CSSProperties = {
+    ...(accent ? { borderTopColor: accent, borderTopWidth: '3px' } : {}),
+    ...(forceLightForm ? { colorScheme: 'light' } : {}),
+  };
+  const formCardClasses = (forceLightForm
+    ? 'rounded-2xl shadow-xl p-6 space-y-5 bg-white border border-zinc-200 force-light'
+    : hasHtmlBlocks
+      ? 'rounded-2xl shadow-xl p-6 space-y-5 bg-zinc-900/80 backdrop-blur-xl border border-white/10'
+      : 'rounded-2xl shadow-xl p-6 space-y-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800');
 
   const FormCard = ({ compact }: { compact: boolean }) => (
     <div className={formCardClasses} style={formCardStyle}>
