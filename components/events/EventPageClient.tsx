@@ -415,7 +415,7 @@ export default function EventPageClient({ campaign }: Props) {
           boxShadow: (!isRegistrationClosed && !isSoldOut) ? `0 0 24px ${(accent ?? '#e50401')}30` : undefined,
         }}
       >
-        {submitting ? t.sending : isRegistrationClosed ? t.registrationClosed : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(price) : t.register}
+        {submitting ? t.sending : isRegistrationClosed ? t.registrationClosed : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(price) : (campaign.submitButtonText || t.register)}
       </button>
     </form>
     );

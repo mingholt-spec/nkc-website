@@ -264,6 +264,7 @@ export interface Campaign {
   contentBlocks?: PageBlock[];
   formLayout?: 'stacked' | 'sidebar';
   formConfig: CampaignFormField[];
+  submitButtonText?: string;
   eventDetails?: {
     price: number; maxAttendees: number;
     startDate: string; endDate?: string;
