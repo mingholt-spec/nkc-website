@@ -361,7 +361,7 @@ export default function EventPageClient({ campaign }: Props) {
   ) : (
     <form onSubmit={handleSubmit}>
       <h2 className={`${compact ? 'text-lg' : 'text-2xl'} font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4 font-display`}>
-        {t.registrationHeading}
+        {campaign.formHeading || t.registrationHeading}
       </h2>
       <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
         {formConfig.map(field => (
