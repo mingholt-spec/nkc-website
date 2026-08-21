@@ -13,6 +13,7 @@ import ColumnsBlock from './blocks/ColumnsBlock';
 import SpacerBlock from './blocks/SpacerBlock';
 import DividerBlock from './blocks/DividerBlock';
 import CtaBlock from './blocks/CtaBlock';
+import LeadFormBlock from './blocks/LeadFormBlock';
 import { safeStr } from '@/lib/utils';
 
 interface Props { page: WebsitePage; blogPosts?: NewsPost[] }
@@ -108,6 +109,7 @@ export function BlockRenderer({ block, blogPosts = [] }: { block: PageBlock; blo
     case 'divider':  return <DividerBlock block={block} />;
     case 'cta':      return <CtaBlock block={block} />;
     case 'blog':     return <BlogBlockClient block={block} posts={blogPosts} />;
+    case 'leadForm': return <LeadFormBlock block={block} />;
     case 'form':     return null;
     default:         return null;
   }
