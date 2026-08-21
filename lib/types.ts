@@ -128,10 +128,42 @@ export interface FormBlock {
   style?: BlockStyleOptions; spacing?: BlockSpacing;
 }
 
+export interface LeadFormField {
+  id: string;
+  /** Stable machine key — set once when the field is created, never changes
+   *  even if the label is edited later. 'email' is reserved for the
+   *  required contact-email field; 'guardianInfo'-type fields ignore this
+   *  in favor of fixed sub-keys (guardianName/guardianEmail/guardianPhone). */
+  key: string;
+  type: 'text' | 'email' | 'tel' | 'textarea' | 'guardianInfo';
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+}
+
+export type PageBlockLeadForm = {
+  id: string; type: 'leadForm'; name?: string;
+  title?: string; description?: string;
+  fields: LeadFormField[];
+  submitLabel?: string; successMessage?: string;
+  /** Tags applied to the lead created on submit. */
+  tags?: string[];
+  style?: BlockStyleOptions; spacing?: BlockSpacing;
+};
+
+/** Marker block — no own content. Renders the campaign's existing
+ *  registration/waitlist card (schedule, price, Stripe, waitlist) at the
+ *  position in `contentBlocks` where this block is placed, instead of a
+ *  fixed layout position. Only meaningful inside a campaign event page. */
+export type PageBlockEventRegistration = {
+  id: string; type: 'eventRegistration'; name?: string;
+  style?: BlockStyleOptions; spacing?: BlockSpacing;
+};
+
 export type PageBlockLeaf =
   | PageBlockHero | PageBlockHeading | PageBlockText | PageBlockImage
   | PageBlockButton | PageBlockDivider | PageBlockSpacer | PageBlockCta
-  | PageBlockHtml | PageBlockBlog | PageBlockVideo;
+  | PageBlockHtml | PageBlockBlog | PageBlockVideo | PageBlockLeadForm;
 
 export type PageBlockColumns = {
   id: string; type: 'columns'; name?: string;
@@ -141,7 +173,7 @@ export type PageBlockColumns = {
   style?: BlockStyleOptions; spacing?: BlockSpacing;
 };
 
-export type PageBlock = PageBlockLeaf | PageBlockColumns | FormBlock;
+export type PageBlock = PageBlockLeaf | PageBlockColumns | FormBlock | PageBlockEventRegistration;
 
 export interface NewsPost {
   id: string; title: string; content: string;

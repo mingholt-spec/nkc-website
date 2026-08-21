@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { onSnapshot, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase-client';
-import type { Campaign, CampaignScheduleDay } from '@/lib/types';
+import type { Campaign, CampaignScheduleDay, PageBlock } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
 import { BlockRenderer } from '@/components/PageRenderer';
+import LeadFormBlock from '@/components/blocks/LeadFormBlock';
 
 
 interface Props {
@@ -456,8 +457,27 @@ export default function EventPageClient({ campaign }: Props) {
 
   const contentBg = hasHtmlBlocks ? '' : 'bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden';
 
+  // Om admin har placerat "Anmälan"-blocket fritt i innehållet, renderas
+  // det där istället för på den fasta mobil/sidopanel/staplad-positionen —
+  // så befintliga event utan blocket fortsätter se exakt likadana ut.
+  const hasEventRegistrationBlock = blocks.some(b => b.type === 'eventRegistration');
+
+  const renderBlock = (block: PageBlock) => {
+    if (block.type === 'eventRegistration') {
+      return (
+        <div key={block.id} ref={!isSidebar ? formRef : undefined} className="max-w-2xl mx-auto px-4 sm:px-8 py-6" style={{ position: 'relative', zIndex: 1 }}>
+          {FormCard({ compact: true })}
+        </div>
+      );
+    }
+    if (block.type === 'leadForm') {
+      return <LeadFormBlock key={block.id} block={block} campaignId={campaign.id} campaignName={pageConfig.title} />;
+    }
+    return <BlockRenderer key={block.id} block={block} />;
+  };
+
   const renderedBlocks = blocks.length > 0
-    ? blocks.map(b => <BlockRenderer key={b.id} block={b} />)
+    ? blocks.map(b => renderBlock(b))
     : description
       ? <p className="px-6 sm:px-10 pt-8 sm:pt-10 pb-6 text-zinc-600 dark:text-zinc-400 leading-relaxed text-base sm:text-lg font-medium">{description}</p>
       : null;
@@ -542,17 +562,21 @@ export default function EventPageClient({ campaign }: Props) {
             {/* Left: content blocks */}
             <div className="flex-1 min-w-0 overflow-hidden">
               <div className={contentBg}>{renderedBlocks}</div>
-              {/* Mobile form */}
-              <div ref={formRef} className="lg:hidden mt-8" style={{ position: 'relative', zIndex: 1 }}>
-                {FormCard({ compact: true })}
-              </div>
+              {/* Mobile form — fallback position when no eventRegistration block is placed */}
+              {!hasEventRegistrationBlock && (
+                <div ref={formRef} className="lg:hidden mt-8" style={{ position: 'relative', zIndex: 1 }}>
+                  {FormCard({ compact: true })}
+                </div>
+              )}
             </div>
-            {/* Right: sticky form (desktop) */}
-            <div className={`hidden lg:block w-[360px] flex-shrink-0 ${hasHtmlBlocks ? 'pr-8 pt-6' : ''}`} style={{ position: 'relative', zIndex: 1 }}>
-              <div className="sticky top-6">
-                {FormCard({ compact: true })}
+            {/* Right: sticky form (desktop) — fallback position when no eventRegistration block is placed */}
+            {!hasEventRegistrationBlock && (
+              <div className={`hidden lg:block w-[360px] flex-shrink-0 ${hasHtmlBlocks ? 'pr-8 pt-6' : ''}`} style={{ position: 'relative', zIndex: 1 }}>
+                <div className="sticky top-6">
+                  {FormCard({ compact: true })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </main>
       ) : (
@@ -562,30 +586,38 @@ export default function EventPageClient({ campaign }: Props) {
               <div className="campaign-blocks" style={{ position: 'relative', zIndex: 0 }}>
                 {renderedBlocks}
               </div>
-              <div ref={formRef} className="max-w-2xl mx-auto px-4 sm:px-8 py-10 md:py-16" style={{ position: 'relative', zIndex: 1 }}>
-                <div className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-6 sm:p-10" style={formCardStyle}>
-                  {renderForm(false)}
+              {/* Fallback position when no eventRegistration block is placed */}
+              {!hasEventRegistrationBlock && (
+                <div ref={formRef} className="max-w-2xl mx-auto px-4 sm:px-8 py-10 md:py-16" style={{ position: 'relative', zIndex: 1 }}>
+                  <div className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-6 sm:p-10" style={formCardStyle}>
+                    {renderForm(false)}
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           ) : (
             <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
               {renderedBlocks}
-              <div className="mx-6 sm:mx-10 border-t border-zinc-100 dark:border-zinc-800" />
-              <div ref={formRef} className="px-6 sm:px-10 py-8 sm:py-10">
-                {hasSchedule && (
-                  <div className="mb-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
-                    <ScheduleCard />
+              {/* Fallback position when no eventRegistration block is placed */}
+              {!hasEventRegistrationBlock && (
+                <>
+                  <div className="mx-6 sm:mx-10 border-t border-zinc-100 dark:border-zinc-800" />
+                  <div ref={formRef} className="px-6 sm:px-10 py-8 sm:py-10">
+                    {hasSchedule && (
+                      <div className="mb-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
+                        <ScheduleCard />
+                      </div>
+                    )}
+                    {(isPaid || maxAttendees > 0) && (
+                      <div className="mb-6 pb-6 border-b border-zinc-100 dark:border-zinc-800 space-y-3">
+                        {isPaid && <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{price} kr</span>}
+                        <SocialProofBar />
+                      </div>
+                    )}
+                    {renderForm(false)}
                   </div>
-                )}
-                {(isPaid || maxAttendees > 0) && (
-                  <div className="mb-6 pb-6 border-b border-zinc-100 dark:border-zinc-800 space-y-3">
-                    {isPaid && <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{price} kr</span>}
-                    <SocialProofBar />
-                  </div>
-                )}
-                {renderForm(false)}
-              </div>
+                </>
+              )}
             </div>
           )}
         </main>
