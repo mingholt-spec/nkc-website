@@ -1,7 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRef } from 'react';
 import type { PageBlockHero } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
+import { spacingToStyle, hasSpacing } from './blockSpacing';
+import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS, type HeadlineStyle } from './blockStyle';
+import { useResponsiveOutline } from './useResponsiveOutline';
 
 interface Props { block: PageBlockHero }
 
@@ -25,10 +29,34 @@ export default function HeroBlock({ block }: Props) {
   const ctaColor = safeStr(block.ctaColor, '#dc2626');
   const bgColor = safeStr(block.style?.backgroundColor, '#18181b');
 
+  const sectionStyle = {
+    backgroundColor: bgColor,
+    ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '64px' }),
+    ...blockStyleToCSS(block.style),
+  };
+  const hasCustomPadding = hasSpacing(block.spacing);
+
+  const titleStyle: HeadlineStyle = { color: titleColor, ...headlineStyleToCSS(block.style, 'title') };
+  const typo = typographyToCSS(block.style);
+  delete typo.textAlign; // hero uses textAlign prop for layout, not typography.textAlign
+  delete typo.fontSize;  // hero uses its own titleFontSize map
+  Object.assign(titleStyle, typo);
+
+  const subtitleStyle: HeadlineStyle = { color: subtitleColor, ...headlineStyleToCSS(block.style, 'subtitle') };
+
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  useResponsiveOutline(titleRef, titleStyle.textShadow as string, titleStyle._mobileTextShadow);
+  useResponsiveOutline(subtitleRef, subtitleStyle.textShadow as string, subtitleStyle._mobileTextShadow);
+
+  const { _mobileTextShadow: _mt, ...cleanTitleStyle } = titleStyle;
+  const { _mobileTextShadow: _ms, ...cleanSubtitleStyle } = subtitleStyle;
+  void _mt; void _ms;
+
   return (
     <section
-      className={`relative flex flex-col justify-center ${height} px-6 py-16 overflow-hidden`}
-      style={{ backgroundColor: bgColor }}
+      className={`relative flex flex-col justify-center ${height} ${hasCustomPadding ? '' : 'px-6 py-16'} overflow-hidden`}
+      style={sectionStyle}
     >
       {bgImage && (
         <Image
@@ -44,12 +72,12 @@ export default function HeroBlock({ block }: Props) {
       {bgImage && <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${overlay})` }} />}
       <div className={`relative z-10 mx-auto w-full max-w-4xl flex flex-col gap-4 ${align}`}>
         {title && (
-          <h1 className="font-bold leading-tight" style={{ color: titleColor, fontSize: titleFontSize(safeStr(block.titleSize)) }}>
+          <h1 ref={titleRef} className="font-bold leading-tight" style={{ ...cleanTitleStyle, fontSize: titleFontSize(safeStr(block.titleSize)) }}>
             {title}
           </h1>
         )}
         {subtitle && (
-          <p className="text-lg md:text-xl max-w-2xl" style={{ color: subtitleColor }}>{subtitle}</p>
+          <p ref={subtitleRef} className="text-lg md:text-xl max-w-2xl" style={cleanSubtitleStyle}>{subtitle}</p>
         )}
         {ctaText && ctaUrl && (
           <div className="flex flex-wrap gap-3 mt-2">

@@ -15,6 +15,8 @@ import DividerBlock from './blocks/DividerBlock';
 import CtaBlock from './blocks/CtaBlock';
 import LeadFormBlock from './blocks/LeadFormBlock';
 import { safeStr } from '@/lib/utils';
+import { spacingToStyle, hasSpacing } from './blocks/blockSpacing';
+import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS } from './blocks/blockStyle';
 
 interface Props { page: WebsitePage; blogPosts?: NewsPost[] }
 
@@ -33,10 +35,21 @@ function BlogBlockClient({ block, posts }: { block: PageBlockBlog; posts: NewsPo
   const title = safeStr(block.title);
   const count = block.count ?? 3;
   const shown = posts.slice(0, count);
+
+  const hasCustomPadding = hasSpacing(block.spacing);
+  const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '48px' }), ...blockStyleToCSS(block.style) };
+  const alignClass = block.style?.textAlign === 'left' ? 'text-left' : block.style?.textAlign === 'right' ? 'text-right' : 'text-center';
+  const titleStyle = headlineStyleToCSS(block.style);
+  delete titleStyle._mobileTextShadow;
+  const typo = typographyToCSS(block.style);
+  delete typo.textAlign;
+  delete typo.fontSize;
+  Object.assign(titleStyle, typo);
+
   return (
-    <section className="mx-auto max-w-5xl px-6 py-12">
+    <section className={`mx-auto max-w-5xl ${hasCustomPadding ? '' : 'px-6 py-12'}`} style={sectionStyle}>
       {title && (
-        <h2 className="text-3xl font-black uppercase tracking-tight mb-8 text-center text-zinc-900 dark:text-zinc-100">
+        <h2 className={`text-3xl font-black uppercase tracking-tight mb-8 ${alignClass} text-zinc-900 dark:text-zinc-100`} style={titleStyle}>
           {title}
         </h2>
       )}
