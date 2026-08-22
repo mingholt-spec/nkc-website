@@ -123,7 +123,6 @@ export function BlockRenderer({ block, blogPosts = [] }: { block: PageBlock; blo
     case 'cta':      return <CtaBlock block={block} />;
     case 'blog':     return <BlogBlockClient block={block} posts={blogPosts} />;
     case 'leadForm': return <LeadFormBlock block={block} />;
-    case 'form':     return null;
     default:         return null;
   }
 }

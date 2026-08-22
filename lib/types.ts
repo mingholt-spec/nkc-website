@@ -106,28 +106,6 @@ export type PageBlockVideo = {
   style?: BlockStyleOptions; spacing?: BlockSpacing;
 };
 
-export type FormFieldType = 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'date' | 'number' | 'file' | 'hidden';
-
-export interface FormField {
-  id: string; type: FormFieldType; label: string;
-  placeholder?: string; required?: boolean;
-  options?: string[];
-  validation?: { minLength?: number; maxLength?: number; pattern?: string };
-  defaultValue?: string;
-  width?: 'full' | 'half';
-}
-
-export interface FormBlock {
-  id: string; type: 'form'; name?: string;
-  title?: string; description?: string;
-  fields: FormField[];
-  submitLabel?: string;
-  successMessage?: string;
-  redirectUrl?: string;
-  emailNotification?: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
-}
-
 export interface LeadFormField {
   id: string;
   /** Stable machine key — set once when the field is created, never changes
@@ -193,7 +171,7 @@ export type PageBlockColumns = {
   style?: BlockStyleOptions; spacing?: BlockSpacing;
 };
 
-export type PageBlock = PageBlockLeaf | PageBlockColumns | FormBlock | PageBlockEventRegistration
+export type PageBlock = PageBlockLeaf | PageBlockColumns | PageBlockEventRegistration
   | PageBlockCampaignHero | PageBlockCampaignQuickInfo | PageBlockShareButtons;
 
 export interface NewsPost {
