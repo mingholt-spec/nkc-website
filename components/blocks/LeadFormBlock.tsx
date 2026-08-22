@@ -37,8 +37,8 @@ const T = {
   },
 };
 
-const inputClasses = 'w-full rounded-xl border px-4 py-3 text-sm outline-none transition-colors border-zinc-200 dark:border-white/15 bg-white dark:bg-white/5 focus:border-zinc-400 dark:focus:border-white/30';
-const inputErrorClasses = 'w-full rounded-xl border px-4 py-3 text-sm outline-none transition-colors border-red-400 bg-red-50 dark:bg-red-900/20 dark:border-red-500/50';
+const inputClasses = 'w-full rounded-xl border px-4 py-3 text-sm outline-none transition-colors border-zinc-200 dark:border-white/15 bg-white dark:bg-white/5 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-white/40 focus:border-zinc-400 dark:focus:border-white/30';
+const inputErrorClasses = 'w-full rounded-xl border px-4 py-3 text-sm outline-none transition-colors border-red-400 bg-red-50 dark:bg-red-900/20 dark:border-red-500/50 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-white/40';
 
 export default function LeadFormBlock({ block, campaignId, campaignName }: Props) {
   const lang = useLanguage();
@@ -111,7 +111,7 @@ export default function LeadFormBlock({ block, campaignId, campaignName }: Props
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <p className="text-lg font-bold">{block.successMessage || t.successDefault}</p>
+          <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{block.successMessage || t.successDefault}</p>
         </div>
       </section>
     );
@@ -120,7 +120,7 @@ export default function LeadFormBlock({ block, campaignId, campaignName }: Props
   return (
     <section className="mx-auto max-w-2xl px-6 py-12">
       {block.title && <h2 className="text-2xl font-black uppercase tracking-tight mb-2 text-center text-zinc-900 dark:text-zinc-100">{block.title}</h2>}
-      {block.description && <p className="text-sm opacity-70 mb-6 text-center">{block.description}</p>}
+      {block.description && <p className="text-sm text-zinc-900 dark:text-zinc-100 opacity-70 mb-6 text-center">{block.description}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div style={{ position: 'absolute', left: '-9999px', opacity: 0 }} aria-hidden="true">
@@ -139,7 +139,7 @@ export default function LeadFormBlock({ block, campaignId, campaignName }: Props
           </div>
         ) : (
           <div key={field.id}>
-            <label className="block text-xs font-bold uppercase tracking-widest mb-1.5 opacity-70">
+            <label className="block text-xs font-bold uppercase tracking-widest mb-1.5 text-zinc-900 dark:text-zinc-100 opacity-70">
               {field.label}{field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {field.type === 'textarea' ? (
@@ -171,7 +171,7 @@ export default function LeadFormBlock({ block, campaignId, campaignName }: Props
             required
             className="mt-0.5 w-5 h-5 rounded border-zinc-200 dark:border-white/20 shrink-0"
           />
-          <span className="text-[11px] leading-relaxed opacity-60">{t.gdprText}</span>
+          <span className="text-[11px] leading-relaxed text-zinc-900 dark:text-zinc-100 opacity-60">{t.gdprText}</span>
         </label>
 
         {submitError && <p className="text-sm text-red-500 font-medium">{submitError}</p>}
