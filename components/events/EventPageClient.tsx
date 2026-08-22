@@ -88,6 +88,108 @@ function formatDateShort(dateStr: string, locale: string): string {
 const inputClasses = 'w-full p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-bold text-sm focus:ring-2 outline-none transition-all placeholder-zinc-500 dark:placeholder-zinc-400';
 const sidebarInputClasses = 'w-full p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-bold text-sm focus:ring-2 outline-none transition-all placeholder-zinc-500 dark:placeholder-zinc-400';
 
+// Hero-banner och info-rad som egna, modul-nivå komponenter (inte closures
+// inuti EventPageClient) — samma placerbara block används både på den fasta
+// fallback-positionen och när admin flyttar in dem i contentBlocks.
+interface HeroSectionProps {
+  headerImage?: string;
+  title: string;
+  titleSize?: string;
+  instructor?: string;
+  accent: string | null;
+  withLabel: string;
+}
+function HeroSection({ headerImage, title, titleSize, instructor, accent, withLabel }: HeroSectionProps) {
+  return (
+    <header className="relative h-[40vh] sm:h-[50vh] md:h-[65vh] min-h-[350px] md:min-h-[500px]">
+      {headerImage ? (
+        <img src={headerImage} alt={title} className="w-full h-full object-cover" decoding="async" />
+      ) : (
+        <div className="w-full h-full bg-zinc-900" />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+      <div className="absolute bottom-10 md:bottom-20 left-0 right-0 px-6 sm:px-10 max-w-6xl mx-auto">
+        <h1 className={`${TITLE_SIZE_CLASSES[titleSize ?? 'xl']} font-black tracking-tighter uppercase leading-[0.85] font-display text-white mb-4`}>
+          {title}
+        </h1>
+        {instructor && (
+          <p className="text-lg sm:text-2xl md:text-3xl font-black uppercase tracking-[0.2em] opacity-90" style={{ color: accent ?? '#e50401' }}>
+            {withLabel} {instructor}
+          </p>
+        )}
+      </div>
+    </header>
+  );
+}
+
+interface QuickInfoBarProps {
+  hasSchedule: boolean;
+  schedule: CampaignScheduleDay[];
+  isPaid: boolean;
+  price: number;
+  maxAttendees: number;
+  isSoldOut: boolean;
+  isUrgent: boolean;
+  spotsLeft: number;
+  bookingPercent: number;
+  accent: string | null;
+  hasHtmlBlocks: boolean;
+  locale: string;
+  priceLabel: string;
+  fewSpotsLeftLabel: string;
+  spotsLeftLabel: (n: number) => string;
+  soldOutLabel: string;
+}
+function QuickInfoBar({
+  hasSchedule, schedule, isPaid, price, maxAttendees, isSoldOut, isUrgent, spotsLeft,
+  bookingPercent, accent, hasHtmlBlocks, locale, priceLabel, fewSpotsLeftLabel, spotsLeftLabel, soldOutLabel,
+}: QuickInfoBarProps) {
+  if (!hasSchedule && !isPaid && maxAttendees <= 0) return null;
+  return (
+    <div className={`border-b ${hasHtmlBlocks ? 'bg-black/60 backdrop-blur-xl border-white/10' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'}`}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-8 py-4 flex flex-wrap items-center justify-center gap-4 sm:gap-8">
+        {hasSchedule && schedule.map((day, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <svg className="w-4 h-4 shrink-0" style={{ color: accent ?? '#e50401' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-wider">
+              {formatDateShort(day.date, locale)} {day.time}{day.endTime ? `–${day.endTime}` : ''}
+            </span>
+          </div>
+        ))}
+        {isPaid && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest">{priceLabel}</span>
+            <span className="text-lg font-black tracking-tight" style={{ color: accent ?? '#e50401' }}>{price} kr</span>
+          </div>
+        )}
+        {maxAttendees > 0 && !isSoldOut && (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className={`text-xs font-black uppercase tracking-wider ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
+                {isUrgent ? fewSpotsLeftLabel : spotsLeftLabel(spotsLeft)}
+              </span>
+            </div>
+            <div className="w-20 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full ${isUrgent ? 'bg-red-500' : ''}`}
+                style={{ width: `${Math.min(bookingPercent, 100)}%`, ...(!isUrgent ? { backgroundColor: accent ?? '#e50401' } : {}) }}
+              />
+            </div>
+          </div>
+        )}
+        {isSoldOut && (
+          <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{soldOutLabel}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function EventPageClient({ campaign }: Props) {
   const lang = useLanguage();
   const t = T[lang];
@@ -457,10 +559,13 @@ export default function EventPageClient({ campaign }: Props) {
 
   const contentBg = hasHtmlBlocks ? '' : 'bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden';
 
-  // Om admin har placerat "Anmälan"-blocket fritt i innehållet, renderas
-  // det där istället för på den fasta mobil/sidopanel/staplad-positionen —
-  // så befintliga event utan blocket fortsätter se exakt likadana ut.
+  // Om admin har placerat något av dessa markörblock fritt i innehållet,
+  // renderas de där istället för på sin fasta position — så befintliga
+  // event utan blocken fortsätter se exakt likadana ut.
   const hasEventRegistrationBlock = blocks.some(b => b.type === 'eventRegistration');
+  const hasCampaignHeroBlock = blocks.some(b => b.type === 'campaignHero');
+  const hasCampaignQuickInfoBlock = blocks.some(b => b.type === 'campaignQuickInfo');
+  const hasShareButtonsBlock = blocks.some(b => b.type === 'shareButtons');
 
   const renderBlock = (block: PageBlock) => {
     if (block.type === 'eventRegistration') {
@@ -472,6 +577,49 @@ export default function EventPageClient({ campaign }: Props) {
     }
     if (block.type === 'leadForm') {
       return <LeadFormBlock key={block.id} block={block} campaignId={campaign.id} campaignName={pageConfig.title} />;
+    }
+    if (block.type === 'campaignHero') {
+      return (
+        <HeroSection
+          key={block.id}
+          headerImage={pageConfig.headerImage}
+          title={title}
+          titleSize={pageConfig.titleSize}
+          instructor={pageConfig.instructor}
+          accent={accent}
+          withLabel={t.with}
+        />
+      );
+    }
+    if (block.type === 'campaignQuickInfo') {
+      return (
+        <QuickInfoBar
+          key={block.id}
+          hasSchedule={hasSchedule}
+          schedule={schedule}
+          isPaid={isPaid}
+          price={price}
+          maxAttendees={maxAttendees}
+          isSoldOut={isSoldOut}
+          isUrgent={isUrgent}
+          spotsLeft={spotsLeft}
+          bookingPercent={bookingPercent}
+          accent={accent}
+          hasHtmlBlocks={hasHtmlBlocks}
+          locale={locale}
+          priceLabel={t.price}
+          fewSpotsLeftLabel={t.fewSpotsLeft}
+          spotsLeftLabel={t.spotsLeft}
+          soldOutLabel={t.soldOut}
+        />
+      );
+    }
+    if (block.type === 'shareButtons') {
+      return (
+        <div key={block.id} className="max-w-4xl mx-auto px-4 sm:px-8 py-6 flex justify-center">
+          <ShareRow title={title} accent={accent ?? '#e50401'} shareLabel={t.share} />
+        </div>
+      );
     }
     return <BlockRenderer key={block.id} block={block} />;
   };
@@ -485,75 +633,46 @@ export default function EventPageClient({ campaign }: Props) {
   return (
     <div className={`${hasHtmlBlocks ? 'bg-black dark:bg-black' : 'bg-zinc-50 dark:bg-black'} min-h-screen font-sans`}>
 
-      {/* HERO */}
-      <header className="relative h-[40vh] sm:h-[50vh] md:h-[65vh] min-h-[350px] md:min-h-[500px]">
-        {pageConfig.headerImage ? (
-          <img src={pageConfig.headerImage} alt={title} className="w-full h-full object-cover" decoding="async" />
-        ) : (
-          <div className="w-full h-full bg-zinc-900" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-        <div className="absolute bottom-10 md:bottom-20 left-0 right-0 px-6 sm:px-10 max-w-6xl mx-auto">
-          <h1 className={`${TITLE_SIZE_CLASSES[pageConfig.titleSize ?? 'xl']} font-black tracking-tighter uppercase leading-[0.85] font-display text-white mb-4`}>
-            {title}
-          </h1>
-          {pageConfig.instructor && (
-            <p className="text-lg sm:text-2xl md:text-3xl font-black uppercase tracking-[0.2em] opacity-90" style={{ color: accent ?? '#e50401' }}>
-              {t.with} {pageConfig.instructor}
-            </p>
-          )}
-        </div>
-      </header>
-
-      {/* QUICK INFO BAR (stacked only) */}
-      {!isSidebar && (hasSchedule || isPaid || maxAttendees > 0) && (
-        <div className={`border-b ${hasHtmlBlocks ? 'bg-black/60 backdrop-blur-xl border-white/10' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'}`}>
-          <div className="max-w-4xl mx-auto px-4 sm:px-8 py-4 flex flex-wrap items-center justify-center gap-4 sm:gap-8">
-            {hasSchedule && schedule.map((day, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <svg className="w-4 h-4 shrink-0" style={{ color: accent ?? '#e50401' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-wider">
-                  {formatDateShort(day.date, locale)} {day.time}{day.endTime ? `–${day.endTime}` : ''}
-                </span>
-              </div>
-            ))}
-            {isPaid && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest">{t.price}</span>
-                <span className="text-lg font-black tracking-tight" style={{ color: accent ?? '#e50401' }}>{price} kr</span>
-              </div>
-            )}
-            {maxAttendees > 0 && !isSoldOut && (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className={`text-xs font-black uppercase tracking-wider ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
-                    {isUrgent ? t.fewSpotsLeft : t.spotsLeft(spotsLeft)}
-                  </span>
-                </div>
-                <div className="w-20 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${isUrgent ? 'bg-red-500' : ''}`}
-                    style={{ width: `${Math.min(bookingPercent, 100)}%`, ...(!isUrgent ? { backgroundColor: accent ?? '#e50401' } : {}) }}
-                  />
-                </div>
-              </div>
-            )}
-            {isSoldOut && (
-              <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{t.soldOut}</span>
-            )}
-          </div>
-        </div>
+      {/* HERO — fallback position when no campaignHero block is placed */}
+      {!hasCampaignHeroBlock && (
+        <HeroSection
+          headerImage={pageConfig.headerImage}
+          title={title}
+          titleSize={pageConfig.titleSize}
+          instructor={pageConfig.instructor}
+          accent={accent}
+          withLabel={t.with}
+        />
       )}
 
-      {/* SHARE BUTTONS */}
-      <div className={`${isSidebar ? 'max-w-6xl' : 'max-w-4xl'} mx-auto px-4 sm:px-8 pt-6 flex justify-center`}>
-        <ShareRow title={title} accent={accent ?? '#e50401'} shareLabel={t.share} />
-      </div>
+      {/* QUICK INFO BAR (stacked only) — fallback position when no campaignQuickInfo block is placed */}
+      {!hasCampaignQuickInfoBlock && !isSidebar && (
+        <QuickInfoBar
+          hasSchedule={hasSchedule}
+          schedule={schedule}
+          isPaid={isPaid}
+          price={price}
+          maxAttendees={maxAttendees}
+          isSoldOut={isSoldOut}
+          isUrgent={isUrgent}
+          spotsLeft={spotsLeft}
+          bookingPercent={bookingPercent}
+          accent={accent}
+          hasHtmlBlocks={hasHtmlBlocks}
+          locale={locale}
+          priceLabel={t.price}
+          fewSpotsLeftLabel={t.fewSpotsLeft}
+          spotsLeftLabel={t.spotsLeft}
+          soldOutLabel={t.soldOut}
+        />
+      )}
+
+      {/* SHARE BUTTONS — fallback position when no shareButtons block is placed */}
+      {!hasShareButtonsBlock && (
+        <div className={`${isSidebar ? 'max-w-6xl' : 'max-w-4xl'} mx-auto px-4 sm:px-8 pt-6 flex justify-center`}>
+          <ShareRow title={title} accent={accent ?? '#e50401'} shareLabel={t.share} />
+        </div>
+      )}
 
       {/* MAIN CONTENT */}
       {isSidebar ? (

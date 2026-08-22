@@ -160,6 +160,26 @@ export type PageBlockEventRegistration = {
   style?: BlockStyleOptions; spacing?: BlockSpacing;
 };
 
+/** Marker block — campaign hero banner (image, title, instructor). No own
+ *  content, reads from campaign.pageConfig. */
+export type PageBlockCampaignHero = {
+  id: string; type: 'campaignHero'; name?: string;
+  style?: BlockStyleOptions; spacing?: BlockSpacing;
+};
+
+/** Marker block — schedule/price/spots-left row. No own content, reads
+ *  from campaign.eventDetails. */
+export type PageBlockCampaignQuickInfo = {
+  id: string; type: 'campaignQuickInfo'; name?: string;
+  style?: BlockStyleOptions; spacing?: BlockSpacing;
+};
+
+/** Marker block — share buttons (Facebook/X/WhatsApp/copy link). */
+export type PageBlockShareButtons = {
+  id: string; type: 'shareButtons'; name?: string;
+  style?: BlockStyleOptions; spacing?: BlockSpacing;
+};
+
 export type PageBlockLeaf =
   | PageBlockHero | PageBlockHeading | PageBlockText | PageBlockImage
   | PageBlockButton | PageBlockDivider | PageBlockSpacer | PageBlockCta
@@ -173,7 +193,8 @@ export type PageBlockColumns = {
   style?: BlockStyleOptions; spacing?: BlockSpacing;
 };
 
-export type PageBlock = PageBlockLeaf | PageBlockColumns | FormBlock | PageBlockEventRegistration;
+export type PageBlock = PageBlockLeaf | PageBlockColumns | FormBlock | PageBlockEventRegistration
+  | PageBlockCampaignHero | PageBlockCampaignQuickInfo | PageBlockShareButtons;
 
 export interface NewsPost {
   id: string; title: string; content: string;
