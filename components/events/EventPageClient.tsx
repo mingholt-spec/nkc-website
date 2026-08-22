@@ -232,6 +232,11 @@ export default function EventPageClient({ campaign }: Props) {
   }, [campaign.id]);
 
   const isSidebar = campaign.formLayout === 'sidebar';
+  // Om admin manuellt placerat "Anmälan (kampanj)"-blocket fritt i innehållet
+  // ska sidan aldrig behålla sidebar-skalet (bred layout, tom kolumn, sticky
+  // CTA-bevakning) — det gäller bara den AUTOMATISKA, ej ännu placerade positionen.
+  const hasEventRegistrationBlock = blocks.some(b => b.type === 'eventRegistration');
+  const useSidebarLayout = isSidebar && !hasEventRegistrationBlock;
   const hasHtmlBlocks = campaign.contentBlocks?.some(b => b.type === 'html') ?? false;
   const schedule = (eventDetails?.schedule ?? []) as CampaignScheduleDay[];
   const hasSchedule = campaign.goal === 'event' && schedule.length > 0;
@@ -249,14 +254,14 @@ export default function EventPageClient({ campaign }: Props) {
   const isRegistrationClosed = !!closeDate && new Date(closeDate) < new Date();
 
   useEffect(() => {
-    if (isSidebar || !formRef.current) return;
+    if (useSidebarLayout || !formRef.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => setShowStickyCta(!entry.isIntersecting),
       { threshold: 0.1 },
     );
     observer.observe(formRef.current);
     return () => observer.disconnect();
-  }, [isSidebar]);
+  }, [useSidebarLayout]);
 
   const scrollToForm = useCallback(() => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -562,7 +567,6 @@ export default function EventPageClient({ campaign }: Props) {
   // Om admin har placerat något av dessa markörblock fritt i innehållet,
   // renderas de där istället för på sin fasta position — så befintliga
   // event utan blocken fortsätter se exakt likadana ut.
-  const hasEventRegistrationBlock = blocks.some(b => b.type === 'eventRegistration');
   const hasCampaignHeroBlock = blocks.some(b => b.type === 'campaignHero');
   const hasCampaignQuickInfoBlock = blocks.some(b => b.type === 'campaignQuickInfo');
   const hasShareButtonsBlock = blocks.some(b => b.type === 'shareButtons');
@@ -570,7 +574,7 @@ export default function EventPageClient({ campaign }: Props) {
   const renderBlock = (block: PageBlock) => {
     if (block.type === 'eventRegistration') {
       return (
-        <div key={block.id} ref={!isSidebar ? formRef : undefined} className="max-w-2xl mx-auto px-4 sm:px-8 py-6" style={{ position: 'relative', zIndex: 1 }}>
+        <div key={block.id} ref={!useSidebarLayout ? formRef : undefined} className="max-w-2xl mx-auto px-4 sm:px-8 py-6" style={{ position: 'relative', zIndex: 1 }}>
           {FormCard({ compact: true })}
         </div>
       );
@@ -631,7 +635,7 @@ export default function EventPageClient({ campaign }: Props) {
       : null;
 
   return (
-    <div className={`${hasHtmlBlocks ? 'bg-black dark:bg-black' : 'bg-zinc-50 dark:bg-black'} min-h-screen font-sans`}>
+    <div className={`${hasHtmlBlocks ? 'dark bg-black' : 'bg-zinc-50 dark:bg-black'} min-h-screen font-sans`}>
 
       {/* HERO — fallback position when no campaignHero block is placed */}
       {!hasCampaignHeroBlock && (
@@ -669,13 +673,13 @@ export default function EventPageClient({ campaign }: Props) {
 
       {/* SHARE BUTTONS — fallback position when no shareButtons block is placed */}
       {!hasShareButtonsBlock && (
-        <div className={`${isSidebar ? 'max-w-6xl' : 'max-w-4xl'} mx-auto px-4 sm:px-8 pt-6 flex justify-center`}>
+        <div className={`${useSidebarLayout ? 'max-w-6xl' : 'max-w-4xl'} mx-auto px-4 sm:px-8 pt-6 flex justify-center`}>
           <ShareRow title={title} accent={accent ?? '#e50401'} shareLabel={t.share} />
         </div>
       )}
 
       {/* MAIN CONTENT */}
-      {isSidebar ? (
+      {useSidebarLayout ? (
         <main className={`relative z-10 ${hasHtmlBlocks ? 'w-full max-w-[100vw] overflow-x-hidden' : 'max-w-6xl mx-auto px-4 sm:px-8 py-6 md:py-10'}`}>
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left: content blocks */}
@@ -743,7 +747,7 @@ export default function EventPageClient({ campaign }: Props) {
       )}
 
       {/* STICKY CTA BAR */}
-      {!isSidebar && showStickyCta && !isSoldOut && (
+      {!useSidebarLayout && showStickyCta && !isSoldOut && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg border-t border-zinc-200 dark:border-zinc-800 shadow-2xl">
           <div className="max-w-4xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
