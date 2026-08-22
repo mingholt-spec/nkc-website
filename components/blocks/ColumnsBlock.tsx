@@ -1,5 +1,7 @@
 import type { PageBlockColumns, PageBlockLeaf } from '@/lib/types';
 import { BlockRenderer } from '@/components/PageRenderer';
+import { spacingToStyle, hasSpacing } from './blockSpacing';
+import { blockStyleToCSS } from './blockStyle';
 
 interface Props { block: PageBlockColumns }
 
@@ -28,9 +30,11 @@ export default function ColumnsBlock({ block }: Props) {
   const cols = Array.isArray(block.columns) ? block.columns : [];
   const colClass = colMap[block.columnCount ?? cols.length] ?? 'grid-cols-1 md:grid-cols-2';
   const gapClass = gapMap[block.gap ?? 'md'] ?? 'gap-8';
+  const hasCustomPadding = hasSpacing(block.spacing);
+  const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '40px' }), ...blockStyleToCSS(block.style) };
 
   return (
-    <div className={`mx-auto max-w-6xl px-6 py-10 grid ${colClass} ${gapClass} items-center`}>
+    <div className={`mx-auto max-w-6xl ${hasCustomPadding ? '' : 'px-6 py-10'} grid ${colClass} ${gapClass} items-center`} style={sectionStyle}>
       {cols.map((col, i) => {
         const blocks = getColBlocks(col);
         return (

@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import type { PageBlockButton } from '@/lib/types';
+import { spacingToStyle, hasSpacing } from './blockSpacing';
+import { blockStyleToCSS } from './blockStyle';
 interface Props { block: PageBlockButton }
 const variantMap = {
   primary: 'bg-red-600 text-white hover:bg-red-700',
@@ -12,9 +14,12 @@ const alignMap = { left: 'justify-start', center: 'justify-center', right: 'just
 export default function ButtonBlock({ block }: Props) {
   const variant = variantMap[block.variant ?? 'primary'];
   const size = sizeMap[block.size ?? 'md'];
-  const align = alignMap[block.align ?? 'center'];
+  const effectiveAlign = block.style?.textAlign ?? block.align ?? 'center';
+  const align = alignMap[effectiveAlign];
+  const hasCustomPadding = hasSpacing(block.spacing);
+  const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '16px' }), ...blockStyleToCSS(block.style) };
   return (
-    <div className={`mx-auto max-w-4xl px-6 py-4 flex ${align}`}>
+    <div className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'} flex ${align}`} style={sectionStyle}>
       <Link href={block.url} className={`inline-flex rounded-lg font-semibold transition-colors ${variant} ${size}`}>
         {block.text}
       </Link>
