@@ -3,7 +3,7 @@ import { getBlogPosts } from '@/lib/data';
 import type { PageBlockBlog } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
-import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS } from './blockStyle';
+import { blockStyleToCSS, blockStyleToScopedCSS, headlineStyleToCSS, typographyToCSS } from './blockStyle';
 
 interface Props { block: PageBlockBlog }
 
@@ -33,9 +33,11 @@ export default async function BlogBlock({ block }: Props) {
   delete typo.textAlign;
   delete typo.fontSize;
   Object.assign(titleStyle, typo);
+  const scopedCss = blockStyleToScopedCSS(block.id, block.style);
 
   return (
-    <section className={`mx-auto max-w-5xl ${hasCustomPadding ? '' : 'px-6 py-12'}`} style={sectionStyle}>
+    <section id={`block-${block.id}`} className={`mx-auto max-w-5xl ${hasCustomPadding ? '' : 'px-6 py-12'}`} style={sectionStyle}>
+      {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
       {title && (
         <h2 className={`text-3xl font-black uppercase tracking-tight mb-8 ${alignClass} text-zinc-900 dark:text-zinc-100`} style={titleStyle}>
           {title}

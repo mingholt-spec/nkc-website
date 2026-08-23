@@ -1,7 +1,7 @@
 import type { PageBlockText } from '@/lib/types';
 import { safeStr, normalizeLinks } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
-import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS } from './blockStyle';
+import { blockStyleToCSS, blockStyleToScopedCSS, headlineStyleToCSS, typographyToCSS } from './blockStyle';
 
 interface Props { block: PageBlockText }
 
@@ -19,9 +19,11 @@ export default function TextBlock({ block }: Props) {
   const hStyle = headlineStyleToCSS(block.style);
   const typo = typographyToCSS(block.style);
   delete typo.textAlign; // handled by alignClass
+  const scopedCss = blockStyleToScopedCSS(block.id, block.style);
 
   return (
-    <div className={`${hasCustomPadding ? '' : 'px-6 py-4'} ${alignClass}`} style={sectionStyle}>
+    <div id={`block-${block.id}`} className={`${hasCustomPadding ? '' : 'px-6 py-4'} ${alignClass}`} style={sectionStyle}>
+      {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
       <div
         className="prose prose-zinc dark:prose-invert max-w-none"
         style={{ fontFamily: 'var(--font-raleway, var(--font-inter)), system-ui, sans-serif', ...hStyle, ...typo }}

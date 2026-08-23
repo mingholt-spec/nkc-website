@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { PageBlockButton } from '@/lib/types';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
-import { blockStyleToCSS } from './blockStyle';
+import { blockStyleToCSS, blockStyleToScopedCSS } from './blockStyle';
 interface Props { block: PageBlockButton }
 const variantMap = {
   primary: 'bg-red-600 text-white hover:bg-red-700',
@@ -18,8 +18,10 @@ export default function ButtonBlock({ block }: Props) {
   const align = alignMap[effectiveAlign];
   const hasCustomPadding = hasSpacing(block.spacing);
   const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '16px' }), ...blockStyleToCSS(block.style) };
+  const scopedCss = blockStyleToScopedCSS(block.id, block.style);
   return (
-    <div className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'} flex ${align}`} style={sectionStyle}>
+    <div id={`block-${block.id}`} className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'} flex ${align}`} style={sectionStyle}>
+      {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
       <Link href={block.url} className={`inline-flex rounded-lg font-semibold transition-colors ${variant} ${size}`}>
         {block.text}
       </Link>

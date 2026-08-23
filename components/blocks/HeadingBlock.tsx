@@ -1,7 +1,7 @@
 import type { PageBlockHeading } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
-import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS } from './blockStyle';
+import { blockStyleToCSS, blockStyleToScopedCSS, headlineStyleToCSS, typographyToCSS } from './blockStyle';
 
 interface Props { block: PageBlockHeading }
 const sizeMap: Record<string, string> = { xs: 'text-lg', sm: 'text-xl', base: 'text-2xl', lg: 'text-3xl', xl: 'text-4xl', '2xl': 'text-5xl', '3xl': 'text-6xl', '4xl': 'text-7xl' };
@@ -29,9 +29,11 @@ export default function HeadingBlock({ block }: Props) {
   delete typo.textAlign; // handled by sectionStyle
   delete typo.fontSize;  // handled by sizeClass
   Object.assign(headingStyle, typo);
+  const scopedCss = blockStyleToScopedCSS(block.id, block.style);
 
   return (
-    <div className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'}`} style={sectionStyle}>
+    <div id={`block-${block.id}`} className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'}`} style={sectionStyle}>
+      {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
       <Tag className={`font-bold ${sizeClass}`} style={headingStyle}>{text}</Tag>
     </div>
   );

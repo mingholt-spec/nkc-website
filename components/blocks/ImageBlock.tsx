@@ -1,18 +1,21 @@
 import Image from 'next/image';
 import type { PageBlockImage } from '@/lib/types';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
-import { blockStyleToCSS } from './blockStyle';
+import { blockStyleToCSS, blockStyleToScopedCSS } from './blockStyle';
 
 interface Props { block: PageBlockImage }
 
 export default function ImageBlock({ block }: Props) {
   const hasCustomPadding = hasSpacing(block.spacing);
   const styleCss = blockStyleToCSS(block.style);
+  const scopedCss = blockStyleToScopedCSS(block.id, block.style);
+  const styleTag = scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />;
 
   if (!block.src) {
     const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '32px' }), ...styleCss };
     return (
-      <div className={hasCustomPadding ? '' : 'px-6 py-8'} style={sectionStyle}>
+      <div id={`block-${block.id}`} className={hasCustomPadding ? '' : 'px-6 py-8'} style={sectionStyle}>
+        {styleTag}
         <div className="max-w-3xl mx-auto aspect-video bg-zinc-100 rounded-2xl flex items-center justify-center">
           <svg className="w-12 h-12 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -23,7 +26,8 @@ export default function ImageBlock({ block }: Props) {
   }
   const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '24px' }), ...styleCss };
   return (
-    <div className={hasCustomPadding ? '' : 'px-6 py-6'} style={sectionStyle}>
+    <div id={`block-${block.id}`} className={hasCustomPadding ? '' : 'px-6 py-6'} style={sectionStyle}>
+      {styleTag}
       <figure className="mx-auto" style={{ maxWidth: block.width || '100%' }}>
         <Image
           src={block.src}
