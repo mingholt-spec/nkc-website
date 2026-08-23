@@ -228,11 +228,78 @@ export type PageBlockQuote = {
   style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
+export type PageBlockCountdown = {
+  id: string; type: 'countdown'; name?: string;
+  title?: string; titleSize?: HeadingSize;
+  targetDate: string;
+  expiredText?: string;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export type PageBlockBadge = {
+  id: string; type: 'badge'; name?: string;
+  text: string;
+  backgroundColor?: string; textColor?: string;
+  align?: 'left' | 'center' | 'right';
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export type PageBlockInstructor = {
+  id: string; type: 'instructor'; name?: string;
+  instructorName: string;
+  role?: string;
+  image?: string;
+  bio?: string;
+  socialLinks?: SocialLink[];
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export interface ProgressStep {
+  id: string;
+  label: string;
+}
+
+export type PageBlockProgress = {
+  id: string; type: 'progress'; name?: string;
+  steps: ProgressStep[];
+  currentStep: number;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export interface GalleryImage {
+  id: string;
+  src: string;
+  alt?: string;
+  caption?: string;
+}
+
+export type PageBlockGallery = {
+  id: string; type: 'gallery'; name?: string;
+  title?: string; titleSize?: HeadingSize;
+  images: GalleryImage[];
+  columns?: 2 | 3 | 4;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export interface TabItem {
+  id: string;
+  label: string;
+  content: string;
+}
+
+export type PageBlockTabs = {
+  id: string; type: 'tabs'; name?: string;
+  tabs: TabItem[];
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
 export type PageBlockLeaf =
   | PageBlockHero | PageBlockHeading | PageBlockText | PageBlockImage
   | PageBlockButton | PageBlockDivider | PageBlockSpacer | PageBlockCta
   | PageBlockHtml | PageBlockBlog | PageBlockVideo | PageBlockLeadForm
-  | PageBlockTestimonial | PageBlockPricing | PageBlockAccordion | PageBlockQuote;
+  | PageBlockTestimonial | PageBlockPricing | PageBlockAccordion | PageBlockQuote
+  | PageBlockCountdown | PageBlockBadge | PageBlockInstructor | PageBlockProgress
+  | PageBlockGallery | PageBlockTabs;
 
 /** Vad en Kolumner-cell kan innehålla — ett vanligt block eller ett nästlat Kolumner-block. */
 export type ColumnCellBlock = PageBlockLeaf | PageBlockColumns;
