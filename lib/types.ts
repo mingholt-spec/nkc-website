@@ -293,13 +293,31 @@ export type PageBlockTabs = {
   style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
+export type PageBlockSocialFeed = {
+  id: string; type: 'socialFeed'; name?: string;
+  title?: string; titleSize?: HeadingSize;
+  platform: SocialPlatform;
+  profileUrl: string;
+  embedUrl?: string;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export type PageBlockMap = {
+  id: string; type: 'map'; name?: string;
+  title?: string; titleSize?: HeadingSize;
+  address?: string;
+  embedUrl?: string;
+  height?: string;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
 export type PageBlockLeaf =
   | PageBlockHero | PageBlockHeading | PageBlockText | PageBlockImage
   | PageBlockButton | PageBlockDivider | PageBlockSpacer | PageBlockCta
   | PageBlockHtml | PageBlockBlog | PageBlockVideo | PageBlockLeadForm
   | PageBlockTestimonial | PageBlockPricing | PageBlockAccordion | PageBlockQuote
   | PageBlockCountdown | PageBlockBadge | PageBlockInstructor | PageBlockProgress
-  | PageBlockGallery | PageBlockTabs;
+  | PageBlockGallery | PageBlockTabs | PageBlockSocialFeed | PageBlockMap;
 
 /** Vad en Kolumner-cell kan innehålla — ett vanligt block eller ett nästlat Kolumner-block. */
 export type ColumnCellBlock = PageBlockLeaf | PageBlockColumns;

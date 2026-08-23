@@ -24,6 +24,8 @@ import InstructorBlock from './blocks/InstructorBlock';
 import ProgressBlock from './blocks/ProgressBlock';
 import GalleryBlock from './blocks/GalleryBlock';
 import TabsBlock from './blocks/TabsBlock';
+import SocialFeedBlock from './blocks/SocialFeedBlock';
+import MapBlock from './blocks/MapBlock';
 import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blocks/blockSpacing';
 import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS } from './blocks/blockStyle';
@@ -143,6 +145,8 @@ export function BlockRenderer({ block, blogPosts = [] }: { block: PageBlock; blo
     case 'progress': return <ProgressBlock block={block} />;
     case 'gallery': return <GalleryBlock block={block} />;
     case 'tabs': return <TabsBlock block={block} />;
+    case 'socialFeed': return <SocialFeedBlock block={block} />;
+    case 'map': return <MapBlock block={block} />;
     default:         return null;
   }
 }
