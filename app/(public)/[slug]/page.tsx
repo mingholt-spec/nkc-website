@@ -33,8 +33,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    robots: { index: true, follow: true },
     alternates: { canonical: `https://www.nkc.nu/${slug}` },
-    openGraph: { title, description, ...(ogImage ? { images: [ogImage] } : {}) },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `https://www.nkc.nu/${slug}`,
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 
