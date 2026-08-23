@@ -15,7 +15,16 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { absolute: title },
     description,
-    openGraph: { title, description, ...(ogImage ? { images: [ogImage] } : {}) },
+    robots: { index: true, follow: true },
+    alternates: { canonical: 'https://www.nkc.nu/' },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: 'https://www.nkc.nu/',
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 
