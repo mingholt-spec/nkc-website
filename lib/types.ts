@@ -140,6 +140,9 @@ export type PageBlockLeadForm = {
   submitLabel?: string; successMessage?: string;
   /** Tags applied to the lead created on submit. */
   tags?: string[];
+  /** If set, navigates the visitor here right after a successful submit
+   *  instead of showing successMessage inline. Used to chain funnel steps. */
+  redirectUrl?: string;
   style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
