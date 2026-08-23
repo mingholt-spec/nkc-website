@@ -4,7 +4,7 @@ import { getPageBySlug, getPageBySlugPreview, getWebsitePages, getWebsiteConfig 
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 
-export const revalidate = 3600;
+export const revalidate = 300; // Matchar event-sidornas cache-tid (300s) — 3600s gjorde att nypublicerat innehåll på vanliga sidor kunde dröja upp till en timme, medan events uppdaterades inom 5 min
 
 type Props = {
   params: Promise<{ slug: string }>;
