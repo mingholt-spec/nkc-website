@@ -31,10 +31,10 @@ export default function HeroBlock({ block }: Props) {
 
   const sectionStyle = {
     backgroundColor: bgColor,
-    ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '64px' }),
+    ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '64px' }),
     ...blockStyleToCSS(block.style),
   };
-  const hasCustomPadding = hasSpacing(block.spacing);
+  const hasCustomPadding = hasSpacing(block.padding);
 
   const titleStyle: HeadlineStyle = { color: titleColor, ...headlineStyleToCSS(block.style, 'title') };
   const typo = typographyToCSS(block.style);

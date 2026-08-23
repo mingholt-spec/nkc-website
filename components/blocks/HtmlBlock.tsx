@@ -18,7 +18,7 @@ export default function HtmlBlock({ block }: Props) {
   const html = safeStr(block.code);
   if (!html) return null;
 
-  const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '0px', y: '0px' }), ...blockStyleToCSS(block.style) };
+  const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '0px', y: '0px' }), ...blockStyleToCSS(block.style) };
 
   return (
     <div style={{ position: 'relative', zIndex: 0, ...sectionStyle }}>

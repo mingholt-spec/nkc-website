@@ -43,20 +43,20 @@ export type PageBlockHero = {
   secondaryCtaText?: string; secondaryCtaUrl?: string;
   titleColor?: string; subtitleColor?: string; ctaColor?: string;
   titleSize?: HeadingSize; subtitleSize?: HeadingSize;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockHeading = {
   id: string; type: 'heading'; name?: string;
   text: string; level?: 1 | 2 | 3 | 4 | 5 | 6;
-  color?: string; align?: 'left' | 'center' | 'right';
-  size?: HeadingSize; style?: BlockStyleOptions; spacing?: BlockSpacing;
+  textColor?: string; align?: 'left' | 'center' | 'right';
+  fontSize?: HeadingSize; style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockText = {
   id: string; type: 'text'; name?: string;
   content: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockImage = {
@@ -64,7 +64,7 @@ export type PageBlockImage = {
   src: string; alt?: string; caption?: string;
   width?: string;
   rounded?: boolean; shadow?: boolean;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockButton = {
@@ -73,18 +73,18 @@ export type PageBlockButton = {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   align?: 'left' | 'center' | 'right';
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockDivider = {
   id: string; type: 'divider'; name?: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockSpacer = {
   id: string; type: 'spacer'; name?: string;
   height?: 'sm' | 'md' | 'lg' | 'xl';
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockCta = {
@@ -92,26 +92,32 @@ export type PageBlockCta = {
   title: string; subtitle?: string;
   buttonText: string; buttonUrl: string;
   backgroundImage?: string; backgroundColor?: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockHtml = {
   id: string; type: 'html'; name?: string;
   code: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockBlog = {
   id: string; type: 'blog'; name?: string;
-  title?: string; count?: number; category?: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  title?: string; titleSize?: HeadingSize; titleAlign?: 'left' | 'center' | 'right';
+  postsToShow?: number;
+  layout?: 'grid' | 'list';
+  showExcerpt?: boolean; showCoverImage?: boolean; showDate?: boolean; showAuthor?: boolean;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockVideo = {
   id: string; type: 'video'; name?: string;
   url: string; caption?: string;
+  title?: string; titleSize?: HeadingSize; maxWidth?: string;
+  aspectRatio?: '16:9' | '4:3' | '1:1';
+  rounded?: boolean; shadow?: boolean;
   autoplay?: boolean; loop?: boolean; muted?: boolean;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export interface LeadFormField {
@@ -134,7 +140,7 @@ export type PageBlockLeadForm = {
   submitLabel?: string; successMessage?: string;
   /** Tags applied to the lead created on submit. */
   tags?: string[];
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 /** Marker block — no own content. Renders the campaign's existing
@@ -143,27 +149,27 @@ export type PageBlockLeadForm = {
  *  fixed layout position. Only meaningful inside a campaign event page. */
 export type PageBlockEventRegistration = {
   id: string; type: 'eventRegistration'; name?: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 /** Marker block — campaign hero banner (image, title, instructor). No own
  *  content, reads from campaign.pageConfig. */
 export type PageBlockCampaignHero = {
   id: string; type: 'campaignHero'; name?: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 /** Marker block — schedule/price/spots-left row. No own content, reads
  *  from campaign.eventDetails. */
 export type PageBlockCampaignQuickInfo = {
   id: string; type: 'campaignQuickInfo'; name?: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 /** Marker block — share buttons (Facebook/X/WhatsApp/copy link). */
 export type PageBlockShareButtons = {
   id: string; type: 'shareButtons'; name?: string;
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlockLeaf =
@@ -181,7 +187,7 @@ export type PageBlockColumns = {
   columns: ColumnCellBlock[][];
   columnCount?: 2 | 3 | 4;
   gap?: 'none' | 'sm' | 'md' | 'lg';
-  style?: BlockStyleOptions; spacing?: BlockSpacing;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
 export type PageBlock = PageBlockLeaf | PageBlockColumns | PageBlockEventRegistration
