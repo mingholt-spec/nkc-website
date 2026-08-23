@@ -163,9 +163,14 @@ export type PageBlockLeaf =
   | PageBlockButton | PageBlockDivider | PageBlockSpacer | PageBlockCta
   | PageBlockHtml | PageBlockBlog | PageBlockVideo | PageBlockLeadForm;
 
+/** Vad en Kolumner-cell kan innehålla — ett vanligt block eller ett nästlat Kolumner-block. */
+export type ColumnCellBlock = PageBlockLeaf | PageBlockColumns;
+
 export type PageBlockColumns = {
   id: string; type: 'columns'; name?: string;
-  columns: PageBlockLeaf[][];
+  /** En cell kan innehålla vanliga block ELLER ett nästlat Kolumner-block
+   *  (kort-i-kort, sektioner-i-sektioner) — genuint rekursivt. */
+  columns: ColumnCellBlock[][];
   columnCount?: 2 | 3 | 4;
   gap?: 'none' | 'sm' | 'md' | 'lg';
   style?: BlockStyleOptions; spacing?: BlockSpacing;

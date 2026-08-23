@@ -1,4 +1,4 @@
-import type { PageBlockColumns, PageBlockLeaf } from '@/lib/types';
+import type { PageBlockColumns, ColumnCellBlock } from '@/lib/types';
 import { BlockRenderer } from '@/components/PageRenderer';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
 import { blockStyleToCSS } from './blockStyle';
@@ -12,15 +12,15 @@ const colMap: Record<number, string> = {
 };
 const gapMap: Record<string, string> = { none: 'gap-0', sm: 'gap-4', md: 'gap-8', lg: 'gap-16' };
 
-function getColBlocks(col: unknown): PageBlockLeaf[] {
-  if (Array.isArray(col)) return col as PageBlockLeaf[];
+function getColBlocks(col: unknown): ColumnCellBlock[] {
+  if (Array.isArray(col)) return col as ColumnCellBlock[];
   if (col && typeof col === 'object') {
     const obj = col as Record<string, unknown>;
     // Firestore stores columns as { blocks: [...] }
-    if (Array.isArray(obj.blocks)) return obj.blocks as PageBlockLeaf[];
+    if (Array.isArray(obj.blocks)) return obj.blocks as ColumnCellBlock[];
     const vals = Object.values(obj);
     if (vals.every(v => v && typeof v === 'object' && 'type' in (v as object))) {
-      return vals as PageBlockLeaf[];
+      return vals as ColumnCellBlock[];
     }
   }
   return [];
