@@ -18,6 +18,12 @@ import TestimonialBlock from './blocks/TestimonialBlock';
 import PricingBlock from './blocks/PricingBlock';
 import AccordionBlock from './blocks/AccordionBlock';
 import QuoteBlock from './blocks/QuoteBlock';
+import CountdownBlock from './blocks/CountdownBlock';
+import BadgeBlock from './blocks/BadgeBlock';
+import InstructorBlock from './blocks/InstructorBlock';
+import ProgressBlock from './blocks/ProgressBlock';
+import GalleryBlock from './blocks/GalleryBlock';
+import TabsBlock from './blocks/TabsBlock';
 import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blocks/blockSpacing';
 import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS } from './blocks/blockStyle';
@@ -131,6 +137,12 @@ export function BlockRenderer({ block, blogPosts = [] }: { block: PageBlock; blo
     case 'pricing': return <PricingBlock block={block} />;
     case 'accordion': return <AccordionBlock block={block} />;
     case 'quote': return <QuoteBlock block={block} />;
+    case 'countdown': return <CountdownBlock block={block} />;
+    case 'badge': return <BadgeBlock block={block} />;
+    case 'instructor': return <InstructorBlock block={block} />;
+    case 'progress': return <ProgressBlock block={block} />;
+    case 'gallery': return <GalleryBlock block={block} />;
+    case 'tabs': return <TabsBlock block={block} />;
     default:         return null;
   }
 }
