@@ -14,6 +14,10 @@ import SpacerBlock from './blocks/SpacerBlock';
 import DividerBlock from './blocks/DividerBlock';
 import CtaBlock from './blocks/CtaBlock';
 import LeadFormBlock from './blocks/LeadFormBlock';
+import TestimonialBlock from './blocks/TestimonialBlock';
+import PricingBlock from './blocks/PricingBlock';
+import AccordionBlock from './blocks/AccordionBlock';
+import QuoteBlock from './blocks/QuoteBlock';
 import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blocks/blockSpacing';
 import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS } from './blocks/blockStyle';
@@ -123,6 +127,10 @@ export function BlockRenderer({ block, blogPosts = [] }: { block: PageBlock; blo
     case 'cta':      return <CtaBlock block={block} />;
     case 'blog':     return <BlogBlockClient block={block} posts={blogPosts} />;
     case 'leadForm': return <LeadFormBlock block={block} />;
+    case 'testimonial': return <TestimonialBlock block={block} />;
+    case 'pricing': return <PricingBlock block={block} />;
+    case 'accordion': return <AccordionBlock block={block} />;
+    case 'quote': return <QuoteBlock block={block} />;
     default:         return null;
   }
 }

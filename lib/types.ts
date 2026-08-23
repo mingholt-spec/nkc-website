@@ -172,10 +172,67 @@ export type PageBlockShareButtons = {
   style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
+export interface TestimonialItem {
+  id: string;
+  quote: string;
+  authorName: string;
+  authorRole?: string;
+  authorImage?: string;
+  rating?: 1 | 2 | 3 | 4 | 5;
+}
+
+export type PageBlockTestimonial = {
+  id: string; type: 'testimonial'; name?: string;
+  title?: string; titleSize?: HeadingSize;
+  items: TestimonialItem[];
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export interface PricingTier {
+  id: string;
+  name: string;
+  price: string;
+  interval?: string;
+  features: string[];
+  highlighted?: boolean;
+  buttonText?: string;
+  buttonUrl?: string;
+}
+
+export type PageBlockPricing = {
+  id: string; type: 'pricing'; name?: string;
+  title?: string; titleSize?: HeadingSize;
+  tiers: PricingTier[];
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export interface AccordionItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export type PageBlockAccordion = {
+  id: string; type: 'accordion'; name?: string;
+  title?: string; titleSize?: HeadingSize;
+  items: AccordionItem[];
+  allowMultipleOpen?: boolean;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export type PageBlockQuote = {
+  id: string; type: 'quote'; name?: string;
+  text: string;
+  author?: string;
+  role?: string;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
 export type PageBlockLeaf =
   | PageBlockHero | PageBlockHeading | PageBlockText | PageBlockImage
   | PageBlockButton | PageBlockDivider | PageBlockSpacer | PageBlockCta
-  | PageBlockHtml | PageBlockBlog | PageBlockVideo | PageBlockLeadForm;
+  | PageBlockHtml | PageBlockBlog | PageBlockVideo | PageBlockLeadForm
+  | PageBlockTestimonial | PageBlockPricing | PageBlockAccordion | PageBlockQuote;
 
 /** Vad en Kolumner-cell kan innehålla — ett vanligt block eller ett nästlat Kolumner-block. */
 export type ColumnCellBlock = PageBlockLeaf | PageBlockColumns;
