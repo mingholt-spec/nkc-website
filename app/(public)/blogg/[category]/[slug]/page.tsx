@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getBlogPostBySlug, getBlogPosts } from '@/lib/data';
+import { getBlogPostBySlug, getBlogPosts, getClubConfig } from '@/lib/data';
 import { slugifyCategory } from '@/lib/utils';
+import { buildBlogPostingSchema, buildBreadcrumbListSchema } from '@/lib/jsonLd';
 import BlogPost from '@/components/blog/BlogPost';
 
 export const revalidate = 3600;
@@ -46,7 +47,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const [post, club] = await Promise.all([getBlogPostBySlug(slug), getClubConfig()]);
   if (!post || !post.isPublished) notFound();
-  return <BlogPost post={post} />;
+
+  const canonicalCategory = slugifyCategory(post.category ?? 'okategoriserat');
+  const canonicalUrl = `https://www.nkc.nu/blogg/${canonicalCategory}/${slug}`;
+  const blogPostingSchema = buildBlogPostingSchema(post, canonicalUrl, club);
+  const breadcrumbSchema = buildBreadcrumbListSchema([
+    { name: 'Hem', url: 'https://www.nkc.nu/' },
+    { name: 'Blogg', url: 'https://www.nkc.nu/blogg' },
+    { name: post.title, url: canonicalUrl },
+  ]);
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }} />
+      {breadcrumbSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      )}
+      <BlogPost post={post} />
+    </>
+  );
 }
