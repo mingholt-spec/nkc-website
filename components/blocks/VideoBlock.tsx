@@ -1,7 +1,7 @@
 import type { PageBlockVideo } from '@/lib/types';
 import VideoEmbed from './VideoEmbed';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
-import { blockStyleToCSS } from './blockStyle';
+import { blockStyleToCSS, blockStyleToScopedCSS } from './blockStyle';
 
 interface Props { block: PageBlockVideo }
 
@@ -17,8 +17,10 @@ export default function VideoBlock({ block }: Props) {
   const embedUrl = getEmbedUrl(block.url);
   const hasCustomPadding = hasSpacing(block.spacing);
   const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '16px' }), ...blockStyleToCSS(block.style) };
+  const scopedCss = blockStyleToScopedCSS(block.id, block.style);
   return (
-    <div className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'}`} style={sectionStyle}>
+    <div id={`block-${block.id}`} className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'}`} style={sectionStyle}>
+      {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
       {embedUrl ? (
         <VideoEmbed embedUrl={embedUrl} caption={block.caption} />
       ) : (

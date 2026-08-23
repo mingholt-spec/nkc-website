@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useRef } from 'react';
 import type { PageBlockCta } from '@/lib/types';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
-import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS, type HeadlineStyle } from './blockStyle';
+import { blockStyleToCSS, blockStyleToScopedCSS, headlineStyleToCSS, typographyToCSS, type HeadlineStyle } from './blockStyle';
 import { useResponsiveOutline } from './useResponsiveOutline';
 
 interface Props { block: PageBlockCta }
@@ -35,12 +35,15 @@ export default function CtaBlock({ block }: Props) {
   const { _mobileTextShadow: _mt, ...cleanTitleStyle } = titleStyle;
   const { _mobileTextShadow: _ms, ...cleanSubtitleStyle } = subtitleStyle;
   void _mt; void _ms;
+  const scopedCss = blockStyleToScopedCSS(block.id, block.style);
 
   return (
     <section
+      id={`block-${block.id}`}
       className={`relative ${hasCustomPadding ? '' : 'px-6 py-16'} ${alignClass}`}
       style={sectionStyle}
     >
+      {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
       {block.backgroundImage && <div className="absolute inset-0 bg-black/50" />}
       <div className="relative z-10 mx-auto max-w-2xl">
         <h2 ref={titleRef} className="text-3xl font-bold" style={cleanTitleStyle}>{block.title}</h2>

@@ -5,7 +5,8 @@ export type BlockSpacing = { top?: SpacingSize; right?: SpacingSize; bottom?: Sp
 export type BlockBase = { name?: string };
 export type HeadingSize = 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 
-export type BlockStyleOptions = {
+/** Bas-fälten för ett blocks stil — se BlockStyleOptions (samma shape återanvänds för hover/responsive, en nivå djupt). */
+export type BlockStyleBase = {
   borderWidth?: '0' | '1' | '2' | '3' | '4';
   borderColor?: string;
   borderRadius?: '0' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
@@ -22,6 +23,13 @@ export type BlockStyleOptions = {
   lineHeight?: 'tight' | 'normal' | 'relaxed' | 'loose';
   letterSpacing?: 'tight' | 'normal' | 'wide' | 'wider';
   fontWeight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'black';
+};
+
+export type BlockStyleOptions = BlockStyleBase & {
+  /** Stil som appliceras bara vid :hover (samma fält-shape som grundstilen). */
+  hover?: BlockStyleBase;
+  /** Stil-overrides per brytpunkt (mobil ≤768px, surfplatta ≤1024px). */
+  responsive?: { mobile?: BlockStyleBase; tablet?: BlockStyleBase };
 };
 
 export type PageBlockHero = {

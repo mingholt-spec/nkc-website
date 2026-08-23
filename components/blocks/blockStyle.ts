@@ -1,4 +1,4 @@
-import type { BlockStyleOptions, HeadingSize } from '@/lib/types';
+import type { BlockStyleOptions, BlockStyleBase, HeadingSize } from '@/lib/types';
 
 // ── Border width mappning ──
 const BORDER_WIDTH: Record<string, string> = {
@@ -231,6 +231,45 @@ export function typographyToCSS(style?: BlockStyleOptions): React.CSSProperties 
     }
 
     return css;
+}
+
+/** camelCase → kebab-case (för att skriva React.CSSProperties-nycklar som riktig CSS-text) */
+function cssPropToKebab(prop: string): string {
+    return prop.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
+}
+
+/** Slår ihop container- (blockStyleToCSS) och typografi-CSS (typographyToCSS) till en CSS-deklarationssträng, t.ex. "border-radius:8px;font-weight:700". */
+function styleBaseToCSSDeclarations(base?: BlockStyleBase): string {
+    if (!base) return '';
+    const css: React.CSSProperties = { ...blockStyleToCSS(base as BlockStyleOptions), ...typographyToCSS(base as BlockStyleOptions) };
+    return Object.entries(css)
+        .filter(([, v]) => v !== undefined && v !== null && v !== '')
+        .map(([k, v]) => `${cssPropToKebab(k)}:${v}`)
+        .join(';');
+}
+
+/**
+ * Genererar en skopad CSS-sträng för ett blocks hover-tillstånd och
+ * responsiva brytpunkt-overrides. Returnerar tom sträng om varken
+ * `style.hover` eller `style.responsive` är satt — komponenten renderar
+ * då ingen extra <style>-tagg alls. Speglar bjj-premiums
+ * components/public/blocks/blockStyle.ts.
+ */
+export function blockStyleToScopedCSS(blockId: string, style?: BlockStyleOptions): string {
+    if (!style || (!style.hover && !style.responsive)) return '';
+    const sel = `#block-${blockId}`;
+    const parts: string[] = [];
+
+    const hoverDecl = styleBaseToCSSDeclarations(style.hover);
+    if (hoverDecl) parts.push(`${sel}:hover{${hoverDecl}}`);
+
+    const tabletDecl = styleBaseToCSSDeclarations(style.responsive?.tablet);
+    if (tabletDecl) parts.push(`@media (max-width:1024px){${sel}{${tabletDecl}}}`);
+
+    const mobileDecl = styleBaseToCSSDeclarations(style.responsive?.mobile);
+    if (mobileDecl) parts.push(`@media (max-width:768px){${sel}{${mobileDecl}}}`);
+
+    return parts.join('\n');
 }
 
 /** Returnerar sant om en BlockStyleOptions har minst ett värde satt */

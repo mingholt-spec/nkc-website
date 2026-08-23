@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import type { PageBlockHero } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
-import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS, type HeadlineStyle } from './blockStyle';
+import { blockStyleToCSS, blockStyleToScopedCSS, headlineStyleToCSS, typographyToCSS, type HeadlineStyle } from './blockStyle';
 import { useResponsiveOutline } from './useResponsiveOutline';
 
 interface Props { block: PageBlockHero }
@@ -52,12 +52,15 @@ export default function HeroBlock({ block }: Props) {
   const { _mobileTextShadow: _mt, ...cleanTitleStyle } = titleStyle;
   const { _mobileTextShadow: _ms, ...cleanSubtitleStyle } = subtitleStyle;
   void _mt; void _ms;
+  const scopedCss = blockStyleToScopedCSS(block.id, block.style);
 
   return (
     <section
+      id={`block-${block.id}`}
       className={`relative flex flex-col justify-center ${height} ${hasCustomPadding ? '' : 'px-6 py-16'} overflow-hidden`}
       style={sectionStyle}
     >
+      {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
       {bgImage && (
         <Image
           src={bgImage}
