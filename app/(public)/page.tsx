@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getHomepage, getClubConfig, getWebsiteConfig, getBlogPosts } from '@/lib/data';
+import { buildFAQPageSchema } from '@/lib/jsonLd';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 
@@ -38,8 +39,13 @@ export default async function HomePage() {
       </div>
     );
   }
+  const faqSchema = buildFAQPageSchema(page.blocks);
+
   return (
     <>
+      {faqSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      )}
       <PageRenderer page={page} blogPosts={blogPosts} />
       <SocialShareBar config={config} title={page.metaTitle ?? page.title} />
     </>

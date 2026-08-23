@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getPageBySlug, getPageBySlugPreview, getWebsitePages, getWebsiteConfig } from '@/lib/data';
+import { buildFAQPageSchema, buildBreadcrumbListSchema } from '@/lib/jsonLd';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 
@@ -56,8 +57,21 @@ export default async function PublicPage({ params, searchParams }: Props) {
     getWebsiteConfig(),
   ]);
   if (!page) notFound();
+
+  const faqSchema = buildFAQPageSchema(page.blocks);
+  const breadcrumbSchema = buildBreadcrumbListSchema([
+    { name: 'Hem', url: 'https://www.nkc.nu/' },
+    { name: page.title, url: `https://www.nkc.nu/${slug}` },
+  ]);
+
   return (
     <>
+      {faqSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      )}
+      {breadcrumbSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      )}
       <PageRenderer page={page} />
       <SocialShareBar config={config} title={page.metaTitle ?? page.title} />
     </>

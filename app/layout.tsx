@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Raleway } from 'next/font/google';
 import { getClubConfig, getWebsiteConfig } from '@/lib/data';
+import { buildSportsClubSchema, buildWebSiteSchema } from '@/lib/jsonLd';
 import CookieConsent from '@/components/layout/CookieConsent';
 import GoogleAnalytics from '@/components/layout/GoogleAnalytics';
 import './globals.css';
@@ -23,8 +24,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
+  const [club, config] = await Promise.all([getClubConfig(), getWebsiteConfig()]);
   const theme = config?.theme;
+  const sportsClubSchema = buildSportsClubSchema(club, config);
+  const webSiteSchema = buildWebSiteSchema(club);
 
   const cssVars = {
     '--site-bg':       theme?.backgroundColor  ?? '#ffffff',
@@ -40,6 +43,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
         {/* Prevent flash of wrong theme on load */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('flowroll_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();` }} />
+        {sportsClubSchema && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsClubSchema) }} />
+        )}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
       </head>
       <body className="min-h-full flex flex-col antialiased">
         {children}
