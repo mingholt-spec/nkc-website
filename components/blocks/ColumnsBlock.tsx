@@ -30,8 +30,8 @@ export default function ColumnsBlock({ block }: Props) {
   const cols = Array.isArray(block.columns) ? block.columns : [];
   const colClass = colMap[block.columnCount ?? cols.length] ?? 'grid-cols-1 md:grid-cols-2';
   const gapClass = gapMap[block.gap ?? 'md'] ?? 'gap-8';
-  const hasCustomPadding = hasSpacing(block.spacing);
-  const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '40px' }), ...blockStyleToCSS(block.style) };
+  const hasCustomPadding = hasSpacing(block.padding);
+  const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '40px' }), ...blockStyleToCSS(block.style) };
   const scopedCss = blockStyleToScopedCSS(block.id, block.style);
 
   return (

@@ -16,8 +16,8 @@ export default function ButtonBlock({ block }: Props) {
   const size = sizeMap[block.size ?? 'md'];
   const effectiveAlign = block.style?.textAlign ?? block.align ?? 'center';
   const align = alignMap[effectiveAlign];
-  const hasCustomPadding = hasSpacing(block.spacing);
-  const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '16px' }), ...blockStyleToCSS(block.style) };
+  const hasCustomPadding = hasSpacing(block.padding);
+  const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '16px' }), ...blockStyleToCSS(block.style) };
   const scopedCss = blockStyleToScopedCSS(block.id, block.style);
   return (
     <div id={`block-${block.id}`} className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'} flex ${align}`} style={sectionStyle}>

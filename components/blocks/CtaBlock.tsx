@@ -7,12 +7,12 @@ import { useResponsiveOutline } from './useResponsiveOutline';
 
 interface Props { block: PageBlockCta }
 export default function CtaBlock({ block }: Props) {
-  const hasCustomPadding = hasSpacing(block.spacing);
+  const hasCustomPadding = hasSpacing(block.padding);
   const sectionStyle = {
     backgroundColor: block.backgroundColor ?? '#18181b',
     backgroundImage: block.backgroundImage ? `url(${block.backgroundImage})` : undefined,
     backgroundSize: 'cover', backgroundPosition: 'center',
-    ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '64px' }),
+    ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '64px' }),
     ...blockStyleToCSS(block.style),
   };
 

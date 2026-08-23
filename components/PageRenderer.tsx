@@ -33,11 +33,11 @@ function formatDate(dateStr: string): string {
 
 function BlogBlockClient({ block, posts }: { block: PageBlockBlog; posts: NewsPost[] }) {
   const title = safeStr(block.title);
-  const count = block.count ?? 3;
-  const shown = posts.slice(0, count);
+  const postsToShow = block.postsToShow ?? 3;
+  const shown = posts.slice(0, postsToShow);
 
-  const hasCustomPadding = hasSpacing(block.spacing);
-  const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '48px' }), ...blockStyleToCSS(block.style) };
+  const hasCustomPadding = hasSpacing(block.padding);
+  const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '48px' }), ...blockStyleToCSS(block.style) };
   const alignClass = block.style?.textAlign === 'left' ? 'text-left' : block.style?.textAlign === 'right' ? 'text-right' : 'text-center';
   const titleStyle = headlineStyleToCSS(block.style);
   delete titleStyle._mobileTextShadow;

@@ -8,19 +8,19 @@ const sizeMap: Record<string, string> = { xs: 'text-lg', sm: 'text-xl', base: 't
 
 export default function HeadingBlock({ block }: Props) {
   const text = safeStr(block.text);
-  const effectiveSize = block.style?.fontSize ?? block.size;
+  const effectiveSize = block.style?.fontSize ?? block.fontSize;
   const sizeClass = sizeMap[safeStr(effectiveSize, 'xl')] ?? 'text-4xl';
   const level = typeof block.level === 'number' ? block.level : 2;
   const align = (block.style?.textAlign ?? safeStr(block.align, 'left')) as 'left' | 'center' | 'right';
-  const color = safeStr(block.color);
+  const color = safeStr(block.textColor);
   const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
   const sectionStyle = {
-    ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '16px' }),
+    ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '16px' }),
     ...blockStyleToCSS(block.style),
     textAlign: align,
   };
-  const hasCustomPadding = hasSpacing(block.spacing);
+  const hasCustomPadding = hasSpacing(block.padding);
 
   const { _mobileTextShadow: _mt, ...headingStyle } = headlineStyleToCSS(block.style);
   void _mt;

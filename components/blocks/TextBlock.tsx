@@ -12,10 +12,10 @@ export default function TextBlock({ block }: Props) {
   const alignClass = align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : '';
 
   const sectionStyle = {
-    ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '16px' }),
+    ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '16px' }),
     ...blockStyleToCSS(block.style),
   };
-  const hasCustomPadding = hasSpacing(block.spacing);
+  const hasCustomPadding = hasSpacing(block.padding);
   const hStyle = headlineStyleToCSS(block.style);
   const typo = typographyToCSS(block.style);
   delete typo.textAlign; // handled by alignClass

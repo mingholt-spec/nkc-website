@@ -5,10 +5,15 @@ import { hasConsent } from '@/lib/consent';
 interface Props {
   embedUrl: string;
   caption?: string;
+  /** Tailwind aspect-ratio class, default 'aspect-video' (16:9). */
+  aspectClass?: string;
+  rounded?: boolean;
+  shadow?: boolean;
 }
 
-export default function VideoEmbed({ embedUrl, caption }: Props) {
+export default function VideoEmbed({ embedUrl, caption, aspectClass = 'aspect-video', rounded = true, shadow = false }: Props) {
   const [consented, setConsented] = useState(false);
+  const frameClass = `relative ${aspectClass} overflow-hidden bg-zinc-900 ${rounded ? 'rounded-xl' : ''} ${shadow ? 'shadow-lg' : ''}`;
 
   useEffect(() => {
     setConsented(hasConsent('functional'));
@@ -20,7 +25,7 @@ export default function VideoEmbed({ embedUrl, caption }: Props) {
   if (!consented) {
     return (
       <>
-        <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 flex flex-col items-center justify-center gap-3 text-center px-6">
+        <div className={`${frameClass} flex flex-col items-center justify-center gap-3 text-center px-6`}>
           <svg className="w-10 h-10 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
           </svg>
@@ -42,7 +47,7 @@ export default function VideoEmbed({ embedUrl, caption }: Props) {
 
   return (
     <>
-      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900">
+      <div className={frameClass}>
         <iframe
           src={embedUrl}
           title={caption ?? 'Video'}

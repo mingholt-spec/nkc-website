@@ -6,13 +6,13 @@ import { blockStyleToCSS, blockStyleToScopedCSS } from './blockStyle';
 interface Props { block: PageBlockImage }
 
 export default function ImageBlock({ block }: Props) {
-  const hasCustomPadding = hasSpacing(block.spacing);
+  const hasCustomPadding = hasSpacing(block.padding);
   const styleCss = blockStyleToCSS(block.style);
   const scopedCss = blockStyleToScopedCSS(block.id, block.style);
   const styleTag = scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />;
 
   if (!block.src) {
-    const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '32px' }), ...styleCss };
+    const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '32px' }), ...styleCss };
     return (
       <div id={`block-${block.id}`} className={hasCustomPadding ? '' : 'px-6 py-8'} style={sectionStyle}>
         {styleTag}
@@ -24,7 +24,7 @@ export default function ImageBlock({ block }: Props) {
       </div>
     );
   }
-  const sectionStyle = { ...spacingToStyle(block.spacing, undefined, { x: '24px', y: '24px' }), ...styleCss };
+  const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '24px' }), ...styleCss };
   return (
     <div id={`block-${block.id}`} className={hasCustomPadding ? '' : 'px-6 py-6'} style={sectionStyle}>
       {styleTag}
