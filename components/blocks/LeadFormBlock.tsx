@@ -95,6 +95,10 @@ export default function LeadFormBlock({ block, campaignId, campaignName }: Props
         body: JSON.stringify({ values: formData, tags: block.tags, campaignId, campaignName }),
       });
       if (!res.ok) throw new Error('server error');
+      if (block.redirectUrl) {
+        window.location.href = block.redirectUrl;
+        return; // lämna submitting=true — sidan navigerar bort ändå
+      }
       setSubmitted(true);
     } catch {
       setSubmitError(t.somethingWentWrong);
