@@ -43,15 +43,20 @@ export default function AccordionBlock({ block }: Props) {
             <div key={item.id} className="rounded-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-white dark:bg-zinc-800">
               <button
                 type="button"
+                id={`accordion-btn-${block.id}-${item.id}`}
                 onClick={() => toggle(item.id)}
                 className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
                 aria-expanded={isOpen}
+                aria-controls={`accordion-panel-${block.id}-${item.id}`}
               >
                 <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{item.question}</span>
                 <svg className={`w-4 h-4 flex-shrink-0 text-zinc-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
               </button>
               {isOpen && (
                 <div
+                  id={`accordion-panel-${block.id}-${item.id}`}
+                  role="region"
+                  aria-labelledby={`accordion-btn-${block.id}-${item.id}`}
                   className="px-5 pb-4 text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed prose prose-sm dark:prose-invert max-w-none"
                   dangerouslySetInnerHTML={{ __html: normalizeLinks(safeStr(item.answer)) }}
                 />
