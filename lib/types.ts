@@ -427,6 +427,8 @@ export interface ClubConfig {
   showClubInfoInFooter?: boolean;
   organization_number?: string;
   country?: string;
+  swishNumber?: string;
+  bankgiro?: string;
 }
 
 export interface CampaignFormField {

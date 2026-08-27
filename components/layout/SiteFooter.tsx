@@ -37,7 +37,7 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
   const showSocial = (config?.socialDisplay?.footer !== false) && (config?.socialLinks || []).filter(l => l.url).length > 0;
   const socialLinks = showSocial ? (config!.socialLinks || []) : [];
 
-  const hasClubInfo = club && (club.clubName || club.phone || club.email || club.address);
+  const hasClubInfo = club && (club.clubName || club.phone || club.email || club.address || club.swishNumber || club.bankgiro);
   const addressParts = [club.address, [club.postalCode, club.city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
 
   const hasContent = footer?.text || (footer?.links?.length ?? 0) > 0 || showSocial || footer?.showPoweredBy !== false || hasClubInfo;
@@ -84,6 +84,24 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
                   </svg>
                   {club.email}
                 </a>
+              )}
+              {club.swishNumber && (
+                <p className="text-xs flex items-center gap-1.5 min-h-[44px]"
+                  style={{ color: `${txtColor}d9`, fontFamily: theme?.bodyFont }}>
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a4 4 0 00-8 0v2m-2 0h12a2 2 0 012 2v7a2 2 0 01-2 2H7a2 2 0 01-2-2v-7a2 2 0 012-2z" />
+                  </svg>
+                  Swish: {club.swishNumber}
+                </p>
+              )}
+              {club.bankgiro && (
+                <p className="text-xs flex items-center gap-1.5 min-h-[44px]"
+                  style={{ color: `${txtColor}d9`, fontFamily: theme?.bodyFont }}>
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Bankgiro: {club.bankgiro}
+                </p>
               )}
             </div>
           </div>

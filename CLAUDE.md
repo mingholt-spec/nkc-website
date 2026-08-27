@@ -39,6 +39,19 @@ failures for returning participants. (Tim Johansson bug, 2026-06.)
 - automation_dedup/{triggerEventId}  (source of truth: has this automation run?)
   Never delete from this collection.
 
+### Two public-block-rendering paths — must also stay in sync
+Every page-builder block type has TWO separate rendering components:
+- nkc-website/components/blocks/*.tsx          ← the REAL public site (this repo, nkc.nu)
+- bjj-premium/components/public/blocks/*.tsx   ← admin-portal live preview only
+
+A visual/behavioral/accessibility fix made to one is invisible on the actual
+live site unless mirrored into the other. This repo's versions are Next.js
+'use client' components using dangerouslySetInnerHTML + normalizeLinks/safeStr
+(not RichTextContent like bjj-premium's). This repo has no GitHub Actions CI —
+it deploys via Firebase App Hosting's native git integration on push to main,
+so there's no `gh run list` to poll; just push and allow a short delay before
+it's live.
+
 ### Where the Cloud Functions, deploy order, and tests live
 All Cloud Functions (onLeadCreated, onLeadUpdated, processAutomationRuns,
 dailyAutomationBackfill, ogShare, etc.) and their tests live in bjj-premium,
