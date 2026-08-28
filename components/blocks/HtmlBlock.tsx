@@ -24,7 +24,7 @@ export default function HtmlBlock({ block }: Props) {
     <div style={{ position: 'relative', zIndex: 0, ...sectionStyle }}>
       <iframe
         srcDoc={html}
-        sandbox="allow-scripts"
+        sandbox="allow-scripts allow-top-navigation-by-user-activation"
         style={{ width: '100%', height: 800, border: 'none', display: 'block' }}
         title="Innehållsblock"
       />
