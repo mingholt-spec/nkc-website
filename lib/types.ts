@@ -110,6 +110,26 @@ export type PageBlockBlog = {
   style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
+/** Live veckoschema — inget schema lagras i blocket, det hämtas från
+ *  `schedule`-collectionen vid varje sidladdning/ISR-revalidering. Speglar
+ *  bjj-premium/types/pageBuilder.ts's PageBlockSchedule. */
+export type PageBlockSchedule = {
+  id: string; type: 'schedule'; name?: string;
+  title?: string; titleSize?: HeadingSize; titleAlign?: 'left' | 'center' | 'right';
+  daysAhead?: number;
+  showInstructor?: boolean;
+  style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
+};
+
+export interface UpcomingClassPreview {
+  id: string;
+  date: string;
+  time: string;
+  endTime?: string;
+  name: string;
+  instructor?: string;
+}
+
 export type PageBlockVideo = {
   id: string; type: 'video'; name?: string;
   url: string; caption?: string;
@@ -320,7 +340,8 @@ export type PageBlockLeaf =
   | PageBlockHtml | PageBlockBlog | PageBlockVideo | PageBlockLeadForm
   | PageBlockTestimonial | PageBlockPricing | PageBlockAccordion | PageBlockQuote
   | PageBlockCountdown | PageBlockBadge | PageBlockInstructor | PageBlockProgress
-  | PageBlockGallery | PageBlockTabs | PageBlockSocialFeed | PageBlockMap;
+  | PageBlockGallery | PageBlockTabs | PageBlockSocialFeed | PageBlockMap
+  | PageBlockSchedule;
 
 /** Vad en Kolumner-cell kan innehålla — ett vanligt block eller ett nästlat Kolumner-block. */
 export type ColumnCellBlock = PageBlockLeaf | PageBlockColumns;

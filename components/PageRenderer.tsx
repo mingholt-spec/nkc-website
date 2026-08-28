@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import type { WebsitePage, PageBlock, NewsPost, PageBlockBlog } from '@/lib/types';
+import type { WebsitePage, PageBlock, NewsPost, PageBlockBlog, PageBlockSchedule, UpcomingClassPreview } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
 import HeroBlock from './blocks/HeroBlock';
 import TextBlock from './blocks/TextBlock';
@@ -30,7 +30,7 @@ import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blocks/blockSpacing';
 import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS } from './blocks/blockStyle';
 
-interface Props { page: WebsitePage; blogPosts?: NewsPost[] }
+interface Props { page: WebsitePage; blogPosts?: NewsPost[]; schedule?: UpcomingClassPreview[] }
 
 function generateExcerpt(html: string, max = 140): string {
   const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -104,7 +104,74 @@ function BlogBlockClient({ block, posts }: { block: PageBlockBlog; posts: NewsPo
   );
 }
 
-export default function PageRenderer({ page, blogPosts = [] }: Props) {
+// Måndag-först (inte JS Date.getDay()'s söndag-först) — speglar
+// bjj-premium/components/public/blocks/ScheduleBlock.tsx.
+const DAY_LABELS = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag'];
+function dayIndexMondayFirst(dateStr: string): number {
+  const jsDay = new Date(`${dateStr}T00:00:00`).getDay();
+  return (jsDay + 6) % 7;
+}
+function groupByWeekday(classes: UpcomingClassPreview[]): { day: string; classes: UpcomingClassPreview[] }[] {
+  const buckets: UpcomingClassPreview[][] = Array.from({ length: 7 }, () => []);
+  for (const c of classes) {
+    if (!c.date) continue;
+    buckets[dayIndexMondayFirst(c.date)].push(c);
+  }
+  return DAY_LABELS
+    .map((day, i) => ({ day, classes: buckets[i] }))
+    .filter(d => d.classes.length > 0);
+}
+
+function ScheduleBlockClient({ block, schedule }: { block: PageBlockSchedule; schedule: UpcomingClassPreview[] }) {
+  const title = safeStr(block.title);
+  const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '48px' }), ...blockStyleToCSS(block.style) };
+  const alignClass = block.style?.textAlign === 'left' ? 'text-left' : block.style?.textAlign === 'right' ? 'text-right' : 'text-center';
+  const titleStyle = headlineStyleToCSS(block.style);
+  delete titleStyle._mobileTextShadow;
+  const typo = typographyToCSS(block.style);
+  delete typo.textAlign;
+  delete typo.fontSize;
+  Object.assign(titleStyle, typo);
+  const days = groupByWeekday(schedule);
+
+  return (
+    <section className="mx-auto max-w-5xl px-6 py-12" style={sectionStyle}>
+      {title && (
+        <h2 className={`text-3xl font-black uppercase tracking-tight mb-8 ${alignClass} text-zinc-900 dark:text-zinc-100`} style={titleStyle}>
+          {title}
+        </h2>
+      )}
+      {days.length === 0 ? (
+        <p className="text-sm text-zinc-600 dark:text-zinc-300 text-center py-8">Inga pass inbokade just nu.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {days.map(({ day, classes: dayClasses }) => (
+            <div key={day} className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
+              <h3 className="text-xs font-black uppercase tracking-widest text-red-600 dark:text-red-400 mb-4">{day}</h3>
+              <div className="space-y-3">
+                {dayClasses.map(c => (
+                  <div key={c.id} className="flex items-start justify-between gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-700 last:border-0 last:pb-0">
+                    <div>
+                      <p className="text-sm font-black text-zinc-900 dark:text-zinc-100">{c.name}</p>
+                      {block.showInstructor !== false && c.instructor && (
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{c.instructor}</p>
+                      )}
+                    </div>
+                    <span className="text-xs font-bold text-zinc-600 dark:text-zinc-300 whitespace-nowrap">
+                      {c.time}{c.endTime ? `–${c.endTime}` : ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+export default function PageRenderer({ page, blogPosts = [], schedule = [] }: Props) {
   const lang = useLanguage();
 
   if (page.mode === 'html') {
@@ -115,12 +182,12 @@ export default function PageRenderer({ page, blogPosts = [] }: Props) {
   const blocks = (lang === 'en' && page.blocksEn?.length) ? page.blocksEn : (page.blocks ?? []);
   return (
     <div>
-      {blocks.map(block => <BlockRenderer key={block.id} block={block} blogPosts={blogPosts} />)}
+      {blocks.map(block => <BlockRenderer key={block.id} block={block} blogPosts={blogPosts} schedule={schedule} />)}
     </div>
   );
 }
 
-export function BlockRenderer({ block, blogPosts = [] }: { block: PageBlock; blogPosts?: NewsPost[] }) {
+export function BlockRenderer({ block, blogPosts = [], schedule = [] }: { block: PageBlock; blogPosts?: NewsPost[]; schedule?: UpcomingClassPreview[] }) {
   switch (block.type) {
     case 'hero':     return <HeroBlock block={block} />;
     case 'text':     return <TextBlock block={block} />;
@@ -129,11 +196,12 @@ export function BlockRenderer({ block, blogPosts = [] }: { block: PageBlock; blo
     case 'button':   return <ButtonBlock block={block} />;
     case 'html':     return <HtmlBlock block={block} />;
     case 'video':    return <VideoBlock block={block} />;
-    case 'columns':  return <ColumnsBlock block={block} />;
+    case 'columns':  return <ColumnsBlock block={block} blogPosts={blogPosts} schedule={schedule} />;
     case 'spacer':   return <SpacerBlock block={block} />;
     case 'divider':  return <DividerBlock block={block} />;
     case 'cta':      return <CtaBlock block={block} />;
     case 'blog':     return <BlogBlockClient block={block} posts={blogPosts} />;
+    case 'schedule': return <ScheduleBlockClient block={block} schedule={schedule} />;
     case 'leadForm': return <LeadFormBlock block={block} />;
     case 'testimonial': return <TestimonialBlock block={block} />;
     case 'pricing': return <PricingBlock block={block} />;

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getPageBySlug, getPageBySlugPreview, getWebsitePages, getWebsiteConfig } from '@/lib/data';
+import { getPageBySlug, getPageBySlugPreview, getWebsitePages, getWebsiteConfig, getBlogPosts, getSchedule } from '@/lib/data';
 import { buildFAQPageSchema, buildBreadcrumbListSchema } from '@/lib/jsonLd';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
@@ -52,9 +52,11 @@ export default async function PublicPage({ params, searchParams }: Props) {
   const sp = searchParams ? await searchParams : {};
   const isPreview = sp?.preview === '1';
 
-  const [page, config] = await Promise.all([
+  const [page, config, blogPosts, schedule] = await Promise.all([
     isPreview ? getPageBySlugPreview(slug) : getPageBySlug(slug),
     getWebsiteConfig(),
+    getBlogPosts(10),
+    getSchedule(),
   ]);
   if (!page) notFound();
 
@@ -72,7 +74,7 @@ export default async function PublicPage({ params, searchParams }: Props) {
       {breadcrumbSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       )}
-      <PageRenderer page={page} />
+      <PageRenderer page={page} blogPosts={blogPosts} schedule={schedule} />
       <SocialShareBar config={config} title={page.metaTitle ?? page.title} />
     </>
   );

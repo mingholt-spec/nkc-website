@@ -1,5 +1,5 @@
 import { db } from './firebase-admin';
-import type { NewsPost, WebsitePage, Campaign, WebsiteConfig, ClubConfig } from './types';
+import type { NewsPost, WebsitePage, Campaign, WebsiteConfig, ClubConfig, UpcomingClassPreview } from './types';
 import { cache } from 'react';
 
 // ── Helpers ──
@@ -92,6 +92,46 @@ export const getBlogPosts = cache(async (limitCount = 50): Promise<NewsPost[]> =
       const snap = await db!.collection('news').where('isPublished', '==', true).limit(limitCount).get();
       return snap.docs.map(d => docToNewsPost(d.id, d.data() as Record<string, unknown>));
     } catch { return []; }
+  }
+});
+
+// ── Schedule ──
+
+/**
+ * Upcoming, publicly-relevant classes for the page builder's live Schedule
+ * block — excludes seminars and private sessions (one-off/closed events,
+ * not "how we train every week"). `schedule` is publicly readable in
+ * Firestore rules, so this needs no special auth handling. Mirrors
+ * bjj-premium/api/data.ts's loadUpcomingSchedule.
+ */
+export const getSchedule = cache(async (daysAhead = 7): Promise<UpcomingClassPreview[]> => {
+  if (!db) return [];
+  try {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + daysAhead);
+    const endStr = endDate.toISOString().split('T')[0];
+
+    const snap = await db.collection('schedule')
+      .where('date', '>=', todayStr)
+      .where('date', '<=', endStr)
+      .get();
+
+    return snap.docs
+      .map(d => d.data() as Record<string, unknown>)
+      .filter(c => !c.isSeminar && !c.isPrivate)
+      .map(c => ({
+        id: String(c.id ?? ''),
+        date: String(c.date ?? ''),
+        time: String(c.time ?? ''),
+        endTime: c.endTime ? String(c.endTime) : undefined,
+        name: String(c.name ?? ''),
+        instructor: c.instructor ? String(c.instructor) : undefined,
+      }))
+      .sort((a, b) => (a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date)));
+  } catch {
+    return [];
   }
 });
 
