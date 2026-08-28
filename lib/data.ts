@@ -110,7 +110,10 @@ export const getSchedule = cache(async (daysAhead = 7): Promise<UpcomingClassPre
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     const endDate = new Date(today);
-    endDate.setDate(endDate.getDate() + daysAhead);
+    // Both ends of the range are inclusive, so `daysAhead - 1` gives exactly
+    // `daysAhead` distinct calendar dates — without the -1 this spans one
+    // extra date, wrapping back onto today's own weekday a second time.
+    endDate.setDate(endDate.getDate() + Math.max(0, daysAhead - 1));
     const endStr = endDate.toISOString().split('T')[0];
 
     const snap = await db.collection('schedule')
