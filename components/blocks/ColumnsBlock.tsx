@@ -1,9 +1,9 @@
-import type { PageBlockColumns, ColumnCellBlock, NewsPost, UpcomingClassPreview } from '@/lib/types';
+import type { PageBlockColumns, ColumnCellBlock, NewsPost, UpcomingClassPreview, UpcomingSeminarPreview } from '@/lib/types';
 import { BlockRenderer } from '@/components/PageRenderer';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
 import { blockStyleToCSS, blockStyleToScopedCSS } from './blockStyle';
 
-interface Props { block: PageBlockColumns; blogPosts?: NewsPost[]; schedule?: UpcomingClassPreview[] }
+interface Props { block: PageBlockColumns; blogPosts?: NewsPost[]; schedule?: UpcomingClassPreview[]; seminars?: UpcomingSeminarPreview[] }
 
 const colMap: Record<number, string> = {
   2: 'grid-cols-1 md:grid-cols-2',
@@ -26,7 +26,7 @@ function getColBlocks(col: unknown): ColumnCellBlock[] {
   return [];
 }
 
-export default function ColumnsBlock({ block, blogPosts = [], schedule = [] }: Props) {
+export default function ColumnsBlock({ block, blogPosts = [], schedule = [], seminars = [] }: Props) {
   const cols = Array.isArray(block.columns) ? block.columns : [];
   const colClass = colMap[block.columnCount ?? cols.length] ?? 'grid-cols-1 md:grid-cols-2';
   const gapClass = gapMap[block.gap ?? 'md'] ?? 'gap-8';
@@ -41,7 +41,7 @@ export default function ColumnsBlock({ block, blogPosts = [], schedule = [] }: P
         const blocks = getColBlocks(col);
         return (
           <div key={i} className="min-w-0">
-            {blocks.map(b => <BlockRenderer key={b.id} block={b} blogPosts={blogPosts} schedule={schedule} />)}
+            {blocks.map(b => <BlockRenderer key={b.id} block={b} blogPosts={blogPosts} schedule={schedule} seminars={seminars} />)}
           </div>
         );
       })}

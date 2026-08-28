@@ -118,6 +118,7 @@ export type PageBlockSchedule = {
   title?: string; titleSize?: HeadingSize; titleAlign?: 'left' | 'center' | 'right';
   daysAhead?: number;
   showInstructor?: boolean;
+  showSeminars?: boolean;
   style?: BlockStyleOptions; padding?: BlockSpacing; margin?: BlockSpacing;
 };
 
@@ -128,6 +129,13 @@ export interface UpcomingClassPreview {
   endTime?: string;
   name: string;
   instructor?: string;
+}
+
+export interface UpcomingSeminarPreview extends UpcomingClassPreview {
+  description?: string;
+  shareImage?: string;
+  /** Public event page slug (nkc.nu/event/{slug}), when this seminar was created from a campaign. */
+  campaignSlug?: string;
 }
 
 export type PageBlockVideo = {

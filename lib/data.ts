@@ -1,5 +1,5 @@
 import { db } from './firebase-admin';
-import type { NewsPost, WebsitePage, Campaign, WebsiteConfig, ClubConfig, UpcomingClassPreview } from './types';
+import type { NewsPost, WebsitePage, Campaign, WebsiteConfig, ClubConfig, UpcomingClassPreview, UpcomingSeminarPreview } from './types';
 import { cache } from 'react';
 
 // ── Helpers ──
@@ -131,6 +131,57 @@ export const getSchedule = cache(async (daysAhead = 7): Promise<UpcomingClassPre
         endTime: c.endTime ? String(c.endTime) : undefined,
         name: String(c.name ?? ''),
         instructor: c.instructor ? String(c.instructor) : undefined,
+      }))
+      .sort((a, b) => (a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date)));
+  } catch {
+    return [];
+  }
+});
+
+/**
+ * Upcoming seminars/events (`schedule` docs with `isSeminar: true`) for the
+ * Schedule block's "Kommande seminarier" section. Mirrors bjj-premium's
+ * api/data.ts's loadUpcomingSeminars — a date-range-only query (isSeminar
+ * filtered in JS, avoids needing a composite Firestore index), joined to the
+ * publicly-readable `campaigns` collection by eventDetails.classId to attach
+ * a public /event/{slug} link when the seminar came from a campaign.
+ */
+export const getSeminars = cache(async (daysAhead = 90): Promise<UpcomingSeminarPreview[]> => {
+  if (!db) return [];
+  try {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + Math.max(0, daysAhead - 1));
+    const endStr = endDate.toISOString().split('T')[0];
+
+    const [scheduleSnap, campaignsSnap] = await Promise.all([
+      db.collection('schedule').where('date', '>=', todayStr).where('date', '<=', endStr).get(),
+      db.collection('campaigns').get(),
+    ]);
+
+    const slugByClassId = new Map<string, string>();
+    campaignsSnap.docs.forEach(d => {
+      const data = d.data() as Record<string, unknown>;
+      const eventDetails = data.eventDetails as Record<string, unknown> | undefined;
+      const classId = eventDetails?.classId as string | undefined;
+      const slug = data.slug as string | undefined;
+      if (classId && slug) slugByClassId.set(classId, slug);
+    });
+
+    return scheduleSnap.docs
+      .map(d => ({ docId: d.id, data: d.data() as Record<string, unknown> }))
+      .filter(({ data: c }) => Boolean(c.isSeminar))
+      .map(({ docId, data: c }) => ({
+        id: String(c.id ?? docId),
+        date: String(c.date ?? ''),
+        time: String(c.time ?? ''),
+        endTime: c.endTime ? String(c.endTime) : undefined,
+        name: String(c.name ?? ''),
+        instructor: c.instructor ? String(c.instructor) : undefined,
+        description: c.description ? String(c.description) : undefined,
+        shareImage: c.shareImage ? String(c.shareImage) : undefined,
+        campaignSlug: slugByClassId.get(docId),
       }))
       .sort((a, b) => (a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date)));
   } catch {

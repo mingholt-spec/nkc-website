@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
-import type { WebsitePage, PageBlock, NewsPost, PageBlockBlog, PageBlockSchedule, UpcomingClassPreview } from '@/lib/types';
+import Link from 'next/link';
+import type { WebsitePage, PageBlock, NewsPost, PageBlockBlog, PageBlockSchedule, UpcomingClassPreview, UpcomingSeminarPreview } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
 import HeroBlock from './blocks/HeroBlock';
 import TextBlock from './blocks/TextBlock';
@@ -30,7 +31,7 @@ import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blocks/blockSpacing';
 import { blockStyleToCSS, headlineStyleToCSS, typographyToCSS } from './blocks/blockStyle';
 
-interface Props { page: WebsitePage; blogPosts?: NewsPost[]; schedule?: UpcomingClassPreview[] }
+interface Props { page: WebsitePage; blogPosts?: NewsPost[]; schedule?: UpcomingClassPreview[]; seminars?: UpcomingSeminarPreview[] }
 
 function generateExcerpt(html: string, max = 140): string {
   const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -122,7 +123,12 @@ function groupByWeekday(classes: UpcomingClassPreview[]): { day: string; classes
     .filter(d => d.classes.length > 0);
 }
 
-function ScheduleBlockClient({ block, schedule }: { block: PageBlockSchedule; schedule: UpcomingClassPreview[] }) {
+function formatSeminarDate(dateStr: string): string {
+  try { return new Intl.DateTimeFormat('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${dateStr}T00:00:00`)); }
+  catch { return dateStr; }
+}
+
+function ScheduleBlockClient({ block, schedule, seminars }: { block: PageBlockSchedule; schedule: UpcomingClassPreview[]; seminars: UpcomingSeminarPreview[] }) {
   const title = safeStr(block.title);
   const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '48px' }), ...blockStyleToCSS(block.style) };
   const alignClass = block.style?.textAlign === 'left' ? 'text-left' : block.style?.textAlign === 'right' ? 'text-right' : 'text-center';
@@ -133,6 +139,7 @@ function ScheduleBlockClient({ block, schedule }: { block: PageBlockSchedule; sc
   delete typo.fontSize;
   Object.assign(titleStyle, typo);
   const days = groupByWeekday(schedule);
+  const showSeminars = block.showSeminars !== false;
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12" style={sectionStyle}>
@@ -167,11 +174,41 @@ function ScheduleBlockClient({ block, schedule }: { block: PageBlockSchedule; sc
           ))}
         </div>
       )}
+      {showSeminars && seminars.length > 0 && (
+        <div className="mt-10">
+          <h3 className={`text-sm font-black uppercase tracking-tight mb-4 ${alignClass} text-zinc-900 dark:text-zinc-100`}>
+            Kommande seminarier
+          </h3>
+          <div className="space-y-3">
+            {seminars.map(s => {
+              const row = (
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 px-5 py-4">
+                  <div>
+                    <p className="text-sm font-black text-zinc-900 dark:text-zinc-100">{s.name}</p>
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+                      {formatSeminarDate(s.date)} · {s.time}{s.endTime ? `–${s.endTime}` : ''}
+                      {block.showInstructor !== false && s.instructor ? ` · ${s.instructor}` : ''}
+                    </p>
+                  </div>
+                  {s.campaignSlug && (
+                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400 whitespace-nowrap">Läs mer →</span>
+                  )}
+                </div>
+              );
+              return s.campaignSlug ? (
+                <Link key={s.id} href={`/event/${s.campaignSlug}`} className="block">{row}</Link>
+              ) : (
+                <div key={s.id}>{row}</div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
 
-export default function PageRenderer({ page, blogPosts = [], schedule = [] }: Props) {
+export default function PageRenderer({ page, blogPosts = [], schedule = [], seminars = [] }: Props) {
   const lang = useLanguage();
 
   if (page.mode === 'html') {
@@ -182,12 +219,12 @@ export default function PageRenderer({ page, blogPosts = [], schedule = [] }: Pr
   const blocks = (lang === 'en' && page.blocksEn?.length) ? page.blocksEn : (page.blocks ?? []);
   return (
     <div>
-      {blocks.map(block => <BlockRenderer key={block.id} block={block} blogPosts={blogPosts} schedule={schedule} />)}
+      {blocks.map(block => <BlockRenderer key={block.id} block={block} blogPosts={blogPosts} schedule={schedule} seminars={seminars} />)}
     </div>
   );
 }
 
-export function BlockRenderer({ block, blogPosts = [], schedule = [] }: { block: PageBlock; blogPosts?: NewsPost[]; schedule?: UpcomingClassPreview[] }) {
+export function BlockRenderer({ block, blogPosts = [], schedule = [], seminars = [] }: { block: PageBlock; blogPosts?: NewsPost[]; schedule?: UpcomingClassPreview[]; seminars?: UpcomingSeminarPreview[] }) {
   switch (block.type) {
     case 'hero':     return <HeroBlock block={block} />;
     case 'text':     return <TextBlock block={block} />;
@@ -196,12 +233,12 @@ export function BlockRenderer({ block, blogPosts = [], schedule = [] }: { block:
     case 'button':   return <ButtonBlock block={block} />;
     case 'html':     return <HtmlBlock block={block} />;
     case 'video':    return <VideoBlock block={block} />;
-    case 'columns':  return <ColumnsBlock block={block} blogPosts={blogPosts} schedule={schedule} />;
+    case 'columns':  return <ColumnsBlock block={block} blogPosts={blogPosts} schedule={schedule} seminars={seminars} />;
     case 'spacer':   return <SpacerBlock block={block} />;
     case 'divider':  return <DividerBlock block={block} />;
     case 'cta':      return <CtaBlock block={block} />;
     case 'blog':     return <BlogBlockClient block={block} posts={blogPosts} />;
-    case 'schedule': return <ScheduleBlockClient block={block} schedule={schedule} />;
+    case 'schedule': return <ScheduleBlockClient block={block} schedule={schedule} seminars={seminars} />;
     case 'leadForm': return <LeadFormBlock block={block} />;
     case 'testimonial': return <TestimonialBlock block={block} />;
     case 'pricing': return <PricingBlock block={block} />;
