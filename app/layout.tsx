@@ -45,6 +45,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             preconnect as unused once that changed. */}
         {/* Prevent flash of wrong theme on load */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('flowroll_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();` }} />
+        {/* CookieConsent renders its banner by default on both server and first client
+            render (so first-time visitors see it in the very first paint instead of it
+            popping in after hydration — that late pop-in was getting picked as the page's
+            Largest Contentful Paint element, since it wasn't in the server HTML at all).
+            This synchronous script hides it before paint for visitors who already
+            consented, same pattern as the theme-flash script above. */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{if(localStorage.getItem('nkc_cookie_consent')){document.documentElement.classList.add('nkc-consent-given');}}catch(e){}})();` }} />
         {sportsClubSchema && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsClubSchema) }} />
         )}

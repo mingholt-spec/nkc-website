@@ -40,14 +40,19 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 }
 
 export default function CookieConsent() {
-  const [visible, setVisible] = useState(false);
+  // Defaults to true (shown) on both server and first client render — this is what
+  // the vast majority of visits are anyway (no consent stored yet), and keeping
+  // server/client in agreement avoids a late, hydration-triggered pop-in. See the
+  // synchronous html.nkc-consent-given script + CSS rule in app/layout.tsx and
+  // globals.css, which hides it before paint for visitors who already consented.
+  const [visible, setVisible] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [functional, setFunctional] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!getConsent()) setVisible(true);
+    if (getConsent()) setVisible(false);
 
     const openHandler = () => {
       const c = getConsent();
@@ -176,7 +181,7 @@ export default function CookieConsent() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] p-3 sm:p-4">
+    <div id="nkc-cookie-banner" className="fixed bottom-0 left-0 right-0 z-[9999] p-3 sm:p-4">
       <div className="mx-auto max-w-4xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 px-5 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1 min-w-0">

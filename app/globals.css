@@ -40,3 +40,11 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 0 24px rgba(229, 4, 1, 0.18);
   }
 }
+
+/* Hides the cookie banner before first paint for visitors who already consented —
+   set synchronously (before React hydrates) by the inline script in app/layout.tsx.
+   CookieConsent.tsx renders the banner by default otherwise, so first-time visitors
+   see it in the very first paint instead of it popping in after hydration. */
+html.nkc-consent-given #nkc-cookie-banner {
+  display: none;
+}
