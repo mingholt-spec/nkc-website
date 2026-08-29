@@ -49,19 +49,44 @@ export default function BlogPost({ post }: Props) {
       </header>
 
       {/* Cover image */}
-      {post.coverImage && (
-        <div className="relative aspect-video rounded-xl overflow-hidden mb-10 bg-zinc-100 dark:bg-zinc-800">
-          <Image
-            src={post.coverImage}
-            alt={post.title}
-            fill
-            priority
-            className="object-cover"
-            style={{ objectPosition: post.coverImagePosition ?? 'center' }}
-            sizes="(max-width: 768px) 100vw, 800px"
-          />
-        </div>
-      )}
+      {post.coverImage && (() => {
+        const coverHeights: Record<string, string> = { sm: '240px', md: '360px', lg: '480px' };
+        const isFull = post.coverImageHeight === 'full';
+
+        if (isFull) {
+          // Natural aspect ratio, uncropped — next/image requires known
+          // dimensions for this, so fall back to a plain <img> like the
+          // admin preview does.
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="w-full h-auto rounded-xl overflow-hidden mb-10"
+              style={{ objectPosition: post.coverImagePosition ?? 'center' }}
+              decoding="async"
+            />
+          );
+        }
+
+        const h = coverHeights[post.coverImageHeight || 'lg'] || coverHeights.lg;
+        return (
+          <div
+            className="relative w-full rounded-xl overflow-hidden mb-10 bg-zinc-100 dark:bg-zinc-800"
+            style={{ height: h }}
+          >
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              priority
+              className="object-cover"
+              style={{ objectPosition: post.coverImagePosition ?? 'center' }}
+              sizes="(max-width: 768px) 100vw, 800px"
+            />
+          </div>
+        );
+      })()}
 
       {/* Content */}
       <div
