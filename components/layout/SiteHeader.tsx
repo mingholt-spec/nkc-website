@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import NextImage from 'next/image';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import type { NavigationItem, WebsiteConfig, WebsitePage, ClubConfig, SocialLink } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
 import { app } from '@/lib/firebase-client';
@@ -217,8 +216,28 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
 
   useEffect(() => {
     if (!app) return;
-    const auth = getAuth(app);
-    return onAuthStateChanged(auth, (user) => setIsLoggedIn(!!user));
+    // Deferred + dynamically imported: firebase/auth's getAuth() kicks off a
+    // request for its __/auth/iframe.js persistence helper immediately, which
+    // showed up in PageSpeed as the single highest-latency link in the LCP
+    // chain (1.4s, 93 kB) — for a check that only toggles "Logga in" vs "Mitt
+    // konto" and isn't needed for the initial paint. Waiting for idle (with a
+    // setTimeout fallback for Safari, which has no requestIdleCallback) keeps
+    // both the JS and the network request off the critical rendering path.
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+    const run = async () => {
+      const { getAuth, onAuthStateChanged } = await import('firebase/auth');
+      if (cancelled || !app) return;
+      const auth = getAuth(app);
+      unsubscribe = onAuthStateChanged(auth, (user) => setIsLoggedIn(!!user));
+    };
+    const ric = typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback : (cb: () => void) => setTimeout(cb, 200);
+    const handle = ric(run);
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+      if (typeof window.cancelIdleCallback === 'function' && typeof handle === 'number') window.cancelIdleCallback(handle);
+    };
   }, []);
 
   const currentSlug = pathname === '/' ? '' : pathname.replace(/^\//, '').split('/')[0];

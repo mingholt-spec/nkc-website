@@ -39,8 +39,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="sv" className={raleway.variable} style={cssVars} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
-        <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
+        {/* No preconnect to firebasestorage.googleapis.com — images now route through
+            the same-origin /_fah/image proxy (see lib/imageLoader.ts), so the browser
+            never talks to that origin directly anymore. PageSpeed flagged the old
+            preconnect as unused once that changed. */}
         {/* Prevent flash of wrong theme on load */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('flowroll_theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();` }} />
         {sportsClubSchema && (
