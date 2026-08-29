@@ -5,7 +5,7 @@ import { slugifyCategory } from '@/lib/utils';
 import { buildBlogPostingSchema, buildBreadcrumbListSchema } from '@/lib/jsonLd';
 import BlogPost from '@/components/blog/BlogPost';
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 type Props = { params: Promise<{ category: string; slug: string }> };
 
