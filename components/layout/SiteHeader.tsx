@@ -219,10 +219,17 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
     // Deferred + dynamically imported: firebase/auth's getAuth() kicks off a
     // request for its __/auth/iframe.js persistence helper immediately, which
     // showed up in PageSpeed as the single highest-latency link in the LCP
-    // chain (1.4s, 93 kB) — for a check that only toggles "Logga in" vs "Mitt
-    // konto" and isn't needed for the initial paint. Waiting for idle (with a
-    // setTimeout fallback for Safari, which has no requestIdleCallback) keeps
-    // both the JS and the network request off the critical rendering path.
+    // chain (up to 1.4s) — for a check that only toggles "Logga in" vs "Mitt
+    // konto" and isn't needed for the initial paint.
+    //
+    // requestIdleCallback (tried first) fires as soon as the main thread is
+    // idle, which on this page is almost immediately — Total Blocking Time is
+    // ~0ms, so there's barely any JS work to wait out, and idle callback ran
+    // early enough to still compete with LCP-critical network requests for
+    // bandwidth. The `load` event is a much stronger signal here: it only
+    // fires once every initial resource (images, fonts, everything) has
+    // finished, which is inherently past the point where a new request could
+    // still slow down LCP.
     let unsubscribe: (() => void) | undefined;
     let cancelled = false;
     const run = async () => {
@@ -231,12 +238,15 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
       const auth = getAuth(app);
       unsubscribe = onAuthStateChanged(auth, (user) => setIsLoggedIn(!!user));
     };
-    const ric = typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback : (cb: () => void) => setTimeout(cb, 200);
-    const handle = ric(run);
+    if (document.readyState === 'complete') {
+      run();
+    } else {
+      window.addEventListener('load', run, { once: true });
+    }
     return () => {
       cancelled = true;
       unsubscribe?.();
-      if (typeof window.cancelIdleCallback === 'function' && typeof handle === 'number') window.cancelIdleCallback(handle);
+      window.removeEventListener('load', run);
     };
   }, []);
 
