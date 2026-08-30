@@ -1,6 +1,7 @@
 import type { PageBlockBadge } from '@/lib/types';
 import { spacingToStyle } from './blockSpacing';
 import { blockStyleToCSS, blockStyleToScopedCSS } from './blockStyle';
+import { backgroundStyleValue, textColorStyleValue } from './gradientStyle';
 
 interface Props { block: PageBlockBadge }
 
@@ -16,7 +17,7 @@ export default function BadgeBlock({ block }: Props) {
       <div className={`flex ${ALIGN_MAP[block.align || 'center']}`}>
         <span
           className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest"
-          style={{ backgroundColor: block.backgroundColor || '#dc2626', color: block.textColor || '#ffffff' }}
+          style={{ ...backgroundStyleValue(block.backgroundColor || '#dc2626'), ...textColorStyleValue(block.textColor || '#ffffff') }}
         >
           {block.text}
         </span>

@@ -6,6 +6,7 @@ import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
 import { blockStyleToCSS, blockStyleToScopedCSS, headlineStyleToCSS, typographyToCSS, type HeadlineStyle } from './blockStyle';
 import { useResponsiveOutline } from './useResponsiveOutline';
+import { backgroundStyleValue, textColorStyleValue } from './gradientStyle';
 
 interface Props { block: PageBlockHero }
 
@@ -30,19 +31,19 @@ export default function HeroBlock({ block }: Props) {
   const bgColor = safeStr(block.style?.backgroundColor, '#18181b');
 
   const sectionStyle = {
-    backgroundColor: bgColor,
+    ...backgroundStyleValue(bgColor),
     ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '64px' }),
     ...blockStyleToCSS(block.style),
   };
   const hasCustomPadding = hasSpacing(block.padding);
 
-  const titleStyle: HeadlineStyle = { color: titleColor, ...headlineStyleToCSS(block.style, 'title') };
+  const titleStyle: HeadlineStyle = { ...textColorStyleValue(titleColor), ...headlineStyleToCSS(block.style, 'title') };
   const typo = typographyToCSS(block.style);
   delete typo.textAlign; // hero uses textAlign prop for layout, not typography.textAlign
   delete typo.fontSize;  // hero uses its own titleFontSize map
   Object.assign(titleStyle, typo);
 
-  const subtitleStyle: HeadlineStyle = { color: subtitleColor, ...headlineStyleToCSS(block.style, 'subtitle') };
+  const subtitleStyle: HeadlineStyle = { ...textColorStyleValue(subtitleColor), ...headlineStyleToCSS(block.style, 'subtitle') };
 
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);

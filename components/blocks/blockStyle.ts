@@ -1,4 +1,5 @@
 import type { BlockStyleOptions, BlockStyleBase, HeadingSize } from '@/lib/types';
+import { backgroundStyleValue, textColorStyleValue } from './gradientStyle';
 
 // ── Border width mappning ──
 const BORDER_WIDTH: Record<string, string> = {
@@ -102,10 +103,8 @@ export function blockStyleToCSS(style?: BlockStyleOptions): React.CSSProperties 
         css.boxShadow = SHADOW[style.shadow] || 'none';
     }
 
-    // Background color
-    if (style.backgroundColor) {
-        css.backgroundColor = style.backgroundColor;
-    }
+    // Background color (eller -gradient — CSS `background` accepterar båda)
+    Object.assign(css, backgroundStyleValue(style.backgroundColor));
 
     return css;
 }
@@ -155,10 +154,8 @@ export function headlineStyleToCSS(style?: BlockStyleOptions, element?: 'title' 
     if (!style) return {};
     const css: HeadlineStyle = {};
 
-    // Headline color
-    if (style.headlineColor) {
-        css.color = style.headlineColor;
-    }
+    // Headline color (eller -gradient)
+    Object.assign(css, textColorStyleValue(style.headlineColor));
 
     // Text shadow (bas)
     const baseShadow = (style.textShadow && style.textShadow !== 'none')

@@ -4,12 +4,13 @@ import type { PageBlockCta } from '@/lib/types';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
 import { blockStyleToCSS, blockStyleToScopedCSS, headlineStyleToCSS, typographyToCSS, type HeadlineStyle } from './blockStyle';
 import { useResponsiveOutline } from './useResponsiveOutline';
+import { backgroundStyleValue } from './gradientStyle';
 
 interface Props { block: PageBlockCta }
 export default function CtaBlock({ block }: Props) {
   const hasCustomPadding = hasSpacing(block.padding);
   const sectionStyle = {
-    backgroundColor: block.backgroundColor ?? '#18181b',
+    ...backgroundStyleValue(block.backgroundColor ?? '#18181b'),
     backgroundImage: block.backgroundImage ? `url(${block.backgroundImage})` : undefined,
     backgroundSize: 'cover', backgroundPosition: 'center',
     ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '64px' }),
