@@ -1,5 +1,31 @@
 import type { BlockStyleOptions, BlockStyleBase, HeadingSize } from '@/lib/types';
-import { backgroundStyleValue, textColorStyleValue } from './gradientStyle';
+import { backgroundStyleValue, textColorStyleValue, isGradientValue } from './gradientStyle';
+
+/** Enkel ljushetsberäkning (0–255) för en #hex-färg — bara för att välja en
+ *  kontrasterande fast bakgrund, inte för exakt WCAG-kontroll. */
+function isDarkHex(hex: string): boolean {
+    const clean = hex.replace('#', '');
+    if (clean.length !== 3 && clean.length !== 6) return false;
+    const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+    const r = parseInt(full.slice(0, 2), 16), g = parseInt(full.slice(2, 4), 16), b = parseInt(full.slice(4, 6), 16);
+    if ([r, g, b].some(Number.isNaN)) return false;
+    return (r * 299 + g * 587 + b * 114) / 1000 < 128;
+}
+
+/**
+ * En blocks bakgrund ärver normalt sajtens REAKTIVA ljust/mörkt-bakgrund (inget
+ * eget värde satt). Text får däremot ofta en FAST färg (block.textColor,
+ * style.headlineColor, ...) som inte reagerar på temat. Kombinationen "fast text,
+ * reaktiv bakgrund" kan göra texten osynlig när temat växlar (t.ex. mörk text
+ * på en bakgrund som blir mörk). Anropa detta med det SLUTGILTIGA upplösta
+ * textfärgvärdet (efter alla fallbacks) för att pinna en matchande fast
+ * bakgrund i det fallet — ingen effekt om blocket redan har en egen bakgrund.
+ */
+export function pinBackgroundForFixedText(hasOwnBackground: boolean, resolvedTextColor: string | undefined): React.CSSProperties {
+    if (hasOwnBackground || !resolvedTextColor) return {};
+    const dark = isGradientValue(resolvedTextColor) ? false : isDarkHex(resolvedTextColor);
+    return { backgroundColor: dark ? '#ffffff' : '#18181b' };
+}
 
 // ── Border width mappning ──
 const BORDER_WIDTH: Record<string, string> = {
@@ -104,7 +130,11 @@ export function blockStyleToCSS(style?: BlockStyleOptions): React.CSSProperties 
     }
 
     // Background color (eller -gradient — CSS `background` accepterar båda)
-    Object.assign(css, backgroundStyleValue(style.backgroundColor));
+    if (style.backgroundColor) {
+        Object.assign(css, backgroundStyleValue(style.backgroundColor));
+    } else {
+        Object.assign(css, pinBackgroundForFixedText(false, style.headlineColor));
+    }
 
     return css;
 }

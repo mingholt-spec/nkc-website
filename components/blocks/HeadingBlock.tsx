@@ -1,7 +1,7 @@
 import type { PageBlockHeading } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
 import { spacingToStyle, hasSpacing } from './blockSpacing';
-import { blockStyleToCSS, blockStyleToScopedCSS, headlineStyleToCSS, typographyToCSS } from './blockStyle';
+import { blockStyleToCSS, blockStyleToScopedCSS, headlineStyleToCSS, typographyToCSS, pinBackgroundForFixedText } from './blockStyle';
 
 interface Props { block: PageBlockHeading }
 const sizeMap: Record<string, string> = { xs: 'text-lg', sm: 'text-xl', base: 'text-2xl', lg: 'text-3xl', xl: 'text-4xl', '2xl': 'text-5xl', '3xl': 'text-6xl', '4xl': 'text-7xl' };
@@ -15,13 +15,6 @@ export default function HeadingBlock({ block }: Props) {
   const color = safeStr(block.textColor);
   const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
-  const sectionStyle = {
-    ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '16px' }),
-    ...blockStyleToCSS(block.style),
-    textAlign: align,
-  };
-  const hasCustomPadding = hasSpacing(block.padding);
-
   const { _mobileTextShadow: _mt, ...headingStyle } = headlineStyleToCSS(block.style);
   void _mt;
   if (color && !headingStyle.color) headingStyle.color = color;
@@ -29,6 +22,19 @@ export default function HeadingBlock({ block }: Props) {
   delete typo.textAlign; // handled by sectionStyle
   delete typo.fontSize;  // handled by sizeClass
   Object.assign(headingStyle, typo);
+
+  const sectionStyle: React.CSSProperties = {
+    ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '16px' }),
+    ...blockStyleToCSS(block.style),
+    textAlign: align,
+  };
+  // block.textColor (eget fält, till skillnad från style.headlineColor) känner
+  // blockStyleToCSS inte till — pinna en matchande fast bakgrund här också om
+  // den slutgiltiga textfärgen är fast och blocket saknar egen bakgrund.
+  if (!sectionStyle.backgroundColor && !sectionStyle.background) {
+    Object.assign(sectionStyle, pinBackgroundForFixedText(false, headingStyle.color as string | undefined));
+  }
+  const hasCustomPadding = hasSpacing(block.padding);
   const scopedCss = blockStyleToScopedCSS(block.id, block.style);
 
   return (
