@@ -90,7 +90,7 @@ export function blockStyleToCSS(style?: BlockStyleOptions): React.CSSProperties 
     if (bw && bw !== '0') {
         css.borderWidth = BORDER_WIDTH[bw] || '0px';
         css.borderStyle = 'solid';
-        css.borderColor = style.borderColor || '#e4e4e7';
+        css.borderColor = style.borderColor || 'var(--block-border-color, #e4e4e7)';
     }
 
     // Border radius

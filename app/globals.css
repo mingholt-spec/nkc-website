@@ -24,6 +24,15 @@ body {
 .dark .site-bg   { background-color: var(--site-bg-dark,  #18181b); }
 .dark .site-text { color:            var(--site-text-dark, #fafafa); }
 
+/* Default block border color — blockStyleToCSS() falls back to this var() when a
+   block has borders enabled but no explicit borderColor. Unlike --site-bg above,
+   this variable is reassigned directly under .dark (not a second class rule), so
+   any inline `style={{ borderColor: 'var(--block-border-color)' }}` anywhere in
+   the DOM reacts automatically via normal CSS inheritance — no site-border class
+   needed on the element. */
+:root { --block-border-color: #e4e4e7; }
+.dark { --block-border-color: #3f3f46; }
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-raleway, var(--font-outfit)), system-ui, sans-serif;
 }
