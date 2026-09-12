@@ -39,12 +39,20 @@ function generateExcerpt(html: string, max = 140): string {
   return text.slice(0, max).replace(/\s\S*$/, '') + '…';
 }
 
-function formatDate(dateStr: string): string {
-  try { return new Date(dateStr).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' }); }
+function formatDate(dateStr: string, locale: string): string {
+  try { return new Date(dateStr).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' }); }
   catch { return dateStr; }
 }
 
+const BLOG_BLOCK_T = {
+  sv: { empty: 'Inga inlägg publicerade' },
+  en: { empty: 'No posts published' },
+};
+
 function BlogBlockClient({ block, posts }: { block: PageBlockBlog; posts: NewsPost[] }) {
+  const lang = useLanguage();
+  const t = BLOG_BLOCK_T[lang];
+  const locale = lang === 'en' ? 'en-GB' : 'sv-SE';
   const title = safeStr(block.title);
   const postsToShow = block.postsToShow ?? 3;
   const shown = posts.slice(0, postsToShow);
@@ -67,19 +75,21 @@ function BlogBlockClient({ block, posts }: { block: PageBlockBlog; posts: NewsPo
         </h2>
       )}
       {shown.length === 0 ? (
-        <p className="text-sm text-zinc-600 dark:text-zinc-300 text-center py-8">Inga inlägg publicerade</p>
+        <p className="text-sm text-zinc-600 dark:text-zinc-300 text-center py-8">{t.empty}</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {shown.map(post => {
             const href = post.category
               ? `/blogg/${post.category}/${post.slug || post.id}`
               : `/blogg/${post.slug || post.id}`;
+            const postTitle = (lang === 'en' && post.titleEn) ? post.titleEn : post.title;
+            const postExcerpt = (lang === 'en' && post.excerptEn) ? post.excerptEn : (post.excerpt || generateExcerpt(post.content));
             return (
               <a key={post.id} href={href}
                 className="group block bg-white dark:bg-zinc-800 rounded-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden hover:shadow-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
                 {post.coverImage && (
                   <div className="aspect-video overflow-hidden relative">
-                    <Image src={post.coverImage} alt={post.title} fill loading="lazy"
+                    <Image src={post.coverImage} alt={postTitle} fill loading="lazy"
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       style={post.coverImagePosition ? { objectPosition: post.coverImagePosition } : undefined} />
@@ -87,13 +97,13 @@ function BlogBlockClient({ block, posts }: { block: PageBlockBlog; posts: NewsPo
                 )}
                 <div className="p-5">
                   <p className="text-[10px] font-bold text-zinc-600 dark:text-zinc-300 uppercase tracking-widest mb-2">
-                    {formatDate(post.createdAt)}
+                    {formatDate(post.createdAt, locale)}
                   </p>
                   <h3 className="text-sm font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100 mb-2 group-hover:opacity-70 transition-opacity line-clamp-2">
-                    {post.title}
+                    {postTitle}
                   </h3>
                   <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed line-clamp-3">
-                    {post.excerpt || generateExcerpt(post.content)}
+                    {postExcerpt}
                   </p>
                 </div>
               </a>
