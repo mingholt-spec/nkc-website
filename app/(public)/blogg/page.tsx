@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getBlogPosts, getWebsiteConfig } from '@/lib/data';
 import BlogList from '@/components/blog/BlogList';
+import ClientTitleOverride from '@/components/ClientTitleOverride';
 
 export const revalidate = 60;
 
@@ -16,5 +17,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BlogListPage() {
   const posts = await getBlogPosts(50);
-  return <BlogList posts={posts} />;
+  return (
+    <>
+      <ClientTitleOverride enTitle="Blog" />
+      <BlogList posts={posts} />
+    </>
+  );
 }

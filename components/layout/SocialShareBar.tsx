@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import type { WebsiteConfig } from '@/lib/types';
+import { useLanguage } from '@/lib/language-context';
 import { useT } from '@/lib/translations';
 
 const SOCIAL_ICONS: Record<string, { viewBox: string; path: string }> = {
@@ -33,9 +34,12 @@ const SHARE_TARGETS = [
 interface Props {
   config: WebsiteConfig | null;
   title: string;
+  titleEn?: string;
 }
 
-export default function SocialShareBar({ config, title }: Props) {
+export default function SocialShareBar({ config, title: titleSv, titleEn }: Props) {
+  const lang = useLanguage();
+  const title = (lang === 'en' && titleEn) || titleSv;
   const header = useT('siteHeader');
   const shareT = useT('shareButtons');
   const [copied, setCopied] = useState(false);

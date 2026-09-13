@@ -4,6 +4,7 @@ import { getBlogPostBySlug, getBlogPosts, getClubConfig } from '@/lib/data';
 import { slugifyCategory } from '@/lib/utils';
 import { buildBlogPostingSchema, buildBreadcrumbListSchema } from '@/lib/jsonLd';
 import BlogPost from '@/components/blog/BlogPost';
+import ClientTitleOverride from '@/components/ClientTitleOverride';
 
 export const revalidate = 60;
 
@@ -65,6 +66,7 @@ export default async function BlogPostPage({ params }: Props) {
       {breadcrumbSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       )}
+      <ClientTitleOverride enTitle={post.titleEn} />
       <BlogPost post={post} />
     </>
   );

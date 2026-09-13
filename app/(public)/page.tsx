@@ -5,6 +5,7 @@ import { buildFAQPageSchema } from '@/lib/jsonLd';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
 import EmptyHomeState from '@/components/EmptyHomeState';
+import ClientTitleOverride from '@/components/ClientTitleOverride';
 
 // ISR: re-render within 60 s of a content change. NOTE (found 2026-08-29): runtime
 // ISR revalidation appears unreliable on Firebase App Hosting for this Next.js
@@ -45,14 +46,17 @@ export default async function HomePage() {
     return <EmptyHomeState />;
   }
   const faqSchema = buildFAQPageSchema(page.blocks);
+  const shareTitle = page.metaTitle ?? page.title;
+  const shareTitleEn = page.metaTitleEn || page.titleEn;
 
   return (
     <>
       {faqSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       )}
+      <ClientTitleOverride enTitle={shareTitleEn} />
       <PageRenderer page={page} blogPosts={blogPosts} schedule={schedule} seminars={seminars} />
-      <SocialShareBar config={config} title={page.metaTitle ?? page.title} />
+      <SocialShareBar config={config} title={shareTitle} titleEn={shareTitleEn} />
     </>
   );
 }

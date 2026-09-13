@@ -4,6 +4,7 @@ import { getPageBySlug, getPageBySlugPreview, getWebsitePages, getWebsiteConfig,
 import { buildFAQPageSchema, buildBreadcrumbListSchema } from '@/lib/jsonLd';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
+import ClientTitleOverride from '@/components/ClientTitleOverride';
 
 export const revalidate = 300; // Matchar event-sidornas cache-tid (300s) — 3600s gjorde att nypublicerat innehåll på vanliga sidor kunde dröja upp till en timme, medan events uppdaterades inom 5 min
 
@@ -66,6 +67,8 @@ export default async function PublicPage({ params, searchParams }: Props) {
     { name: 'Hem', url: 'https://www.nkc.nu/' },
     { name: page.title, url: `https://www.nkc.nu/${slug}` },
   ]);
+  const shareTitle = page.metaTitle ?? page.title;
+  const shareTitleEn = page.titleEn || page.metaTitleEn;
 
   return (
     <>
@@ -75,8 +78,9 @@ export default async function PublicPage({ params, searchParams }: Props) {
       {breadcrumbSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       )}
+      <ClientTitleOverride enTitle={shareTitleEn} />
       <PageRenderer page={page} blogPosts={blogPosts} schedule={schedule} seminars={seminars} />
-      <SocialShareBar config={config} title={page.metaTitle ?? page.title} />
+      <SocialShareBar config={config} title={shareTitle} titleEn={shareTitleEn} />
     </>
   );
 }

@@ -1,5 +1,7 @@
 import { db } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { getServerLanguage } from '@/lib/server-language';
+import { getT } from '@/lib/translations';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,18 +10,19 @@ interface Props {
 }
 
 export default async function BekraftaPlatsPage({ searchParams }: Props) {
-  const { token } = await searchParams;
+  const [{ token }, lang] = await Promise.all([searchParams, getServerLanguage()]);
+  const t = getT('bekrafta', lang);
 
   let title = '';
   let message = '';
   let success = false;
 
   if (!token) {
-    title = 'Ogiltig länk';
-    message = 'Token saknas i länken.';
+    title = t.invalidLinkTitle;
+    message = t.invalidLinkMessage;
   } else if (!db) {
-    title = 'Serverfel';
-    message = 'Något gick fel. Försök igen om en stund.';
+    title = t.serverErrorTitle;
+    message = t.serverErrorMessage;
   } else {
     try {
       const snap = await db.collection('leads')
@@ -28,17 +31,17 @@ export default async function BekraftaPlatsPage({ searchParams }: Props) {
         .get();
 
       if (snap.empty) {
-        title = 'Länken är inte längre giltig';
-        message = 'Platsen har redan bekräftats eller länken har gått ut. Kontakta oss om du har frågor.';
+        title = t.linkExpiredTitle;
+        message = t.linkExpiredMessage;
       } else {
         const leadDoc = snap.docs[0];
         const lead = leadDoc.data();
         const firstName: string = lead.firstName || '';
-        const campaignName: string = lead.campaignName || 'eventet';
+        const campaignName: string = lead.campaignName || t.eventFallback;
 
         if (lead.status !== 'waitlisted') {
-          title = 'Platsen är redan bekräftad';
-          message = `${firstName ? `Hej ${firstName}! ` : ''}Du är redan bokad på ${campaignName}. Vi ses där!`;
+          title = t.alreadyBookedTitle;
+          message = t.alreadyBookedMessage(firstName, campaignName);
           success = true;
         } else {
           // Read Resend config for from/replyTo
@@ -57,10 +60,10 @@ export default async function BekraftaPlatsPage({ searchParams }: Props) {
 
           const name = firstName || (lead.email as string) || '';
           const confirmHtml = `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#18181b;padding:32px 24px">
-  <h2 style="font-size:24px;font-weight:900;margin:0 0 20px;letter-spacing:-0.5px">Din plats är bekräftad!</h2>
-  <p style="margin:0 0 12px;font-size:16px">Hej ${name},</p>
-  <p style="margin:0 0 16px;font-size:16px;line-height:1.6">Din plats på <strong>${campaignName}</strong> är nu bekräftad. Vi ser fram emot att träffa dig!</p>
-  <p style="margin:32px 0 0;color:#71717a;font-size:12px;line-height:1.5">Har du frågor? Svara på detta mejl så hjälper vi dig.</p>
+  <h2 style="font-size:24px;font-weight:900;margin:0 0 20px;letter-spacing:-0.5px">${t.emailHeading}</h2>
+  <p style="margin:0 0 12px;font-size:16px">${t.emailGreeting(name)}</p>
+  <p style="margin:0 0 16px;font-size:16px;line-height:1.6">${t.emailBody(campaignName)}</p>
+  <p style="margin:32px 0 0;color:#71717a;font-size:12px;line-height:1.5">${t.emailFooter}</p>
 </div>`;
 
           const batch = db.batch();
@@ -78,7 +81,7 @@ export default async function BekraftaPlatsPage({ searchParams }: Props) {
           const mailRef = db.collection('mail_queue').doc();
           batch.set(mailRef, {
             to: [lead.email as string],
-            message: { subject: `Din plats är bekräftad — ${campaignName}`, html: confirmHtml },
+            message: { subject: t.emailSubject(campaignName), html: confirmHtml },
             ...(fromStr ? { from: fromStr } : {}),
             ...(replyTo ? { replyTo } : {}),
             source: 'waitlist_confirmed',
@@ -86,14 +89,14 @@ export default async function BekraftaPlatsPage({ searchParams }: Props) {
           });
           await batch.commit();
 
-          title = 'Platsen är bekräftad!';
-          message = `${firstName ? `Hej ${firstName}! ` : ''}Du är nu bokad på ${campaignName}. Vi ses där!`;
+          title = t.confirmedTitle;
+          message = t.confirmedMessage(firstName, campaignName);
           success = true;
         }
       }
     } catch {
-      title = 'Serverfel';
-      message = 'Något gick fel. Försök igen om en stund.';
+      title = t.serverErrorTitle;
+      message = t.serverErrorMessage;
     }
   }
 

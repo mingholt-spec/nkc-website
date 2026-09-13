@@ -4,7 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import SiteHeader from './SiteHeader';
 import SiteFooter from './SiteFooter';
 import type { ClubConfig, WebsiteConfig, WebsitePage } from '@/lib/types';
-import { LanguageContext, LANGUAGE_CHANGED_EVENT } from '@/lib/language-context';
+import { LanguageContext, LANGUAGE_CHANGED_EVENT, type Lang } from '@/lib/language-context';
+
+// Mirrors the language choice into a cookie (in addition to localStorage) so
+// server-rendered code without any other language signal — metadata, JSON-LD,
+// /bekrafta — can read it via getServerLanguage(). 1 year, matches the
+// effectively-permanent nature of the localStorage preference it mirrors.
+function writeLanguageCookie(lang: Lang) {
+  try { document.cookie = `flowroll_lang=${lang}; path=/; max-age=31536000; samesite=lax`; } catch {}
+}
 
 interface Props {
   club: ClubConfig;
@@ -21,7 +29,7 @@ export default function PublicLayoutClient({ club, config, pages, children }: Pr
   useEffect(() => {
     try {
       const saved = localStorage.getItem('flowroll_lang');
-      if (saved === 'en' || saved === 'sv') setLanguage(saved);
+      if (saved === 'en' || saved === 'sv') { setLanguage(saved); writeLanguageCookie(saved); }
     } catch {}
 
     try {
@@ -47,6 +55,14 @@ export default function PublicLayoutClient({ club, config, pages, children }: Pr
     }
   }, [isDark]);
 
+  // Keeps the <html lang> attribute correct for screen readers/browser
+  // features without needing a server-side cookie read (which would force
+  // every page out of static rendering — see ClientTitleOverride for the
+  // same trade-off applied to <title>).
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const toggleDark = useCallback(() => {
     if (darkMode !== 'user') return;
     setIsDark(prev => {
@@ -60,6 +76,7 @@ export default function PublicLayoutClient({ club, config, pages, children }: Pr
     setLanguage(prev => {
       const next = prev === 'sv' ? 'en' : 'sv';
       try { localStorage.setItem('flowroll_lang', next); } catch {}
+      writeLanguageCookie(next);
       window.dispatchEvent(new CustomEvent(LANGUAGE_CHANGED_EVENT, { detail: next }));
       return next;
     });

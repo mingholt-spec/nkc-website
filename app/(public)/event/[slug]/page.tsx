@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { getCampaignBySlug, getClubConfig } from '@/lib/data';
 import { buildEventSchema, buildFAQPageSchema, buildBreadcrumbListSchema } from '@/lib/jsonLd';
 import EventPage from '@/components/events/EventPage';
+import ClientTitleOverride from '@/components/ClientTitleOverride';
 
 export const revalidate = 300; // Events uppdateras ofta (anmälningar)
 
@@ -45,6 +46,7 @@ export default async function CampaignPage({ params }: Props) {
     { name: 'Hem', url: 'https://www.nkc.nu/' },
     { name: campaign.pageConfig.title, url: canonicalUrl },
   ]);
+  const titleEn = campaign.pageConfig_titleEn;
 
   return (
     <>
@@ -57,6 +59,7 @@ export default async function CampaignPage({ params }: Props) {
       {breadcrumbSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       )}
+      <ClientTitleOverride enTitle={titleEn} />
       <EventPage campaign={campaign} />
     </>
   );
