@@ -6,11 +6,15 @@ import { getT } from '@/lib/translations';
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; lang?: string }>;
 }
 
 export default async function BekraftaPlatsPage({ searchParams }: Props) {
-  const [{ token }, lang] = await Promise.all([searchParams, getServerLanguage()]);
+  const [{ token, lang: langParam }, cookieLang] = await Promise.all([searchParams, getServerLanguage()]);
+  // The confirmation email link encodes ?lang= explicitly (sendWaitlistNotification in
+  // bjj-premium/api/campaigns.ts) — that survives being opened on a different device/browser
+  // than the one used to sign up, unlike the flowroll_lang cookie, so it takes priority.
+  const lang = langParam === 'en' ? 'en' : cookieLang;
   const t = getT('bekrafta', lang);
 
   let title = '';

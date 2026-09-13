@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json() as Record<string, string>;
     const { campaignId, campaignName } = body;
     const email = (body.email ?? '').trim().toLowerCase();
+    const lang = body.lang === 'en' ? 'en' : 'sv';
 
     if (!campaignId || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
       gdprConsentDate: now,
       status: 'waitlisted',
       source: 'nkc-website',
+      lang,
     });
 
     return NextResponse.json({ success: true });

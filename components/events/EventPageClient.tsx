@@ -318,6 +318,7 @@ export default function EventPageClient({ campaign }: Props) {
       const body: Record<string, string> = {
         campaignId: campaign.id,
         campaignName: pageConfig.title,
+        lang,
       };
       for (const [key, value] of Object.entries(data)) {
         if (typeof value === 'string') body[key] = value;
