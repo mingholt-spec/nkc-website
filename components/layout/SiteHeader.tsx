@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import type { NavigationItem, WebsiteConfig, WebsitePage, ClubConfig, SocialLink } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
 import { app } from '@/lib/firebase-client';
+import { useT } from '@/lib/translations';
 
 // Lazy-load LoginModal + Firebase Auth — only fetched when user clicks "Logga in"
 const LoginModal = dynamic(() => import('./LoginModal'), { ssr: false });
@@ -29,11 +30,6 @@ const BRAND_COLORS: Record<string, { bg: string; fg: string }> = {
   x: { bg: '#000000', fg: '#ffffff' },
   linkedin: { bg: '#0A66C2', fg: '#ffffff' },
   whatsapp: { bg: '#25D366', fg: '#ffffff' },
-};
-
-const T = {
-  sv: { lightMode: 'Ljust läge', darkMode: 'Mörkt läge', myAccount: 'Mitt konto', login: 'Logga in', becomeMember: 'Bli Medlem', follow: 'Följ oss' },
-  en: { lightMode: 'Light mode', darkMode: 'Dark mode', myAccount: 'My Account', login: 'Login', becomeMember: 'Become a Member', follow: 'Follow us' },
 };
 
 function SocialIcons({ links, textColor, colorMode }: { links: SocialLink[]; textColor: string; colorMode?: boolean }) {
@@ -251,7 +247,8 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
   }, []);
 
   const currentSlug = pathname === '/' ? '' : pathname.replace(/^\//, '').split('/')[0];
-  const t = T[language];
+  const t = useT('siteHeader');
+  const c = useT('common');
 
   const header = config?.headerConfig;
   const nav = Array.isArray(config?.navigation) ? config!.navigation : [];
@@ -293,7 +290,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
     <header className={`w-full z-50 site-bg ${header?.sticky !== false ? 'sticky top-0' : ''}`}>
       <div className="mx-auto flex items-center justify-between px-6 py-4" style={{ maxWidth }}>
         {/* Logo + club name */}
-        <a href="/" className="flex items-center gap-3" aria-label={clubName || 'Startsida'}>
+        <a href="/" className="flex items-center gap-3" aria-label={clubName || c.homeAriaLabel}>
           {logoUrl && (
             <NextImage src={logoUrl} alt={clubName} width={160} height={40} className="h-10 w-auto object-contain" priority />
           )}
@@ -384,7 +381,7 @@ export default function SiteHeader({ club, config, pages, isDark, onToggleDark, 
         {/* Mobile: dark toggle + hamburger */}
         <div className="flex items-center gap-2 md:hidden">
           {onToggleDark && <DarkToggle ariaLabel={isDark ? t.lightMode : t.darkMode} />}
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2.5" aria-label={mobileOpen ? 'Stäng meny' : 'Öppna meny'} aria-expanded={mobileOpen} style={{ color: txtColor }}>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2.5" aria-label={mobileOpen ? c.closeMenu : c.openMenu} aria-expanded={mobileOpen} style={{ color: txtColor }}>
             {mobileOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             ) : (

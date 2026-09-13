@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useT } from '@/lib/translations';
 
 const SHARE_TARGETS = [
   {
@@ -37,6 +38,7 @@ interface Props {
 }
 
 export default function ShareButtons({ title, primaryColor = '#e50401', backHref, backLabel }: Props) {
+  const t = useT('shareButtons');
   const [copied, setCopied] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
@@ -75,18 +77,18 @@ export default function ShareButtons({ title, primaryColor = '#e50401', backHref
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            {backLabel ?? 'Tillbaka'}
+            {backLabel ?? t.back}
           </Link>
         )}
         <div className="flex items-center gap-3">
           <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: `${txtColor}60` }}>
-            Dela
+            {t.share}
           </span>
           {SHARE_TARGETS.map(btn => (
             <button
               key={btn.label}
               onClick={() => share(btn.getUrl)}
-              aria-label={`Dela på ${btn.label}`}
+              aria-label={t.shareOn(btn.label)}
               className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
               style={{ backgroundColor: btnBg, color: txtColor }}
             >
@@ -95,7 +97,7 @@ export default function ShareButtons({ title, primaryColor = '#e50401', backHref
           ))}
           <button
             onClick={handleCopy}
-            aria-label="Kopiera länk"
+            aria-label={t.copyLink}
             className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
             style={{
               backgroundColor: copied ? `${primaryColor}20` : btnBg,

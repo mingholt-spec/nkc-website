@@ -4,6 +4,7 @@ import { getHomepage, getClubConfig, getWebsiteConfig, getBlogPosts, getSchedule
 import { buildFAQPageSchema } from '@/lib/jsonLd';
 import PageRenderer from '@/components/PageRenderer';
 import SocialShareBar from '@/components/layout/SocialShareBar';
+import EmptyHomeState from '@/components/EmptyHomeState';
 
 // ISR: re-render within 60 s of a content change. NOTE (found 2026-08-29): runtime
 // ISR revalidation appears unreliable on Firebase App Hosting for this Next.js
@@ -41,12 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const [page, config, blogPosts, schedule, seminars] = await Promise.all([getHomepage(), getWebsiteConfig(), getBlogPosts(10), getSchedule(), getSeminars()]);
   if (!page) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-        <h1 className="text-3xl font-bold text-zinc-800">Välkommen</h1>
-        <p className="mt-3 text-zinc-500">Webbplatsen är under uppbyggnad.</p>
-      </div>
-    );
+    return <EmptyHomeState />;
   }
   const faqSchema = buildFAQPageSchema(page.blocks);
 

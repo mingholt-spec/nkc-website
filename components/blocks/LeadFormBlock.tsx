@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import type { PageBlockLeadForm } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
+import { useT } from '@/lib/translations';
 
 interface Props {
   block: PageBlockLeadForm;
@@ -10,39 +11,12 @@ interface Props {
   campaignName?: string;
 }
 
-const T = {
-  sv: {
-    required: 'Detta fält är obligatoriskt',
-    invalidEmail: 'Ogiltig e-postadress',
-    rateLimited: 'Vänta en stund innan du skickar igen.',
-    somethingWentWrong: 'Något gick fel. Försök igen.',
-    sending: 'Skickar...',
-    submit: 'Skicka',
-    successDefault: 'Tack! Vi hör av oss.',
-    gdprText: 'Jag godkänner att mina personuppgifter lagras och behandlas i enlighet med GDPR.',
-    guardianInfo: 'Målsmans uppgifter',
-    guardianName: 'Namn', guardianEmail: 'E-post', guardianPhone: 'Telefon',
-  },
-  en: {
-    required: 'This field is required',
-    invalidEmail: 'Invalid email address',
-    rateLimited: 'Please wait a moment before sending again.',
-    somethingWentWrong: 'Something went wrong. Please try again.',
-    sending: 'Sending...',
-    submit: 'Send',
-    successDefault: "Thanks! We'll be in touch.",
-    gdprText: 'I agree that my personal data is stored and processed in accordance with GDPR.',
-    guardianInfo: "Guardian's details",
-    guardianName: 'Name', guardianEmail: 'Email', guardianPhone: 'Phone',
-  },
-};
-
 const inputClasses = 'w-full rounded-xl border px-4 py-3 text-sm outline-none transition-colors border-zinc-200 dark:border-white/15 bg-white dark:bg-white/5 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-white/40 focus:border-zinc-400 dark:focus:border-white/30';
 const inputErrorClasses = 'w-full rounded-xl border px-4 py-3 text-sm outline-none transition-colors border-red-400 bg-red-50 dark:bg-red-900/20 dark:border-red-500/50 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-white/40';
 
 export default function LeadFormBlock({ block, campaignId, campaignName }: Props) {
   const lang = useLanguage();
-  const t = T[lang];
+  const t = useT('leadForm');
 
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -115,7 +89,7 @@ export default function LeadFormBlock({ block, campaignId, campaignName }: Props
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{block.successMessage || t.successDefault}</p>
+          <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{(lang === 'sv' && block.successMessage) || t.successDefault}</p>
         </div>
       </section>
     );
@@ -185,7 +159,7 @@ export default function LeadFormBlock({ block, campaignId, campaignName }: Props
           disabled={submitting || !gdprAccepted}
           className="w-full sm:w-auto px-8 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg disabled:opacity-50"
         >
-          {submitting ? t.sending : (block.submitLabel || t.submit)}
+          {submitting ? t.sending : ((lang === 'sv' && block.submitLabel) || t.submit)}
         </button>
       </form>
     </section>

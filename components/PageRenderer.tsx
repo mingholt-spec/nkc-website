@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { WebsitePage, PageBlock, NewsPost, PageBlockBlog, PageBlockSchedule, UpcomingClassPreview, UpcomingSeminarPreview } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
+import { useT } from '@/lib/translations';
 import HeroBlock from './blocks/HeroBlock';
 import TextBlock from './blocks/TextBlock';
 import HeadingBlock from './blocks/HeadingBlock';
@@ -44,14 +45,9 @@ function formatDate(dateStr: string, locale: string): string {
   catch { return dateStr; }
 }
 
-const BLOG_BLOCK_T = {
-  sv: { empty: 'Inga inlägg publicerade' },
-  en: { empty: 'No posts published' },
-};
-
 function BlogBlockClient({ block, posts }: { block: PageBlockBlog; posts: NewsPost[] }) {
   const lang = useLanguage();
-  const t = BLOG_BLOCK_T[lang];
+  const t = useT('blogBlock');
   const locale = lang === 'en' ? 'en-GB' : 'sv-SE';
   const title = safeStr(block.title);
   const postsToShow = block.postsToShow ?? 3;
@@ -117,28 +113,30 @@ function BlogBlockClient({ block, posts }: { block: PageBlockBlog; posts: NewsPo
 
 // Måndag-först (inte JS Date.getDay()'s söndag-först) — speglar
 // bjj-premium/components/public/blocks/ScheduleBlock.tsx.
-const DAY_LABELS = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag'];
 function dayIndexMondayFirst(dateStr: string): number {
   const jsDay = new Date(`${dateStr}T00:00:00`).getDay();
   return (jsDay + 6) % 7;
 }
-function groupByWeekday(classes: UpcomingClassPreview[]): { day: string; classes: UpcomingClassPreview[] }[] {
+function groupByWeekday(classes: UpcomingClassPreview[], dayLabels: readonly string[]): { day: string; classes: UpcomingClassPreview[] }[] {
   const buckets: UpcomingClassPreview[][] = Array.from({ length: 7 }, () => []);
   for (const c of classes) {
     if (!c.date) continue;
     buckets[dayIndexMondayFirst(c.date)].push(c);
   }
-  return DAY_LABELS
+  return dayLabels
     .map((day, i) => ({ day, classes: buckets[i] }))
     .filter(d => d.classes.length > 0);
 }
 
-function formatSeminarDate(dateStr: string): string {
-  try { return new Intl.DateTimeFormat('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${dateStr}T00:00:00`)); }
+function formatSeminarDate(dateStr: string, locale: string): string {
+  try { return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${dateStr}T00:00:00`)); }
   catch { return dateStr; }
 }
 
 function ScheduleBlockClient({ block, schedule, seminars }: { block: PageBlockSchedule; schedule: UpcomingClassPreview[]; seminars: UpcomingSeminarPreview[] }) {
+  const lang = useLanguage();
+  const t = useT('scheduleBlock');
+  const locale = lang === 'en' ? 'en-GB' : 'sv-SE';
   const title = safeStr(block.title);
   const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '48px' }), ...blockStyleToCSS(block.style) };
   const alignClass = block.style?.textAlign === 'left' ? 'text-left' : block.style?.textAlign === 'right' ? 'text-right' : 'text-center';
@@ -148,7 +146,7 @@ function ScheduleBlockClient({ block, schedule, seminars }: { block: PageBlockSc
   delete typo.textAlign;
   delete typo.fontSize;
   Object.assign(titleStyle, typo);
-  const days = groupByWeekday(schedule);
+  const days = groupByWeekday(schedule, t.dayLabels);
   const showSeminars = block.showSeminars !== false;
 
   return (
@@ -159,7 +157,7 @@ function ScheduleBlockClient({ block, schedule, seminars }: { block: PageBlockSc
         </h2>
       )}
       {days.length === 0 ? (
-        <p className="text-sm text-zinc-600 dark:text-zinc-300 text-center py-8">Inga pass inbokade just nu.</p>
+        <p className="text-sm text-zinc-600 dark:text-zinc-300 text-center py-8">{t.noClasses}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {days.map(({ day, classes: dayClasses }) => (
@@ -187,7 +185,7 @@ function ScheduleBlockClient({ block, schedule, seminars }: { block: PageBlockSc
       {showSeminars && seminars.length > 0 && (
         <div className="mt-10">
           <h3 className={`text-sm font-black uppercase tracking-tight mb-4 ${alignClass} text-zinc-900 dark:text-zinc-100`}>
-            Kommande seminarier
+            {t.upcomingSeminars}
           </h3>
           <div className="space-y-3">
             {seminars.map(s => {
@@ -196,12 +194,12 @@ function ScheduleBlockClient({ block, schedule, seminars }: { block: PageBlockSc
                   <div>
                     <p className="text-sm font-black text-zinc-900 dark:text-zinc-100">{s.name}</p>
                     <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
-                      {formatSeminarDate(s.date)} · {s.time}{s.endTime ? `–${s.endTime}` : ''}
+                      {formatSeminarDate(s.date, locale)} · {s.time}{s.endTime ? `–${s.endTime}` : ''}
                       {block.showInstructor !== false && s.instructor ? ` · ${s.instructor}` : ''}
                     </p>
                   </div>
                   {s.campaignSlug && (
-                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400 whitespace-nowrap">Läs mer →</span>
+                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400 whitespace-nowrap">{t.readMore}</span>
                   )}
                 </div>
               );

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import SiteHeader from './SiteHeader';
 import SiteFooter from './SiteFooter';
 import type { ClubConfig, WebsiteConfig, WebsitePage } from '@/lib/types';
-import { LanguageContext } from '@/lib/language-context';
+import { LanguageContext, LANGUAGE_CHANGED_EVENT } from '@/lib/language-context';
 
 interface Props {
   club: ClubConfig;
@@ -60,6 +60,7 @@ export default function PublicLayoutClient({ club, config, pages, children }: Pr
     setLanguage(prev => {
       const next = prev === 'sv' ? 'en' : 'sv';
       try { localStorage.setItem('flowroll_lang', next); } catch {}
+      window.dispatchEvent(new CustomEvent(LANGUAGE_CHANGED_EVENT, { detail: next }));
       return next;
     });
   }, []);

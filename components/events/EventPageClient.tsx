@@ -5,6 +5,7 @@ import { onSnapshot, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase-client';
 import type { Campaign, CampaignScheduleDay, PageBlock } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
+import { useT } from '@/lib/translations';
 import { BlockRenderer } from '@/components/PageRenderer';
 import LeadFormBlock from '@/components/blocks/LeadFormBlock';
 
@@ -12,63 +13,6 @@ import LeadFormBlock from '@/components/blocks/LeadFormBlock';
 interface Props {
   campaign: Campaign;
 }
-
-const T = {
-  sv: {
-    schedule: 'Schema',
-    registrationClosed: 'Anmälan stängd',
-    soldOut: 'Fullbokat',
-    fewSpotsLeft: 'Få platser kvar!',
-    spotsLeft: (n: number) => `${n} platser kvar`,
-    price: 'Pris',
-    guardianInfo: 'Målsmans uppgifter',
-    registrationHeading: 'Anmälan',
-    registrationReceived: 'Anmälan mottagen!',
-    weWillBeInTouch: 'Vi hör av oss till dig inom kort.',
-    gdprText: 'Jag godkänner att mina uppgifter sparas och behandlas i enlighet med GDPR för hantering av min anmälan.',
-    sending: 'Skickar...',
-    payAndRegister: (price: number) => `Betala & anmäl — ${price} kr`,
-    register: 'Skicka anmälan',
-    registerNow: 'Anmäl dig nu',
-    somethingWentWrong: 'Något gick fel. Försök igen eller kontakta oss direkt.',
-    with: 'Med',
-    share: 'Dela',
-    waitlistHeading: 'Väntelista',
-    waitlistSubtext: 'Eventet är fullbokat — anmäl dig till väntelistan.',
-    waitlistSuccess: 'Du är på väntelistan!',
-    waitlistSuccessText: 'Vi hör av oss om en plats öppnar sig.',
-    waitlistButton: 'Anmäl till väntelistan',
-    waitlistButtonSending: 'Anmäler...',
-    waitlistCount: (n: number) => `${n} ${n === 1 ? 'person' : 'personer'} på väntelistan`,
-  },
-  en: {
-    schedule: 'Schedule',
-    registrationClosed: 'Registration closed',
-    soldOut: 'Sold out',
-    fewSpotsLeft: 'Few spots left!',
-    spotsLeft: (n: number) => `${n} spots left`,
-    price: 'Price',
-    guardianInfo: "Guardian's details",
-    registrationHeading: 'Sign up',
-    registrationReceived: 'Registration received!',
-    weWillBeInTouch: "We'll be in touch shortly.",
-    gdprText: 'I agree that my details are stored and processed in accordance with GDPR for handling my registration.',
-    sending: 'Sending...',
-    payAndRegister: (price: number) => `Pay & register — ${price} kr`,
-    register: 'Register',
-    registerNow: 'Register now',
-    somethingWentWrong: 'Something went wrong. Please try again or contact us directly.',
-    with: 'With',
-    share: 'Share',
-    waitlistHeading: 'Waitlist',
-    waitlistSubtext: 'Event is full — join the waitlist.',
-    waitlistSuccess: 'You are on the waitlist!',
-    waitlistSuccessText: "We'll reach out if a spot opens.",
-    waitlistButton: 'Join waitlist',
-    waitlistButtonSending: 'Joining...',
-    waitlistCount: (n: number) => `${n} ${n === 1 ? 'person' : 'people'} on waitlist`,
-  },
-};
 
 const TITLE_SIZE_CLASSES: Record<string, string> = {
   xs:  'text-xl sm:text-2xl md:text-3xl lg:text-4xl',
@@ -192,7 +136,7 @@ function QuickInfoBar({
 
 export default function EventPageClient({ campaign }: Props) {
   const lang = useLanguage();
-  const t = T[lang];
+  const t = useT('eventPage');
   const { pageConfig, formConfig, eventDetails } = campaign;
   const accent = campaign.accentColor ?? null;
 
@@ -292,11 +236,11 @@ export default function EventPageClient({ campaign }: Props) {
         return;
       }
       if (json.alreadyRegistered) {
-        setSubmitError('Du är redan anmäld till detta event.');
+        setSubmitError(t.alreadyRegistered);
         return;
       }
       if (json.alreadyWaitlisted) {
-        setSubmitError('Du står redan på väntelistan för detta event.');
+        setSubmitError(t.alreadyWaitlisted);
         return;
       }
       setSubmitted(true);
@@ -414,10 +358,10 @@ export default function EventPageClient({ campaign }: Props) {
       </div>
       <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4">{t.waitlistSubtext}</p>
       <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
-        <input name="firstName" placeholder="Förnamn" aria-label="Förnamn" required className={compact ? sidebarInputClasses : inputClasses} />
-        <input name="lastName" placeholder="Efternamn" aria-label="Efternamn" required className={compact ? sidebarInputClasses : inputClasses} />
-        <input name="email" type="email" placeholder="E-post" aria-label="E-post" required className={compact ? sidebarInputClasses : inputClasses} />
-        <input name="phone" type="tel" placeholder="Telefon" aria-label="Telefon" className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="firstName" placeholder={t.firstNamePlaceholder} aria-label={t.firstNamePlaceholder} required className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="lastName" placeholder={t.lastNamePlaceholder} aria-label={t.lastNamePlaceholder} required className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="email" type="email" placeholder={t.emailPlaceholder} aria-label={t.emailPlaceholder} required className={compact ? sidebarInputClasses : inputClasses} />
+        <input name="phone" type="tel" placeholder={t.phonePlaceholder} aria-label={t.phonePlaceholder} className={compact ? sidebarInputClasses : inputClasses} />
       </div>
 
       <label className={`flex items-start gap-3 ${compact ? 'mt-3' : 'mt-4'} cursor-pointer`}>
@@ -452,7 +396,7 @@ export default function EventPageClient({ campaign }: Props) {
     if (isRegistrationClosed) return (
       <div className="py-6 text-center space-y-2">
         <p className="font-black text-zinc-900 dark:text-white uppercase tracking-tight">{t.registrationClosed}</p>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">Anmälningstiden har gått ut.</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">{t.registrationClosedText}</p>
       </div>
     );
     if (isSoldOut && waitlistEnabled) return renderWaitlistForm(compact);
@@ -469,7 +413,7 @@ export default function EventPageClient({ campaign }: Props) {
   ) : (
     <form onSubmit={handleSubmit}>
       <h2 className={`${compact ? 'text-lg' : 'text-2xl'} font-black text-zinc-900 dark:text-white uppercase tracking-tighter mb-4 font-display`}>
-        {campaign.formHeading || t.registrationHeading}
+        {(lang === 'sv' && campaign.formHeading) || t.registrationHeading}
       </h2>
       <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
         {formConfig.map(field => (
@@ -478,9 +422,9 @@ export default function EventPageClient({ campaign }: Props) {
               <div className="p-3 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-zinc-800 space-y-2">
                 <p className="text-[9px] font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest mb-1">{t.guardianInfo}</p>
                 <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-3'} gap-2`}>
-                  <input name="guardianName" placeholder="Namn" aria-label="Målsmans namn" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
-                  <input name="guardianEmail" type="email" placeholder="E-post" aria-label="Målsmans e-post" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
-                  <input name="guardianPhone" type="tel" placeholder="Telefon" aria-label="Målsmans telefon" required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
+                  <input name="guardianName" placeholder={t.guardianNamePlaceholder} aria-label={t.guardianNameAria} required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
+                  <input name="guardianEmail" type="email" placeholder={t.guardianEmailPlaceholder} aria-label={t.guardianEmailAria} required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
+                  <input name="guardianPhone" type="tel" placeholder={t.guardianPhonePlaceholder} aria-label={t.guardianPhoneAria} required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
                 </div>
               </div>
             ) : (
@@ -523,7 +467,7 @@ export default function EventPageClient({ campaign }: Props) {
           boxShadow: (!isRegistrationClosed && !isSoldOut) ? `0 0 24px ${(accent ?? '#e50401')}30` : undefined,
         }}
       >
-        {submitting ? t.sending : isRegistrationClosed ? t.registrationClosed : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(price) : (campaign.submitButtonText || t.register)}
+        {submitting ? t.sending : isRegistrationClosed ? t.registrationClosed : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(price) : ((lang === 'sv' && campaign.submitButtonText) || t.register)}
       </button>
     </form>
     );
@@ -776,6 +720,7 @@ export default function EventPageClient({ campaign }: Props) {
 
 // Share row — inline because it needs window.location
 function ShareRow({ title, accent, shareLabel }: { title: string; accent: string; shareLabel: string }) {
+  const shareT = useT('shareButtons');
   const [url, setUrl] = useState('');
   const [copied, setCopied] = useState(false);
   useEffect(() => { setUrl(window.location.href); }, []);
@@ -799,12 +744,12 @@ function ShareRow({ title, accent, shareLabel }: { title: string; accent: string
     <div className="flex items-center gap-3">
       <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">{shareLabel}</span>
       {TARGETS.map(btn => (
-        <button key={btn.label} onClick={() => share(btn.getUrl)} aria-label={`Dela på ${btn.label}`}
+        <button key={btn.label} onClick={() => share(btn.getUrl)} aria-label={shareT.shareOn(btn.label)}
           className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-zinc-200/60 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-300">
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d={btn.path} /></svg>
         </button>
       ))}
-      <button onClick={copy} aria-label="Kopiera länk"
+      <button onClick={copy} aria-label={shareT.copyLink}
         className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
         style={{ backgroundColor: copied ? `${accent}20` : 'rgba(161,161,170,0.2)', color: copied ? accent : '#71717a' }}>
         {copied

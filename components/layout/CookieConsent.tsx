@@ -1,27 +1,8 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { getConsent, saveConsent } from '@/lib/consent';
-
-const CATEGORIES = [
-  {
-    id: 'necessary' as const,
-    title: 'Nödvändiga',
-    description: 'Nödvändiga cookies krävs för att webbplatsen ska fungera korrekt. De lagrar inga personuppgifter och kan inte inaktiveras.',
-    alwaysActive: true,
-  },
-  {
-    id: 'functional' as const,
-    title: 'Funktionella',
-    description: 'Funktionella cookies möjliggör inbäddade videor från YouTube och Vimeo. Utan dessa visas en platshållare istället för videon.',
-    alwaysActive: false,
-  },
-  {
-    id: 'analytics' as const,
-    title: 'Analys',
-    description: 'Analyticscookies hjälper oss förstå hur besökare använder webbplatsen. Vi använder Google Analytics 4 med anonymiserad IP-adress.',
-    alwaysActive: false,
-  },
-];
+import { useStoredLanguage } from '@/lib/language-context';
+import { getT } from '@/lib/translations';
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -50,6 +31,9 @@ export default function CookieConsent() {
   const [functional, setFunctional] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const lang = useStoredLanguage();
+  const t = getT('cookieConsent', lang);
+  const CATEGORIES = t.categories;
 
   useEffect(() => {
     if (getConsent()) setVisible(false);
@@ -91,16 +75,16 @@ export default function CookieConsent() {
         style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
         aria-modal="true"
         role="dialog"
-        aria-label="Cookie-inställningar"
+        aria-label={t.settingsDialogAria}
       >
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-base font-black text-zinc-900 dark:text-white">Hantera samtyckesinställningar</h2>
+            <h2 className="text-base font-black text-zinc-900 dark:text-white">{t.settingsTitle}</h2>
             <button
               type="button"
               onClick={rejectAll}
               className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors p-1 rounded-lg"
-              aria-label="Stäng och neka alla"
+              aria-label={t.settingsCloseAria}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -110,8 +94,7 @@ export default function CookieConsent() {
 
           <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3">
             <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
-              Vi använder cookies och liknande tekniker för att webbplatsen ska fungera, visa videor och mäta trafik.
-              Nödvändiga cookies är alltid aktiva. Övriga kan du välja fritt.
+              {t.settingsIntro}
             </p>
 
             {CATEGORIES.map(cat => (
@@ -120,7 +103,7 @@ export default function CookieConsent() {
                   type="button"
                   onClick={() => setExpanded(expanded === cat.id ? null : cat.id)}
                   aria-expanded={expanded === cat.id}
-                  aria-label={`${expanded === cat.id ? 'Stäng' : 'Öppna'} ${cat.title}`}
+                  aria-label={`${expanded === cat.id ? t.categoryClose : t.categoryOpen} ${cat.title}`}
                   className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                 >
                   <div className="flex items-center gap-2">
@@ -133,7 +116,7 @@ export default function CookieConsent() {
                     <span className="font-bold text-sm text-zinc-900 dark:text-white">{cat.title}</span>
                   </div>
                   {cat.alwaysActive ? (
-                    <span className="text-xs font-bold text-green-600 dark:text-green-400">Alltid aktiv</span>
+                    <span className="text-xs font-bold text-green-600 dark:text-green-400">{t.alwaysActive}</span>
                   ) : (
                     <span onClick={e => e.stopPropagation()}>
                       <Toggle
@@ -158,21 +141,21 @@ export default function CookieConsent() {
               onClick={rejectAll}
               className="flex-1 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
             >
-              Neka alla
+              {t.rejectAll}
             </button>
             <button
               type="button"
               onClick={savePrefs}
               className="flex-1 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
             >
-              Spara inställningar
+              {t.saveSettings}
             </button>
             <button
               type="button"
               onClick={acceptAll}
               className="flex-1 px-4 py-2.5 rounded-xl bg-amber-500 text-sm font-bold text-zinc-900 hover:bg-amber-600 transition-colors"
             >
-              Acceptera alla
+              {t.acceptAll}
             </button>
           </div>
         </div>
@@ -185,9 +168,9 @@ export default function CookieConsent() {
       <div className="mx-auto max-w-4xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 px-5 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-zinc-900 dark:text-white mb-0.5">Vi använder cookies</p>
+            <p className="text-sm font-bold text-zinc-900 dark:text-white mb-0.5">{t.bannerTitle}</p>
             <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
-              Cookies används för att webbplatsen ska fungera, visa videor och mäta trafik med Google Analytics.
+              {t.bannerText}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
@@ -196,21 +179,21 @@ export default function CookieConsent() {
               onClick={rejectAll}
               className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors whitespace-nowrap"
             >
-              Neka alla
+              {t.rejectAll}
             </button>
             <button
               type="button"
               onClick={() => setShowSettings(true)}
               className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors whitespace-nowrap"
             >
-              Anpassa
+              {t.customize}
             </button>
             <button
               type="button"
               onClick={acceptAll}
               className="px-4 py-2 rounded-xl bg-amber-500 text-xs font-bold text-zinc-900 hover:bg-amber-600 transition-colors whitespace-nowrap"
             >
-              Acceptera alla
+              {t.acceptAll}
             </button>
           </div>
         </div>

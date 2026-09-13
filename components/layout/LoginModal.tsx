@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { app } from '@/lib/firebase-client';
+import { useT } from '@/lib/translations';
 
 const auth = app ? getAuth(app) : null;
 
@@ -14,6 +15,7 @@ interface Props {
 type View = 'login' | 'forgotPassword' | 'resetSent';
 
 export default function LoginModal({ onClose, primaryColor }: Props) {
+  const t = useT('loginModal');
   const [view, setView] = useState<View>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,11 +45,11 @@ export default function LoginModal({ onClose, primaryColor }: Props) {
     } catch (err: unknown) {
       const code = (err as { code?: string }).code ?? '';
       if (code.includes('invalid-credential') || code.includes('user-not-found') || code.includes('wrong-password')) {
-        setError('Fel e-post eller lösenord.');
+        setError(t.errorInvalidCredentials);
       } else if (code.includes('too-many-requests')) {
-        setError('För många försök. Försök igen senare.');
+        setError(t.errorTooManyRequests);
       } else {
-        setError('Något gick fel. Försök igen.');
+        setError(t.errorGeneric);
       }
     } finally {
       setLoading(false);
@@ -56,14 +58,14 @@ export default function LoginModal({ onClose, primaryColor }: Props) {
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth || !email) { setError('Ange din e-postadress.'); return; }
+    if (!auth || !email) { setError(t.errorEmailRequired); return; }
     setError('');
     setLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
       setView('resetSent');
     } catch {
-      setError('Kunde inte skicka återställningsmail. Kontrollera e-postadressen.');
+      setError(t.errorResetFailed);
     } finally {
       setLoading(false);
     }
@@ -78,9 +80,9 @@ export default function LoginModal({ onClose, primaryColor }: Props) {
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
-              {view === 'resetSent' ? 'Klart!' : view === 'forgotPassword' ? 'Återställ lösenord' : 'Logga in'}
+              {view === 'resetSent' ? t.titleDone : view === 'forgotPassword' ? t.titleForgot : t.titleLogin}
             </h2>
-            <button onClick={onClose} aria-label="Stäng" className="text-zinc-400 hover:text-zinc-600 transition-colors">
+            <button onClick={onClose} aria-label={t.closeAria} className="text-zinc-400 hover:text-zinc-600 transition-colors">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -88,20 +90,20 @@ export default function LoginModal({ onClose, primaryColor }: Props) {
           {view === 'resetSent' ? (
             <div className="text-center py-4">
               <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-6">
-                Vi har skickat ett återställningsmail till <strong>{email}</strong>.
+                {t.resetSentPrefix} <strong>{email}</strong>.
               </p>
               <button
                 onClick={() => setView('login')}
                 className="text-[10px] font-black uppercase tracking-widest transition-colors"
                 style={{ color: primaryColor }}
               >
-                Tillbaka till inloggning
+                {t.backToLogin}
               </button>
             </div>
           ) : view === 'forgotPassword' ? (
             <form onSubmit={handleReset} className="space-y-6">
               <div>
-                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1">E-post</label>
+                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1">{t.emailLabel}</label>
                 <input
                   ref={inputRef}
                   type="email"
@@ -110,7 +112,7 @@ export default function LoginModal({ onClose, primaryColor }: Props) {
                   required
                   className="w-full p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-bold focus:ring-2 focus:outline-none text-zinc-900 dark:text-white transition-all"
                   style={{ ['--tw-ring-color' as string]: `${primaryColor}33` }}
-                  placeholder="din@email.se"
+                  placeholder={t.emailPlaceholder}
                 />
               </div>
               {error && (
@@ -124,19 +126,19 @@ export default function LoginModal({ onClose, primaryColor }: Props) {
                 className="w-full text-white font-black py-5 rounded-xl text-xs uppercase tracking-[0.2em] transition-all active:scale-[0.98] disabled:opacity-50"
                 style={{ backgroundColor: primaryColor }}
               >
-                {loading ? 'Skickar...' : 'Skicka återställningsmail'}
+                {loading ? t.sending : t.sendResetButton}
               </button>
               <div className="text-center">
                 <button type="button" onClick={() => { setView('login'); setError(''); }}
                   className="text-[10px] font-black text-zinc-400 hover:text-zinc-600 uppercase tracking-widest transition-colors">
-                  Tillbaka till inloggning
+                  {t.backToLogin}
                 </button>
               </div>
             </form>
           ) : (
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1">E-post</label>
+                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1">{t.emailLabel}</label>
                 <input
                   ref={inputRef}
                   type="email"
@@ -145,13 +147,13 @@ export default function LoginModal({ onClose, primaryColor }: Props) {
                   required
                   autoComplete="email"
                   className="w-full p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-bold focus:ring-2 focus:outline-none text-zinc-900 dark:text-white transition-all"
-                  placeholder="din@email.se"
+                  placeholder={t.emailPlaceholder}
                 />
               </div>
               <div>
                 <div className="flex justify-between items-center mb-2 ml-1">
-                  <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest">Lösenord</label>
-                  <span className="text-[9px] font-bold text-zinc-400 italic">inte din pinkod</span>
+                  <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t.passwordLabel}</label>
+                  <span className="text-[9px] font-bold text-zinc-400 italic">{t.passwordHint}</span>
                 </div>
                 <input
                   type="password"
@@ -174,12 +176,12 @@ export default function LoginModal({ onClose, primaryColor }: Props) {
                 className="w-full text-white font-black py-5 rounded-xl text-xs uppercase tracking-[0.2em] transition-all active:scale-[0.98] disabled:opacity-50"
                 style={{ backgroundColor: primaryColor }}
               >
-                {loading ? 'Loggar in...' : 'Logga in'}
+                {loading ? t.loggingIn : t.loginButton}
               </button>
               <div className="text-center">
                 <button type="button" onClick={() => { setView('forgotPassword'); setError(''); }}
                   className="text-[10px] font-black text-zinc-400 hover:text-zinc-600 uppercase tracking-widest transition-colors">
-                  Glömt lösenordet?
+                  {t.forgotPassword}
                 </button>
               </div>
             </form>

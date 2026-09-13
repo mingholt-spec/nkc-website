@@ -3,18 +3,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { NewsPost } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
+import { useT } from '@/lib/translations';
 import { slugifyCategory } from '@/lib/utils';
 
 interface Props { posts: NewsPost[] }
 
-const T = {
-  sv: { heading: 'Blogg', empty: 'Inga inlägg publicerade ännu.' },
-  en: { heading: 'Blog', empty: 'No posts published yet.' },
-};
-
 export default function BlogList({ posts }: Props) {
-  const lang = useLanguage();
-  const t = T[lang];
+  const t = useT('blogList');
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-8">{t.heading}</h1>
@@ -42,7 +37,7 @@ function PostCard({ post }: { post: NewsPost }) {
         <div className="aspect-video relative bg-zinc-100 dark:bg-zinc-700">
           <Image
             src={post.coverImage}
-            alt={post.title}
+            alt={title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, 50vw"

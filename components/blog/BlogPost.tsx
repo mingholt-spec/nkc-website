@@ -4,18 +4,14 @@ import Link from 'next/link';
 import type { NewsPost } from '@/lib/types';
 import ShareButtons from './ShareButtons';
 import { useLanguage } from '@/lib/language-context';
+import { useT } from '@/lib/translations';
 import { normalizeLinks } from '@/lib/utils';
 
 interface Props { post: NewsPost }
 
-const T = {
-  sv: { by: 'Av', back: 'Tillbaka till bloggen', blog: 'Blogg', share: 'Dela' },
-  en: { by: 'By', back: 'Back to blog', blog: 'Blog', share: 'Share' },
-};
-
 export default function BlogPost({ post }: Props) {
   const lang = useLanguage();
-  const t = T[lang];
+  const t = useT('blogPost');
   const title = (lang === 'en' && post.titleEn) ? post.titleEn : post.title;
   const content = (lang === 'en' && post.contentEn) ? post.contentEn : (post.content ?? '');
   const excerpt = (lang === 'en' && post.excerptEn) ? post.excerptEn : post.excerpt;
@@ -61,7 +57,7 @@ export default function BlogPost({ post }: Props) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={post.coverImage}
-              alt={post.title}
+              alt={title}
               className="w-full h-auto rounded-xl overflow-hidden mb-10"
               style={{ objectPosition: post.coverImagePosition ?? 'center' }}
               decoding="async"
@@ -77,7 +73,7 @@ export default function BlogPost({ post }: Props) {
           >
             <Image
               src={post.coverImage}
-              alt={post.title}
+              alt={title}
               fill
               priority
               className="object-cover"
