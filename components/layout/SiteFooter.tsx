@@ -1,6 +1,7 @@
 'use client';
 
 import type { ClubConfig, WebsiteConfig } from '@/lib/types';
+import { useT } from '@/lib/translations';
 
 const SOCIAL_ICONS: Record<string, { viewBox: string; path: string; label: string }> = {
   facebook:  { label: 'Facebook',  viewBox: '0 0 24 24', path: 'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z' },
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export default function SiteFooter({ club, config, resolvedColors }: Props) {
+  const t = useT('siteFooter');
   const footer = config?.footerConfig;
   const theme = config?.theme;
   const txtColor = resolvedColors.text;
@@ -57,7 +59,7 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
               )}
               {club.organization_number && (
                 <p className="text-xs mb-1" style={{ color: `${txtColor}d9`, fontFamily: theme?.bodyFont }}>
-                  Org.nr: {club.organization_number}
+                  {t.orgNumberLabel} {club.organization_number}
                 </p>
               )}
               {addressParts && (
@@ -161,11 +163,11 @@ export default function SiteFooter({ club, config, resolvedColors }: Props) {
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('nkc:open-consent'))}
-            aria-label="Hantera cookie-inställningar"
+            aria-label={t.cookieSettingsAria}
             className="text-[10px] uppercase tracking-widest hover:opacity-70 transition-opacity"
             style={{ color: `${txtColor}d9`, fontFamily: theme?.bodyFont }}
           >
-            Cookie-inställningar
+            {t.cookieSettingsLabel}
           </button>
         </div>
       </div>

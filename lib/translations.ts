@@ -74,6 +74,9 @@ const translations = {
       readMore: 'Läs mer →',
     },
     homePage: { emptyTitle: 'Välkommen', emptyText: 'Webbplatsen är under uppbyggnad.' },
+    countdownBlock: { days: 'Dagar', hours: 'Timmar', minutes: 'Min', seconds: 'Sek', expiredDefault: 'Tiden har gått ut!' },
+    htmlBlock: { iframeTitle: 'Innehållsblock' },
+    siteFooter: { orgNumberLabel: 'Org.nr:', cookieSettingsLabel: 'Cookie-inställningar', cookieSettingsAria: 'Hantera cookie-inställningar' },
     eventPage: {
       schedule: 'Schema',
       registrationClosed: 'Anmälan stängd',
@@ -176,6 +179,9 @@ const translations = {
       readMore: 'Read more →',
     },
     homePage: { emptyTitle: 'Welcome', emptyText: 'The website is under construction.' },
+    countdownBlock: { days: 'Days', hours: 'Hours', minutes: 'Min', seconds: 'Sec', expiredDefault: 'Time has run out!' },
+    htmlBlock: { iframeTitle: 'Content block' },
+    siteFooter: { orgNumberLabel: 'Org. no.:', cookieSettingsLabel: 'Cookie settings', cookieSettingsAria: 'Manage cookie settings' },
     eventPage: {
       schedule: 'Schedule',
       registrationClosed: 'Registration closed',

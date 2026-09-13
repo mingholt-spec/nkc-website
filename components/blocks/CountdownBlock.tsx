@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import type { PageBlockCountdown } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
+import { useLanguage } from '@/lib/language-context';
+import { useT } from '@/lib/translations';
 import { spacingToStyle } from './blockSpacing';
 import { blockStyleToCSS, blockStyleToScopedCSS, headingSizeCls, typographyToCSS } from './blockStyle';
 
@@ -19,9 +21,10 @@ function getTimeLeft(targetDate: string) {
   };
 }
 
-const UNIT_LABELS: Record<string, string> = { days: 'Dagar', hours: 'Timmar', minutes: 'Min', seconds: 'Sek' };
-
 export default function CountdownBlock({ block }: Props) {
+  const lang = useLanguage();
+  const t = useT('countdownBlock');
+  const UNIT_LABELS: Record<string, string> = { days: t.days, hours: t.hours, minutes: t.minutes, seconds: t.seconds };
   const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(block.targetDate));
 
   useEffect(() => {
@@ -57,7 +60,7 @@ export default function CountdownBlock({ block }: Props) {
             ))}
           </div>
         ) : (
-          <p className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{block.expiredText || 'Tiden har gått ut!'}</p>
+          <p className="text-lg font-bold text-zinc-700 dark:text-zinc-200">{(lang === 'sv' && block.expiredText) || t.expiredDefault}</p>
         )}
       </div>
     </section>

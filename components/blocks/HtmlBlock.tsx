@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { PageBlockHtml } from '@/lib/types';
 import { safeStr } from '@/lib/utils';
+import { useT } from '@/lib/translations';
 import { spacingToStyle } from './blockSpacing';
 import { blockStyleToCSS } from './blockStyle';
 
@@ -35,6 +36,7 @@ function darkModeScript(isDark: boolean): string {
 // real scroll event inside the iframe to re-trigger AOS. The section scrolls
 // inside the iframe instead, which doesn't have that problem.
 export default function HtmlBlock({ block }: Props) {
+  const t = useT('htmlBlock');
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export default function HtmlBlock({ block }: Props) {
         srcDoc={html}
         sandbox="allow-scripts allow-top-navigation-by-user-activation"
         style={{ width: '100%', height: 800, border: 'none', display: 'block' }}
-        title="Innehållsblock"
+        title={t.iframeTitle}
       />
     </div>
   );
