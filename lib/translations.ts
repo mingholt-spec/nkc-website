@@ -1,4 +1,3 @@
-'use client';
 import { useLanguage, type Lang } from './language-context';
 
 // Single source of truth for all UI-chrome copy on nkc-website. Previously
