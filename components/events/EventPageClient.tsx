@@ -432,8 +432,8 @@ export default function EventPageClient({ campaign }: Props) {
               <input
                 type={field.type === 'phone' ? 'tel' : field.type}
                 name={field.name}
-                placeholder={field.label}
-                aria-label={field.label}
+                placeholder={lang === 'sv' ? field.label : (field.labelEn || field.label)}
+                aria-label={lang === 'sv' ? field.label : (field.labelEn || field.label)}
                 required={field.required}
                 className={compact ? sidebarInputClasses : inputClasses}
               />

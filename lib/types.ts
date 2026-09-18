@@ -465,6 +465,8 @@ export interface CampaignFormField {
   type: 'text' | 'email' | 'phone' | 'guardianInfo';
   name: string;
   label: string;
+  /** Shown to visitors who've selected English. Falls back to `label` if unset. */
+  labelEn?: string;
   required: boolean;
 }
 
