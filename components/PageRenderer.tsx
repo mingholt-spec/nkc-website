@@ -216,12 +216,15 @@ function ScheduleBlockClient({ block, schedule, seminars }: { block: PageBlockSc
   );
 }
 
-/** Block types with no translatable content at all — an image or the live
- *  class schedule is the same regardless of language, so they always render
- *  from the Swedish (canonical) block rather than the AI-translated array.
- *  This prevents them from ever going stale relative to a Swedish-side edit
- *  made after the last "translate to English" pass in the page builder. */
-const LANGUAGE_INDEPENDENT_BLOCK_TYPES = new Set(['image', 'schedule']);
+/** Block types with no translatable content at all — an image is the same
+ *  regardless of language, so it always renders from the Swedish (canonical)
+ *  block rather than the AI-translated array. This prevents it from ever
+ *  going stale relative to a Swedish-side edit made after the last
+ *  "translate to English" pass in the page builder. The `schedule` block is
+ *  handled separately below: its heading text is translatable, but its
+ *  live-data config (daysAhead/showInstructor/showSeminars) must always come
+ *  from the Swedish source, same reasoning as image. */
+const LANGUAGE_INDEPENDENT_BLOCK_TYPES = new Set(['image']);
 
 function getColBlocksForMerge(col: unknown): PageBlock[] {
   if (Array.isArray(col)) return col as PageBlock[];
@@ -259,6 +262,16 @@ function mergeLocalizedBlocks(svBlocks: PageBlock[], enBlocks: PageBlock[] | und
       // the admin builder's columns handling, not something introduced here.
       const mergedCols = cols.map(col => getColBlocksForMerge(col).map(merge)) as unknown as PageBlockColumns['columns'];
       return { ...block, columns: mergedCols };
+    }
+    if (block.type === 'schedule') {
+      const enMatch = enById.get(block.id);
+      // Only the heading text is translatable — daysAhead/showInstructor/
+      // showSeminars control which LIVE data renders and must always come
+      // from the Swedish source, never a stale AI snapshot.
+      if (enMatch && enMatch.type === 'schedule' && enMatch.title) {
+        return { ...block, title: enMatch.title, titleSize: enMatch.titleSize ?? block.titleSize, titleAlign: enMatch.titleAlign ?? block.titleAlign };
+      }
+      return block;
     }
     if (LANGUAGE_INDEPENDENT_BLOCK_TYPES.has(block.type)) return block;
     return enById.get(block.id) ?? block;
