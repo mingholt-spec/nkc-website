@@ -1,8 +1,8 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { WebsitePage, PageBlock, NewsPost, PageBlockBlog, PageBlockSchedule, UpcomingClassPreview, UpcomingSeminarPreview } from '@/lib/types';
-import { useLanguage } from '@/lib/language-context';
+import type { WebsitePage, PageBlock, NewsPost, PageBlockBlog, PageBlockSchedule, PageBlockColumns, UpcomingClassPreview, UpcomingSeminarPreview } from '@/lib/types';
+import { useLanguage, type Lang } from '@/lib/language-context';
 import { useT } from '@/lib/translations';
 import HeroBlock from './blocks/HeroBlock';
 import TextBlock from './blocks/TextBlock';
@@ -216,6 +216,56 @@ function ScheduleBlockClient({ block, schedule, seminars }: { block: PageBlockSc
   );
 }
 
+/** Block types with no translatable content at all — an image or the live
+ *  class schedule is the same regardless of language, so they always render
+ *  from the Swedish (canonical) block rather than the AI-translated array.
+ *  This prevents them from ever going stale relative to a Swedish-side edit
+ *  made after the last "translate to English" pass in the page builder. */
+const LANGUAGE_INDEPENDENT_BLOCK_TYPES = new Set(['image', 'schedule']);
+
+function getColBlocksForMerge(col: unknown): PageBlock[] {
+  if (Array.isArray(col)) return col as PageBlock[];
+  if (col && typeof col === 'object') {
+    const obj = col as Record<string, unknown>;
+    if (Array.isArray(obj.blocks)) return obj.blocks as PageBlock[];
+  }
+  return [];
+}
+
+function flattenBlocksById(blocks: PageBlock[], map: Map<string, PageBlock>): Map<string, PageBlock> {
+  for (const block of blocks) {
+    map.set(block.id, block);
+    if (block.type === 'columns') {
+      const cols = Array.isArray(block.columns) ? block.columns : [];
+      for (const col of cols) flattenBlocksById(getColBlocksForMerge(col), map);
+    }
+  }
+  return map;
+}
+
+/** Merges the Swedish block tree with the English translation by block id
+ *  (recursing into columns), instead of switching between two whole arrays.
+ *  A block added on the Swedish side after the last translation simply
+ *  renders in Swedish until translated, rather than the whole English page
+ *  falling back to a stale snapshot missing that block. */
+function mergeLocalizedBlocks(svBlocks: PageBlock[], enBlocks: PageBlock[] | undefined, lang: Lang): PageBlock[] {
+  if (lang !== 'en' || !enBlocks?.length) return svBlocks;
+  const enById = flattenBlocksById(enBlocks, new Map());
+  const merge = (block: PageBlock): PageBlock => {
+    if (block.type === 'columns') {
+      const cols = Array.isArray(block.columns) ? block.columns : [];
+      // Campaign-only block types (EventRegistration/CampaignHero/etc.) can't
+      // legally appear inside a Columns cell — same known type-shape gap as
+      // the admin builder's columns handling, not something introduced here.
+      const mergedCols = cols.map(col => getColBlocksForMerge(col).map(merge)) as unknown as PageBlockColumns['columns'];
+      return { ...block, columns: mergedCols };
+    }
+    if (LANGUAGE_INDEPENDENT_BLOCK_TYPES.has(block.type)) return block;
+    return enById.get(block.id) ?? block;
+  };
+  return svBlocks.map(merge);
+}
+
 export default function PageRenderer({ page, blogPosts = [], schedule = [], seminars = [] }: Props) {
   const lang = useLanguage();
 
@@ -224,7 +274,7 @@ export default function PageRenderer({ page, blogPosts = [], schedule = [], semi
     return <div dangerouslySetInnerHTML={{ __html: html }} />;
   }
 
-  const blocks = (lang === 'en' && page.blocksEn?.length) ? page.blocksEn : (page.blocks ?? []);
+  const blocks = mergeLocalizedBlocks(page.blocks ?? [], page.blocksEn, lang);
   return (
     <div>
       {blocks.map(block => <BlockRenderer key={block.id} block={block} blogPosts={blogPosts} schedule={schedule} seminars={seminars} />)}
