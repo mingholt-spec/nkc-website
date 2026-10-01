@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/_fah/image/:path*',
-        destination: 'https://europe-west1-bjj-manager-pro.cloudfunctions.net/ext-image-processing-api-handler/:path*',
+        destination: 'https://europe-west1-bjj-manager-pro.cloudfunctions.net/imageProcessingHandler/:path*',
       },
     ];
   },
