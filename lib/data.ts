@@ -99,10 +99,12 @@ export const getBlogPosts = cache(async (limitCount = 50): Promise<NewsPost[]> =
 
 /**
  * Upcoming, publicly-relevant classes for the page builder's live Schedule
- * block — excludes seminars and private sessions (one-off/closed events,
- * not "how we train every week"). `schedule` is publicly readable in
- * Firestore rules, so this needs no special auth handling. Mirrors
- * bjj-premium/api/data.ts's loadUpcomingSchedule.
+ * block — excludes seminars, private sessions, and facility/venue bookings
+ * (one-off/closed events, not "how we train every week"; a facility booking
+ * especially must never leak here — it's internal scheduling info, not a
+ * bookable class). `schedule` is publicly readable in Firestore rules, so
+ * this needs no special auth handling. Mirrors bjj-premium/api/data.ts's
+ * loadUpcomingSchedule.
  */
 export const getSchedule = cache(async (daysAhead = 7): Promise<UpcomingClassPreview[]> => {
   if (!db) return [];
@@ -123,7 +125,7 @@ export const getSchedule = cache(async (daysAhead = 7): Promise<UpcomingClassPre
 
     return snap.docs
       .map(d => d.data() as Record<string, unknown>)
-      .filter(c => !c.isSeminar && !c.isPrivate)
+      .filter(c => !c.isSeminar && !c.isPrivate && !c.isFacilityBooking)
       .map(c => ({
         id: String(c.id ?? ''),
         date: String(c.date ?? ''),
