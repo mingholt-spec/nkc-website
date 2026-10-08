@@ -1,15 +1,20 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { NewsPost } from '@/lib/types';
+import type { NewsPost, BlogBanner } from '@/lib/types';
 import ShareButtons from './ShareButtons';
+import { BlogSidebar } from './BlogSidebar';
 import { useLanguage } from '@/lib/language-context';
 import { useT } from '@/lib/translations';
 import { normalizeLinks } from '@/lib/utils';
 
-interface Props { post: NewsPost }
+interface Props {
+  post: NewsPost;
+  sidebarEnabled?: boolean;
+  banners?: BlogBanner[];
+}
 
-export default function BlogPost({ post }: Props) {
+export default function BlogPost({ post, sidebarEnabled = false, banners = [] }: Props) {
   const lang = useLanguage();
   const t = useT('blogPost');
   const title = (lang === 'en' && post.titleEn) ? post.titleEn : post.title;
@@ -21,8 +26,14 @@ export default function BlogPost({ post }: Props) {
     ? new Date(post.publishedAt).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
 
+  // Respektera showBanners per inlägg, samma som bjj-premium/components/public/PublicBlogPost.tsx.
+  const sidebarBanners = banners.filter(b => b.isActive && b.position === 'sidebar');
+  const postShowBanners = post.showBanners !== false;
+  const showSidebar = sidebarEnabled && sidebarBanners.length > 0 && postShowBanners;
+
   return (
-    <article className="mx-auto max-w-3xl px-4 py-12">
+    <div className={`mx-auto px-4 py-12 ${showSidebar ? 'max-w-6xl flex flex-col lg:flex-row gap-8' : 'max-w-3xl'}`}>
+      <article className={showSidebar ? 'flex-1 min-w-0' : ''}>
       {/* Breadcrumb */}
       <nav className="text-sm text-zinc-600 dark:text-zinc-300 mb-6">
         <Link href="/blogg" className="hover:text-zinc-900 dark:hover:text-white">{t.blog}</Link>
@@ -105,5 +116,12 @@ export default function BlogPost({ post }: Props) {
         backLabel={t.back}
       />
     </article>
+
+      {showSidebar && (
+        <div className="lg:sticky lg:top-6 lg:self-start">
+          <BlogSidebar banners={banners} />
+        </div>
+      )}
+    </div>
   );
 }

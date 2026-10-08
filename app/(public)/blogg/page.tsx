@@ -16,11 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BlogListPage() {
-  const posts = await getBlogPosts(50);
+  const [posts, config] = await Promise.all([getBlogPosts(50), getWebsiteConfig()]);
   return (
     <>
       <ClientTitleOverride enTitle="Blog" />
-      <BlogList posts={posts} />
+      <BlogList posts={posts} sidebarEnabled={config?.blogConfig?.sidebarEnabled} banners={config?.blogConfig?.banners} />
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getBlogPostBySlug, getBlogPosts, getClubConfig } from '@/lib/data';
+import { getBlogPostBySlug, getBlogPosts, getClubConfig, getWebsiteConfig } from '@/lib/data';
 import { slugifyCategory } from '@/lib/utils';
 import { buildBlogPostingSchema, buildBreadcrumbListSchema } from '@/lib/jsonLd';
 import BlogPost from '@/components/blog/BlogPost';
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const [post, club] = await Promise.all([getBlogPostBySlug(slug), getClubConfig()]);
+  const [post, club, config] = await Promise.all([getBlogPostBySlug(slug), getClubConfig(), getWebsiteConfig()]);
   if (!post || !post.isPublished) notFound();
 
   const canonicalCategory = slugifyCategory(post.category ?? 'okategoriserat');
@@ -67,7 +67,7 @@ export default async function BlogPostPage({ params }: Props) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       )}
       <ClientTitleOverride enTitle={post.titleEn} />
-      <BlogPost post={post} />
+      <BlogPost post={post} sidebarEnabled={config?.blogConfig?.sidebarEnabled} banners={config?.blogConfig?.banners} />
     </>
   );
 }

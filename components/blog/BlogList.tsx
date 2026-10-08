@@ -1,24 +1,58 @@
 'use client';
+import { Fragment } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import type { NewsPost } from '@/lib/types';
+import type { NewsPost, BlogBanner } from '@/lib/types';
 import { useLanguage } from '@/lib/language-context';
 import { useT } from '@/lib/translations';
 import { slugifyCategory } from '@/lib/utils';
+import { BlogSidebar, InlineBanner } from './BlogSidebar';
 
-interface Props { posts: NewsPost[] }
+interface Props {
+  posts: NewsPost[];
+  sidebarEnabled?: boolean;
+  banners?: BlogBanner[];
+}
 
-export default function BlogList({ posts }: Props) {
+export default function BlogList({ posts, sidebarEnabled = false, banners = [] }: Props) {
   const t = useT('blogList');
+
+  // Samma placeringslogik som bjj-premium/components/public/PublicBlogList.tsx:
+  // sidofältet kräver minst en aktiv sidebar-banner, annars faller listan
+  // tillbaka till fullbredd. Inline-banners (en eller flera, roterande) visas
+  // var 4:e inlägg när sidofältet är synligt, annars var 6:e.
+  const sidebarBanners = banners.filter(b => b.isActive && b.position === 'sidebar');
+  const inlineBanners = banners.filter(b => b.isActive && b.position === 'inline');
+  const showSidebar = sidebarEnabled && sidebarBanners.length > 0;
+  const inlineEvery = showSidebar ? 4 : 6;
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
+    <div className="mx-auto max-w-6xl px-4 py-12">
       <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-8">{t.heading}</h1>
-      <div className="grid gap-8 sm:grid-cols-2">
-        {posts.map(post => <PostCard key={post.id} post={post} />)}
+      <div className={showSidebar ? 'flex flex-col lg:flex-row gap-8' : ''}>
+        <div className="flex-1 min-w-0">
+          <div className={`grid gap-8 ${showSidebar ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
+            {posts.map((post, idx) => (
+              <Fragment key={post.id}>
+                <PostCard post={post} />
+                {inlineBanners.length > 0 && (idx + 1) % inlineEvery === 0 && (
+                  <div className={showSidebar ? 'sm:col-span-2' : 'sm:col-span-2 lg:col-span-3'}>
+                    <InlineBanner banner={inlineBanners[Math.floor(idx / inlineEvery) % inlineBanners.length]} />
+                  </div>
+                )}
+              </Fragment>
+            ))}
+          </div>
+          {posts.length === 0 && (
+            <p className="text-zinc-600 dark:text-zinc-300 text-center py-20">{t.empty}</p>
+          )}
+        </div>
+        {showSidebar && (
+          <div className="lg:sticky lg:top-6 lg:self-start">
+            <BlogSidebar banners={banners} />
+          </div>
+        )}
       </div>
-      {posts.length === 0 && (
-        <p className="text-zinc-600 dark:text-zinc-300 text-center py-20">{t.empty}</p>
-      )}
     </div>
   );
 }
