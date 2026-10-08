@@ -118,7 +118,7 @@ export default function BlogPost({ post, sidebarEnabled = false, banners = [] }:
     </article>
 
       {showSidebar && (
-        <div className="lg:sticky lg:top-6 lg:self-start">
+        <div className="lg:sticky lg:top-24 lg:self-start">
           <BlogSidebar banners={banners} />
         </div>
       )}
