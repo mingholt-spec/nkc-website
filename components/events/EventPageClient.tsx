@@ -477,11 +477,17 @@ export default function EventPageClient({ campaign }: Props) {
                         key={day.date}
                         type="button"
                         onClick={() => toggleAttendingDay(day.date)}
-                        className={`p-3 rounded-xl border-2 text-left font-bold text-xs transition-all ${
-                          isSelected ? 'text-zinc-900 dark:text-white' : 'border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:border-zinc-300'
+                        aria-pressed={isSelected}
+                        className={`flex items-center gap-2.5 p-3 rounded-xl border-2 text-left font-bold text-xs transition-all ${
+                          isSelected ? 'text-white shadow-md' : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300'
                         }`}
-                        style={isSelected ? { borderColor: accent ?? '#e50401', backgroundColor: `${accent ?? '#e50401'}0d` } : undefined}
+                        style={isSelected ? { borderColor: accent ?? '#e50401', backgroundColor: accent ?? '#e50401' } : undefined}
                       >
+                        <span className={`shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center ${isSelected ? 'border-white bg-white/20' : 'border-zinc-300 dark:border-zinc-600'}`}>
+                          {isSelected && (
+                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                          )}
+                        </span>
                         {formatDateShort(day.date, locale)} · {day.time}{day.endTime ? `–${day.endTime}` : ''}
                       </button>
                     );
