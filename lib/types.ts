@@ -462,7 +462,10 @@ export interface ClubConfig {
 
 export interface CampaignFormField {
   id: string;
-  type: 'text' | 'email' | 'phone' | 'guardianInfo';
+  /** 'daySelect' ignores name/label — options come from the event's own
+   *  eventDetails.schedule, value is always submitted under the fixed key
+   *  `attendingDays` (comma-joined dates). Mirrors bjj-premium's FormBlock. */
+  type: 'text' | 'email' | 'phone' | 'guardianInfo' | 'daySelect';
   name: string;
   label: string;
   /** Shown to visitors who've selected English. Falls back to `label` if unset. */
@@ -503,6 +506,9 @@ export interface Campaign {
     schedule: CampaignScheduleDay[]; classId: string;
     paymentLink?: string; stripePriceId?: string;
     registrationCloseDate?: string;
+    /** Pris per dagkombination för flerdagarsevent — mirrors
+     *  bjj-premium's types/core.ts Campaign.eventDetails.dayComboPricing. */
+    dayComboPricing?: { comboKey: string; price: number }[];
   };
   guestInstructorInviteId?: string;
   guestProducts?: string[];

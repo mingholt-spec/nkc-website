@@ -8,6 +8,7 @@ import { useLanguage } from '@/lib/language-context';
 import { useT } from '@/lib/translations';
 import { BlockRenderer } from '@/components/PageRenderer';
 import LeadFormBlock from '@/components/blocks/LeadFormBlock';
+import { resolveComboPrice } from '@/lib/dayCombos';
 
 
 interface Props {
@@ -185,7 +186,20 @@ export default function EventPageClient({ campaign }: Props) {
   const schedule = (eventDetails?.schedule ?? []) as CampaignScheduleDay[];
   const hasSchedule = campaign.goal === 'event' && schedule.length > 0;
   const price = eventDetails?.price ?? 0;
-  const isPaid = campaign.goal === 'event' && price > 0;
+
+  // Dagväljare för flerdagarsevent — null = "inte rört ännu", tolkas som ALLA
+  // dagar valda (opt-out, samma princip som bjj-premium:s useRegistrationForm.ts).
+  const [selectedDays, setSelectedDays] = useState<string[] | null>(null);
+  const effectiveSelectedDays = selectedDays ?? schedule.map(d => d.date);
+  const toggleAttendingDay = (date: string) => {
+    setSelectedDays(prev => {
+      const current = prev ?? schedule.map(d => d.date);
+      const next = current.includes(date) ? current.filter(d => d !== date) : [...current, date];
+      return next.length === 0 ? prev : next;
+    });
+  };
+  const effectivePrice = resolveComboPrice(effectiveSelectedDays.join(','), eventDetails?.dayComboPricing, price);
+  const isPaid = campaign.goal === 'event' && effectivePrice > 0;
   const maxAttendees = eventDetails?.maxAttendees ?? 0;
   const registrationCount = liveRegistrationCount ?? campaign.registrationCount ?? 0;
   const waitlistEnabled = liveWaitlistEnabled ?? campaign.waitlistEnabled ?? false;
@@ -418,8 +432,39 @@ export default function EventPageClient({ campaign }: Props) {
       </h2>
       <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
         {formConfig.map(field => (
-          <div key={field.id} className={!compact && field.type === 'guardianInfo' ? 'sm:col-span-2' : ''}>
-            {field.type === 'guardianInfo' ? (
+          <div key={field.id} className={!compact && (field.type === 'guardianInfo' || field.type === 'daySelect') ? 'sm:col-span-2' : ''}>
+            {field.type === 'daySelect' ? (
+              <div className="space-y-2">
+                <input type="hidden" name="attendingDays" value={effectiveSelectedDays.join(',')} />
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t.daySelectLabel}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {schedule.map(day => {
+                    const isSelected = effectiveSelectedDays.includes(day.date);
+                    return (
+                      <button
+                        key={day.date}
+                        type="button"
+                        onClick={() => toggleAttendingDay(day.date)}
+                        className={`p-3 rounded-xl border-2 text-left font-bold text-xs transition-all ${
+                          isSelected ? 'text-zinc-900 dark:text-white' : 'border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:border-zinc-300'
+                        }`}
+                        style={isSelected ? { borderColor: accent ?? '#e50401', backgroundColor: `${accent ?? '#e50401'}0d` } : undefined}
+                      >
+                        {formatDateShort(day.date, locale)} · {day.time}{day.endTime ? `–${day.endTime}` : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                  {t.daySelectSummary(
+                    [...effectiveSelectedDays]
+                      .sort()
+                      .map(d => new Date(`${d}T00:00:00`).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'short' }))
+                      .join(' + ')
+                  )}
+                </p>
+              </div>
+            ) : field.type === 'guardianInfo' ? (
               <div className="p-3 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-zinc-800 space-y-2">
                 <p className="text-[9px] font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest mb-1">{t.guardianInfo}</p>
                 <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-3'} gap-2`}>
@@ -468,7 +513,7 @@ export default function EventPageClient({ campaign }: Props) {
           boxShadow: (!isRegistrationClosed && !isSoldOut) ? `0 0 24px ${(accent ?? '#e50401')}30` : undefined,
         }}
       >
-        {submitting ? t.sending : isRegistrationClosed ? t.registrationClosed : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(price) : ((lang === 'sv' && campaign.submitButtonText) || t.register)}
+        {submitting ? t.sending : isRegistrationClosed ? t.registrationClosed : isSoldOut ? t.soldOut : isPaid ? t.payAndRegister(effectivePrice) : ((lang === 'sv' && campaign.submitButtonText) || t.register)}
       </button>
     </form>
     );
@@ -498,7 +543,7 @@ export default function EventPageClient({ campaign }: Props) {
       {(isPaid || maxAttendees > 0) && (
         <div className="pb-4 border-b border-zinc-100 dark:border-zinc-800 space-y-3">
           {isPaid && (
-            <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{price} kr</span>
+            <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{effectivePrice} kr</span>
           )}
           <SocialProofBar />
         </div>
@@ -547,7 +592,7 @@ export default function EventPageClient({ campaign }: Props) {
           hasSchedule={hasSchedule}
           schedule={schedule}
           isPaid={isPaid}
-          price={price}
+          price={effectivePrice}
           maxAttendees={maxAttendees}
           isSoldOut={isSoldOut}
           isUrgent={isUrgent}
@@ -600,7 +645,7 @@ export default function EventPageClient({ campaign }: Props) {
           hasSchedule={hasSchedule}
           schedule={schedule}
           isPaid={isPaid}
-          price={price}
+          price={effectivePrice}
           maxAttendees={maxAttendees}
           isSoldOut={isSoldOut}
           isUrgent={isUrgent}
@@ -678,7 +723,7 @@ export default function EventPageClient({ campaign }: Props) {
                     )}
                     {(isPaid || maxAttendees > 0) && (
                       <div className="mb-6 pb-6 border-b border-zinc-100 dark:border-zinc-800 space-y-3">
-                        {isPaid && <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{price} kr</span>}
+                        {isPaid && <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">{effectivePrice} kr</span>}
                         <SocialProofBar />
                       </div>
                     )}
@@ -697,7 +742,7 @@ export default function EventPageClient({ campaign }: Props) {
           <div className="max-w-4xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
               {isPaid && (
-                <span className="text-lg font-black text-zinc-900 dark:text-white tracking-tight shrink-0">{price} kr</span>
+                <span className="text-lg font-black text-zinc-900 dark:text-white tracking-tight shrink-0">{effectivePrice} kr</span>
               )}
               {maxAttendees > 0 && (
                 <span className={`text-[10px] font-black uppercase tracking-widest shrink-0 ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
