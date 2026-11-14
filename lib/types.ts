@@ -502,13 +502,17 @@ export interface Campaign {
   formTheme?: 'auto' | 'light';
   eventDetails?: {
     price: number; maxAttendees: number;
+    /** Pris för befintliga klubbmedlemmar — mirrors bjj-premium's
+     *  types/core.ts Campaign.eventDetails.memberPrice. Gäller event utan
+     *  flera dagkombinationer; annars styr varje rads egen memberPrice. */
+    memberPrice?: number;
     startDate: string; endDate?: string;
     schedule: CampaignScheduleDay[]; classId: string;
     paymentLink?: string; stripePriceId?: string;
     registrationCloseDate?: string;
     /** Pris per dagkombination för flerdagarsevent — mirrors
      *  bjj-premium's types/core.ts Campaign.eventDetails.dayComboPricing. */
-    dayComboPricing?: { comboKey: string; price: number }[];
+    dayComboPricing?: { comboKey: string; price: number; memberPrice?: number }[];
   };
   guestInstructorInviteId?: string;
   guestProducts?: string[];

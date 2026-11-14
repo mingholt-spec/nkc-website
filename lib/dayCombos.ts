@@ -17,16 +17,32 @@ export function comboKeyFromAttendingDays(attendingDays: string | undefined): st
   return comboKeyFromDates(attendingDays.split(',').filter(Boolean));
 }
 
-/** Slår upp rätt pris för den valda dagkombinationen. Faller tillbaka på
- *  `flatPrice` (dagens beteende) om inga pris-per-kombination är satta, eller
- *  om just den kombinationen saknar en egen rad. */
-export function resolveComboPrice(
-  attendingDays: string | undefined,
-  dayComboPricing: { comboKey: string; price: number }[] | undefined,
-  flatPrice: number,
-): number {
-  if (!dayComboPricing || dayComboPricing.length === 0) return flatPrice;
+export interface ComboPriceRow {
+  comboKey: string;
+  price: number;
+  memberPrice?: number;
+}
+
+/** Slår upp rätt pris för den valda dagkombinationen OCH medlemskapsstatus.
+ *  Faller tillbaka på `flatPrice`/`flatMemberPrice` om inga pris-per-
+ *  kombination är satta, eller om just den kombinationen saknar en egen
+ *  rad. `isMember` kommer här bara från /api/event/check-member-pricing —
+ *  rent informativt (den här sidan gör ingen dynamisk Stripe-checkout). */
+export function resolveComboPrice(params: {
+  attendingDays: string | undefined;
+  dayComboPricing: ComboPriceRow[] | undefined;
+  flatPrice: number;
+  flatMemberPrice?: number;
+  isMember: boolean;
+}): number {
+  const { attendingDays, dayComboPricing, flatPrice, flatMemberPrice, isMember } = params;
+
+  if (!dayComboPricing || dayComboPricing.length === 0) {
+    return isMember && flatMemberPrice !== undefined ? flatMemberPrice : flatPrice;
+  }
+
   const comboKey = comboKeyFromAttendingDays(attendingDays);
   const match = dayComboPricing.find(row => row.comboKey === comboKey);
-  return match ? match.price : flatPrice;
+  if (!match) return flatPrice;
+  return isMember && match.memberPrice !== undefined ? match.memberPrice : match.price;
 }

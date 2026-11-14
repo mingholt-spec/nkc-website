@@ -198,7 +198,39 @@ export default function EventPageClient({ campaign }: Props) {
       return next.length === 0 ? prev : next;
     });
   };
-  const effectivePrice = resolveComboPrice(effectiveSelectedDays.join(','), eventDetails?.dayComboPricing, price);
+
+  // Medlemsprischeck — rent informativt (sidan gör ingen dynamisk Stripe-
+  // checkout), debounced 600ms efter senaste tangenttryck/blur. Bara
+  // relevant om admin faktiskt satt ett medlemspris någonstans för eventet.
+  const hasMemberPricing = eventDetails?.memberPrice !== undefined
+    || !!eventDetails?.dayComboPricing?.some(row => row.memberPrice !== undefined);
+  const [memberCheckEmail, setMemberCheckEmail] = useState('');
+  const [isMember, setIsMember] = useState(false);
+  useEffect(() => {
+    if (!hasMemberPricing || !memberCheckEmail.trim()) {
+      setIsMember(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      fetch('/api/event/check-member-pricing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: memberCheckEmail }),
+      })
+        .then(res => res.json())
+        .then(json => setIsMember(!!json.isMember))
+        .catch(() => setIsMember(false));
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [memberCheckEmail, hasMemberPricing]);
+
+  const effectivePrice = resolveComboPrice({
+    attendingDays: effectiveSelectedDays.join(','),
+    dayComboPricing: eventDetails?.dayComboPricing,
+    flatPrice: price,
+    flatMemberPrice: eventDetails?.memberPrice,
+    isMember,
+  });
   const isPaid = campaign.goal === 'event' && effectivePrice > 0;
   const maxAttendees = eventDetails?.maxAttendees ?? 0;
   const registrationCount = liveRegistrationCount ?? campaign.registrationCount ?? 0;
@@ -469,7 +501,7 @@ export default function EventPageClient({ campaign }: Props) {
                 <p className="text-[9px] font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest mb-1">{t.guardianInfo}</p>
                 <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-3'} gap-2`}>
                   <input name="guardianName" placeholder={t.guardianNamePlaceholder} aria-label={t.guardianNameAria} required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
-                  <input name="guardianEmail" type="email" placeholder={t.guardianEmailPlaceholder} aria-label={t.guardianEmailAria} required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
+                  <input name="guardianEmail" type="email" placeholder={t.guardianEmailPlaceholder} aria-label={t.guardianEmailAria} required={field.required} onBlur={e => setMemberCheckEmail(e.target.value)} className={compact ? sidebarInputClasses : inputClasses} />
                   <input name="guardianPhone" type="tel" placeholder={t.guardianPhonePlaceholder} aria-label={t.guardianPhoneAria} required={field.required} className={compact ? sidebarInputClasses : inputClasses} />
                 </div>
               </div>
@@ -480,6 +512,7 @@ export default function EventPageClient({ campaign }: Props) {
                 placeholder={lang === 'sv' ? field.label : (field.labelEn || field.label)}
                 aria-label={lang === 'sv' ? field.label : (field.labelEn || field.label)}
                 required={field.required}
+                onBlur={field.type === 'email' ? e => setMemberCheckEmail(e.target.value) : undefined}
                 className={compact ? sidebarInputClasses : inputClasses}
               />
             )}
