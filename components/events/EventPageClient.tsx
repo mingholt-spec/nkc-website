@@ -610,7 +610,7 @@ export default function EventPageClient({ campaign }: Props) {
   const renderBlock = (block: PageBlock) => {
     if (block.type === 'eventRegistration') {
       return (
-        <div key={block.id} ref={!useSidebarLayout ? formRef : undefined} className="max-w-2xl mx-auto px-4 sm:px-8 py-6" style={{ position: 'relative', zIndex: 1 }}>
+        <div id="anmalan" key={block.id} ref={!useSidebarLayout ? formRef : undefined} className="max-w-2xl mx-auto px-4 sm:px-8 py-6" style={{ position: 'relative', zIndex: 1 }}>
           {FormCard({ compact: true })}
         </div>
       );
@@ -716,7 +716,13 @@ export default function EventPageClient({ campaign }: Props) {
 
       {/* MAIN CONTENT */}
       {useSidebarLayout ? (
-        <main className={`relative z-10 ${hasHtmlBlocks ? 'w-full max-w-[100vw] overflow-x-hidden' : 'max-w-6xl mx-auto px-4 sm:px-8 py-6 md:py-10'}`}>
+        // id="anmalan": AI-designern kan (trots systeminstruktionen) hitta på en
+        // CTA-knapp med href="#anmalan" mot anmälningsformuläret — denna id ser
+        // till att den länken faktiskt landar här. Sitter på HELA layouten, inte
+        // på de två formRef-wrapprarna nedanför, eftersom BÅDA (mobil + desktop-
+        // sidopanel) alltid finns i DOM:en samtidigt (dolda via CSS) — en id på
+        // varje hade gett dubbletter (B103).
+        <main id="anmalan" className={`relative z-10 ${hasHtmlBlocks ? 'w-full max-w-[100vw] overflow-x-hidden' : 'max-w-6xl mx-auto px-4 sm:px-8 py-6 md:py-10'}`}>
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left: content blocks */}
             <div className="flex-1 min-w-0 overflow-hidden">
@@ -747,7 +753,7 @@ export default function EventPageClient({ campaign }: Props) {
               </div>
               {/* Fallback position when no eventRegistration block is placed */}
               {!hasEventRegistrationBlock && (
-                <div ref={formRef} className="max-w-2xl mx-auto px-4 sm:px-8 py-10 md:py-16" style={{ position: 'relative', zIndex: 1 }}>
+                <div id="anmalan" ref={formRef} className="max-w-2xl mx-auto px-4 sm:px-8 py-10 md:py-16" style={{ position: 'relative', zIndex: 1 }}>
                   <div className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-6 sm:p-10" style={formCardStyle}>
                     {renderForm(false)}
                   </div>
@@ -761,7 +767,7 @@ export default function EventPageClient({ campaign }: Props) {
               {!hasEventRegistrationBlock && (
                 <>
                   <div className="mx-6 sm:mx-10 border-t border-zinc-100 dark:border-zinc-800" />
-                  <div ref={formRef} className="px-6 sm:px-10 py-8 sm:py-10">
+                  <div id="anmalan" ref={formRef} className="px-6 sm:px-10 py-8 sm:py-10">
                     {hasSchedule && (
                       <div className="mb-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                         <ScheduleCard />
