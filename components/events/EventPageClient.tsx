@@ -139,7 +139,14 @@ export default function EventPageClient({ campaign }: Props) {
   const lang = useLanguage();
   const t = useT('eventPage');
   const { pageConfig, formConfig, eventDetails } = campaign;
-  const accent = campaign.accentColor ?? null;
+  // REGRESSION (B102, 2026-11-15): nya kampanjer har accentColor: '' som
+  // default (useCampaignEditor.ts), inte undefined — ?? triggar bara på
+  // null/undefined, inte tomma strängar, så `accent` blev '' istället för
+  // null. Varje `accent ?? '#e50401'`-fallback nedanför slog då ALDRIG in
+  // (tom sträng är redan "definierad"), vilket gav tomma style-värden som
+  // React tyst struntar i att rendera — osynlig bakgrund/kant/text-färg på
+  // skicka-knappen och dagval-korten. || fångar tomma strängar också.
+  const accent = campaign.accentColor || null;
 
   const title = (lang === 'en' && campaign.pageConfig_titleEn) ? campaign.pageConfig_titleEn : pageConfig.title;
   const description = (lang === 'en' && campaign.pageConfig_descriptionEn) ? campaign.pageConfig_descriptionEn : pageConfig.description;
