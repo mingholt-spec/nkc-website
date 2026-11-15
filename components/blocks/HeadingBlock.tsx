@@ -40,7 +40,7 @@ export default function HeadingBlock({ block }: Props) {
   return (
     <div id={`block-${block.id}`} className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'}`} style={sectionStyle}>
       {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
-      <Tag className={`font-bold ${sizeClass}`} style={headingStyle}>{text}</Tag>
+      <Tag className={`font-bold ${sizeClass}`} style={headingStyle} dangerouslySetInnerHTML={{ __html: text }} />
     </div>
   );
 }
