@@ -49,9 +49,19 @@ export default function CtaBlock({ block }: Props) {
       <div className="relative z-10 mx-auto max-w-2xl">
         <h2 ref={titleRef} className="text-3xl font-bold" style={cleanTitleStyle}>{block.title}</h2>
         {block.subtitle && <p ref={subtitleRef} className="mt-3 text-lg text-white/80" style={cleanSubtitleStyle}>{block.subtitle}</p>}
-        <Link href={block.buttonUrl} className="mt-6 inline-block px-8 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors">
-          {block.buttonText}
-        </Link>
+        {/* block.buttonUrl !== '#': "#" var knappens gamla standardvärde innan admin
+            fyllt i en riktig länk (B104) — en sådan länk bara skrollar till sidans
+            topp, ser ut som den fungerar men leder fel. bjj-premiums admin-
+            förhandsgranskning hade redan ett liknande (ofullständigt) skydd. */}
+        {block.buttonText && block.buttonUrl && block.buttonUrl !== '#' ? (
+          <Link href={block.buttonUrl} className="mt-6 inline-block px-8 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors">
+            {block.buttonText}
+          </Link>
+        ) : block.buttonText ? (
+          <span className="mt-6 inline-block px-8 py-3 rounded-lg bg-red-600 text-white font-semibold opacity-50 cursor-not-allowed">
+            {block.buttonText}
+          </span>
+        ) : null}
       </div>
     </section>
   );

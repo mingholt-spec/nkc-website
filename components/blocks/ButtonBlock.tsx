@@ -19,12 +19,20 @@ export default function ButtonBlock({ block }: Props) {
   const hasCustomPadding = hasSpacing(block.padding);
   const sectionStyle = { ...spacingToStyle(block.padding, block.margin, { x: '24px', y: '16px' }), ...blockStyleToCSS(block.style) };
   const scopedCss = blockStyleToScopedCSS(block.id, block.style);
+  const classNames = `inline-flex rounded-lg font-semibold transition-colors ${variant} ${size}`;
+  // "#" var knappens gamla standardvärde innan admin hunnit fylla i en
+  // riktig länk (B104, mirror av bjj-premiums admin-förhandsgranskning) —
+  // en sådan länk skrollar bara till sidans topp, ser ut som den "fungerar"
+  // men leder fel. Visa den overksam istället för tyst missvisande.
+  const hasRealUrl = !!block.url && block.url !== '#';
   return (
     <div id={`block-${block.id}`} className={`mx-auto max-w-4xl ${hasCustomPadding ? '' : 'px-6 py-4'} flex ${align}`} style={sectionStyle}>
       {scopedCss && <style dangerouslySetInnerHTML={{ __html: scopedCss }} />}
-      <Link href={block.url} className={`inline-flex rounded-lg font-semibold transition-colors ${variant} ${size}`}>
-        {block.text}
-      </Link>
+      {hasRealUrl ? (
+        <Link href={block.url} className={classNames}>{block.text}</Link>
+      ) : (
+        <span className={`${classNames} opacity-50 cursor-not-allowed`}>{block.text}</span>
+      )}
     </div>
   );
 }
