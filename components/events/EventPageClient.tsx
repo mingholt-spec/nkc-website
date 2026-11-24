@@ -266,7 +266,17 @@ export default function EventPageClient({ campaign }: Props) {
   const spotsLeft = maxAttendees > 0 ? maxAttendees - registrationCount : 0;
   const bookingPercent = maxAttendees > 0 ? Math.round((registrationCount / maxAttendees) * 100) : 0;
   const isUrgent = maxAttendees > 0 && bookingPercent >= 75;
-  const isSoldOut = maxAttendees > 0 && registrationCount >= maxAttendees;
+  // B105: för flerdagarsevent får "slutsålt" ALDRIG bygga på den delade, flata
+  // registrationCount — den passerar maxAttendees långt innan någon enskild
+  // dag faktiskt är full (t.ex. 10 personer bara dag 1 + 10 bara dag 2 = 20
+  // totalt, men 10/20 ledigt på VARJE dag). isSoldOut (som styr om
+  // anmälningsformuläret eller den gamla, dagslösa väntelistan visas) är
+  // bara sant om SAMTLIGA schemalagda dagar är fulla var för sig.
+  const isSoldOut = maxAttendees > 0 && (
+    schedule.length > 1
+      ? schedule.every(d => (registrationCountByDay[d.date] ?? 0) >= maxAttendees)
+      : registrationCount >= maxAttendees
+  );
   const closeDate = eventDetails?.registrationCloseDate;
   const isRegistrationClosed = !!closeDate && new Date(closeDate) < new Date();
 
@@ -326,6 +336,11 @@ export default function EventPageClient({ campaign }: Props) {
   };
 
   // ── Schedule card ──
+  // B105: en global X/maxAttendees-siffra blir missvisande för flerdagarsevent
+  // (blandar ihop två olika dagars beläggning mot en gemensam pott som inte
+  // längre finns) — visa platser kvar PER DAG i schemat istället när det är
+  // mer än en dag, och göm då den globala stapeln i SocialProofBar nedan.
+  const isMultiDay = schedule.length > 1;
   const ScheduleCard = () => {
     if (!hasSchedule) return null;
     return (
@@ -336,19 +351,32 @@ export default function EventPageClient({ campaign }: Props) {
           </svg>
           <span className="text-[10px] font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest">{t.schedule}</span>
         </div>
-        {schedule.map((day, i) => (
+        {schedule.map((day, i) => {
+          const dayCount = registrationCountByDay[day.date] ?? 0;
+          const dayFull = isMultiDay && maxAttendees > 0 && dayCount >= maxAttendees;
+          const daySpotsLeft = maxAttendees > 0 ? maxAttendees - dayCount : 0;
+          return (
           <div key={i} className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-xl">
             <span className="text-sm font-black text-zinc-900 dark:text-white">{formatDateShort(day.date, locale)}</span>
-            <span className="text-xs font-bold text-zinc-600 dark:text-zinc-300">{day.time}{day.endTime ? ` – ${day.endTime}` : ''}</span>
+            <span className="flex items-center gap-2">
+              <span className="text-xs font-bold text-zinc-600 dark:text-zinc-300">{day.time}{day.endTime ? ` – ${day.endTime}` : ''}</span>
+              {isMultiDay && maxAttendees > 0 && (
+                dayFull
+                  ? <span className="text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">{t.dayFullWaitlistBadge}</span>
+                  : <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400">{t.spotsLeft(daySpotsLeft)}</span>
+              )}
+            </span>
           </div>
-        ))}
+          );
+        })}
       </div>
     );
   };
 
-  // ── Social proof bar ──
+  // ── Social proof bar ── (för flerdagarsevent visas platser kvar per dag i
+  // ScheduleCard ovan istället — en global siffra skulle blanda ihop dagarna)
   const SocialProofBar = () => {
-    if (maxAttendees <= 0) return null;
+    if (maxAttendees <= 0 || isMultiDay) return null;
     if (isSoldOut) {
       return (
         <div className="flex flex-col gap-1">
@@ -834,7 +862,7 @@ export default function EventPageClient({ campaign }: Props) {
               {isPaid && (
                 <span className="text-lg font-black text-zinc-900 dark:text-white tracking-tight shrink-0">{effectivePrice} kr</span>
               )}
-              {maxAttendees > 0 && (
+              {maxAttendees > 0 && !isMultiDay && (
                 <span className={`text-[10px] font-black uppercase tracking-widest shrink-0 ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-300'}`}>
                   {isUrgent ? t.fewSpotsLeft : t.spotsLeft(spotsLeft)}
                 </span>
