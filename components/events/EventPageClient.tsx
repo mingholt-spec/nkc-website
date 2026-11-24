@@ -99,19 +99,43 @@ function QuickInfoBar({
     <div className={`border-b ${hasHtmlBlocks ? 'bg-black/60 backdrop-blur-xl border-white/10' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'}`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-8 py-4 flex flex-wrap items-center justify-center gap-4 sm:gap-8">
         {hasSchedule && schedule.map((day, i) => {
-          const isDayFull = maxAttendees > 0 && (registrationCountByDay?.[day.date] ?? 0) >= maxAttendees;
+          const isMultiDay = schedule.length > 1;
+          const dayCount = registrationCountByDay?.[day.date] ?? 0;
+          const dayFull = isMultiDay && maxAttendees > 0 && dayCount >= maxAttendees;
+          const daySpotsLeft = maxAttendees > 0 ? maxAttendees - dayCount : 0;
+          const dayBookingPercent = maxAttendees > 0 ? Math.round((dayCount / maxAttendees) * 100) : 0;
+          const dayIsUrgent = maxAttendees > 0 && dayBookingPercent >= 75;
           return (
-          <div key={i} className="flex items-center gap-2">
-            <svg className="w-4 h-4 shrink-0" style={{ color: accent ?? '#e50401' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-wider">
-              {formatDateShort(day.date, locale)} {day.time}{day.endTime ? `–${day.endTime}` : ''}
-            </span>
-            {isDayFull && dayFullWaitlistBadge && (
-              <span className="text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">
-                {dayFullWaitlistBadge}
+          <div key={i} className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 shrink-0" style={{ color: accent ?? '#e50401' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-wider">
+                {formatDateShort(day.date, locale)} {day.time}{day.endTime ? `–${day.endTime}` : ''}
               </span>
+            </div>
+            {/* B105: per-dags-stapel, samma visuella mönster som den globala
+                stapeln nedan hade innan — en stapel per dag istället för en
+                delad siffra för hela eventet. */}
+            {isMultiDay && maxAttendees > 0 && (
+              dayFull ? (
+                <span className="text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">
+                  {dayFullWaitlistBadge}
+                </span>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-black uppercase tracking-wide ${dayIsUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                    {dayIsUrgent ? fewSpotsLeftLabel : spotsLeftLabel(daySpotsLeft)}
+                  </span>
+                  <div className="w-14 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${dayIsUrgent ? 'bg-red-500' : ''}`}
+                      style={{ width: `${Math.min(dayBookingPercent, 100)}%`, ...(!dayIsUrgent ? { backgroundColor: accent ?? '#e50401' } : {}) }}
+                    />
+                  </div>
+                </div>
+              )
             )}
           </div>
           );
@@ -122,7 +146,9 @@ function QuickInfoBar({
             <span className="text-lg font-black tracking-tight" style={{ color: accent ?? '#e50401' }}>{price} kr</span>
           </div>
         )}
-        {maxAttendees > 0 && !isSoldOut && (
+        {/* Global stapel — bara relevant för enkeldagsevent (eller event utan
+            schema alls). Flerdagarsevent visar en stapel PER DAG ovan istället. */}
+        {schedule.length <= 1 && maxAttendees > 0 && !isSoldOut && (
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -140,7 +166,7 @@ function QuickInfoBar({
             </div>
           </div>
         )}
-        {isSoldOut && (
+        {schedule.length <= 1 && isSoldOut && (
           <span className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{soldOutLabel}</span>
         )}
       </div>
@@ -355,17 +381,33 @@ export default function EventPageClient({ campaign }: Props) {
           const dayCount = registrationCountByDay[day.date] ?? 0;
           const dayFull = isMultiDay && maxAttendees > 0 && dayCount >= maxAttendees;
           const daySpotsLeft = maxAttendees > 0 ? maxAttendees - dayCount : 0;
+          const dayBookingPercent = maxAttendees > 0 ? Math.round((dayCount / maxAttendees) * 100) : 0;
+          const dayIsUrgent = maxAttendees > 0 && dayBookingPercent >= 75;
           return (
-          <div key={i} className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-xl">
-            <span className="text-sm font-black text-zinc-900 dark:text-white">{formatDateShort(day.date, locale)}</span>
-            <span className="flex items-center gap-2">
+          <div key={i} className="bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-xl space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-black text-zinc-900 dark:text-white">{formatDateShort(day.date, locale)}</span>
               <span className="text-xs font-bold text-zinc-600 dark:text-zinc-300">{day.time}{day.endTime ? ` – ${day.endTime}` : ''}</span>
-              {isMultiDay && maxAttendees > 0 && (
-                dayFull
-                  ? <span className="text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">{t.dayFullWaitlistBadge}</span>
-                  : <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-400">{t.spotsLeft(daySpotsLeft)}</span>
-              )}
-            </span>
+            </div>
+            {/* B105: samma stapel-mönster som den globala SocialProofBar
+                tidigare visade — en per dag istället för en delad siffra. */}
+            {isMultiDay && maxAttendees > 0 && (
+              dayFull ? (
+                <span className="inline-block text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">{t.dayFullWaitlistBadge}</span>
+              ) : (
+                <div className="space-y-1">
+                  <span className={`text-[10px] font-black uppercase tracking-wide ${dayIsUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                    {dayIsUrgent ? t.fewSpotsLeft : t.spotsLeft(daySpotsLeft)}
+                  </span>
+                  <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${dayIsUrgent ? 'bg-red-500' : ''}`}
+                      style={{ width: `${Math.min(dayBookingPercent, 100)}%`, ...(!dayIsUrgent ? { backgroundColor: accent ?? '#e50401' } : {}) }}
+                    />
+                  </div>
+                </div>
+              )
+            )}
           </div>
           );
         })}
