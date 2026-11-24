@@ -126,7 +126,7 @@ function QuickInfoBar({
               ) : (
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-black uppercase tracking-wide ${dayIsUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                    {dayIsUrgent ? fewSpotsLeftLabel : spotsLeftLabel(daySpotsLeft)}
+                    {spotsLeftLabel(daySpotsLeft)}
                   </span>
                   <div className="w-14 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
                     <div
@@ -397,7 +397,7 @@ export default function EventPageClient({ campaign }: Props) {
               ) : (
                 <div className="space-y-1">
                   <span className={`text-[10px] font-black uppercase tracking-wide ${dayIsUrgent ? 'text-red-600 dark:text-red-400' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                    {dayIsUrgent ? t.fewSpotsLeft : t.spotsLeft(daySpotsLeft)}
+                    {t.spotsLeft(daySpotsLeft)}
                   </span>
                   <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
                     <div
