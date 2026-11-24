@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { splitAttendingDays } from '@/lib/dayCapacity';
 
 function todayString(): string {
   return new Date().toISOString().slice(0, 10);
@@ -34,12 +35,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ alreadyRegistered: true });
     }
 
-    // Read campaign to get auto-tags and registration deadline
+    // Read campaign to get auto-tags, registration deadline, and (B105) per-day capacity state
     let campaignTags: string[] = [];
+    let maxAttendees = 0;
+    let registrationCountByDay: Record<string, number> | undefined;
     try {
       const campSnap = await db.collection('campaigns').doc(campaignId).get();
       if (campSnap.exists) {
         campaignTags = campSnap.data()?.tags ?? [];
+        maxAttendees = campSnap.data()?.eventDetails?.maxAttendees ?? 0;
+        registrationCountByDay = campSnap.data()?.registrationCountByDay;
         const closeDate = campSnap.data()?.eventDetails?.registrationCloseDate as string | undefined;
         if (closeDate && new Date(closeDate) < new Date()) {
           return NextResponse.json({ registrationClosed: true }, { status: 400 });
@@ -47,7 +52,20 @@ export async function POST(req: NextRequest) {
       }
     } catch { /* ignore — tags are best-effort */ }
 
-    const STANDARD = new Set(['campaignId', 'campaignName', 'firstName', 'lastName', 'email', 'phone', 'guardianName', 'guardianEmail', 'guardianPhone', 'gdprConsentDate', 'preOrders', 'status']);
+    // B105: dela upp valda dagar i bekräftade/väntelistade mot kampanjens PER-DAGS
+    // kapacitet. Körs bara när formuläret faktiskt skickat med attendingDays (event
+    // med dagväljare) — berör inte lead-capture eller enkeldagsevent utan daySelect.
+    const selectedDays = (body.attendingDays ?? '').split(',').filter(Boolean);
+    let confirmedDays = selectedDays;
+    let waitlistedDays: string[] = [];
+    if (selectedDays.length > 0) {
+      const split = splitAttendingDays(selectedDays, maxAttendees, registrationCountByDay);
+      confirmedDays = split.confirmedDays;
+      waitlistedDays = split.waitlistedDays;
+    }
+    const isFullyWaitlisted = selectedDays.length > 0 && confirmedDays.length === 0;
+
+    const STANDARD = new Set(['campaignId', 'campaignName', 'firstName', 'lastName', 'email', 'phone', 'guardianName', 'guardianEmail', 'guardianPhone', 'gdprConsentDate', 'preOrders', 'status', 'attendingDays', 'waitlistedDays']);
     const customFields: Record<string, string> = {};
     for (const [key, value] of Object.entries(body)) {
       if (!STANDARD.has(key) && typeof value === 'string' && value.trim()) {
@@ -95,6 +113,14 @@ export async function POST(req: NextRequest) {
         tags: mergedTags,
         eventHistory: mergedHistory,
         source: 'nkc-website',
+        // B105: reflekterar DENNA registrerings utfall. Flippar bara ut ur
+        // 'waitlisted' om den var satt sen innan och nu blivit (del-)bekräftad —
+        // rör annars inte en admin-satt CRM-status (t.ex. 'converted').
+        ...(selectedDays.length > 0 ? {
+          attendingDays: selectedDays.join(','),
+          waitlistedDays: waitlistedDays.length > 0 ? waitlistedDays.join(',') : FieldValue.delete(),
+          status: isFullyWaitlisted ? 'waitlisted' : existingData.status === 'waitlisted' ? 'new' : existingData.status,
+        } : {}),
         ...(Object.keys(customFields).length > 0 ? { customFields: { ...(existingData.customFields ?? {}), ...customFields } } : {}),
       });
     } else {
@@ -113,13 +139,17 @@ export async function POST(req: NextRequest) {
         eventHistory: [eventEntry],
         submittedAt: now,
         gdprConsentDate: now,
-        status: 'new',
+        status: isFullyWaitlisted ? 'waitlisted' : 'new',
         source: 'nkc-website',
+        ...(selectedDays.length > 0 ? {
+          attendingDays: selectedDays.join(','),
+          ...(waitlistedDays.length > 0 ? { waitlistedDays: waitlistedDays.join(',') } : {}),
+        } : {}),
         ...(Object.keys(customFields).length > 0 ? { customFields } : {}),
       });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, confirmedDays, waitlistedDays });
   } catch (error) {
     console.error('[event/register]', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

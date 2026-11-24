@@ -84,16 +84,23 @@ interface QuickInfoBarProps {
   fewSpotsLeftLabel: string;
   spotsLeftLabel: (n: number) => string;
   soldOutLabel: string;
+  /** B105: per-dags-kapacitet — visar en väntelista-badge per dagsrad istället
+   *  för bara en global "platser kvar"-siffra för hela eventet. */
+  registrationCountByDay?: Record<string, number>;
+  dayFullWaitlistBadge?: string;
 }
 function QuickInfoBar({
   hasSchedule, schedule, isPaid, price, maxAttendees, isSoldOut, isUrgent, spotsLeft,
   bookingPercent, accent, hasHtmlBlocks, locale, priceLabel, fewSpotsLeftLabel, spotsLeftLabel, soldOutLabel,
+  registrationCountByDay, dayFullWaitlistBadge,
 }: QuickInfoBarProps) {
   if (!hasSchedule && !isPaid && maxAttendees <= 0) return null;
   return (
     <div className={`border-b ${hasHtmlBlocks ? 'bg-black/60 backdrop-blur-xl border-white/10' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'}`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-8 py-4 flex flex-wrap items-center justify-center gap-4 sm:gap-8">
-        {hasSchedule && schedule.map((day, i) => (
+        {hasSchedule && schedule.map((day, i) => {
+          const isDayFull = maxAttendees > 0 && (registrationCountByDay?.[day.date] ?? 0) >= maxAttendees;
+          return (
           <div key={i} className="flex items-center gap-2">
             <svg className="w-4 h-4 shrink-0" style={{ color: accent ?? '#e50401' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -101,8 +108,14 @@ function QuickInfoBar({
             <span className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-wider">
               {formatDateShort(day.date, locale)} {day.time}{day.endTime ? `–${day.endTime}` : ''}
             </span>
+            {isDayFull && dayFullWaitlistBadge && (
+              <span className="text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">
+                {dayFullWaitlistBadge}
+              </span>
+            )}
           </div>
-        ))}
+          );
+        })}
         {isPaid && (
           <div className="flex items-center gap-2">
             <span className="text-xs font-black text-zinc-600 dark:text-zinc-300 uppercase tracking-widest">{priceLabel}</span>
@@ -158,12 +171,17 @@ export default function EventPageClient({ campaign }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  /** B105: satt bara om minst en vald dag hamnade på väntelista (delad
+   *  anmälan) — tomt = allt bekräftat precis som idag. */
+  const [waitlistedDays, setWaitlistedDays] = useState<string[]>([]);
   const formRef = useRef<HTMLDivElement>(null);
 
   // Live counts from Firestore
   const [liveRegistrationCount, setLiveRegistrationCount] = useState<number | null>(null);
   const [liveWaitlistEnabled, setLiveWaitlistEnabled] = useState<boolean | null>(null);
   const [liveWaitlistCount, setLiveWaitlistCount] = useState<number | null>(null);
+  /** B105: per-dags-kapacitet — driver dagväljarens "fullt/väntelista"-märkning per dag. */
+  const [liveRegistrationCountByDay, setLiveRegistrationCountByDay] = useState<Record<string, number> | null>(null);
 
   // Waitlist form state
   const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
@@ -179,6 +197,7 @@ export default function EventPageClient({ campaign }: Props) {
       if (typeof data.registrationCount === 'number') setLiveRegistrationCount(data.registrationCount);
       setLiveWaitlistEnabled(Boolean(data.waitlistEnabled));
       if (typeof data.waitlistCount === 'number') setLiveWaitlistCount(data.waitlistCount);
+      if (data.registrationCountByDay) setLiveRegistrationCountByDay(data.registrationCountByDay);
     });
     return () => unsubscribe();
   }, [campaign.id]);
@@ -241,6 +260,7 @@ export default function EventPageClient({ campaign }: Props) {
   const isPaid = campaign.goal === 'event' && effectivePrice > 0;
   const maxAttendees = eventDetails?.maxAttendees ?? 0;
   const registrationCount = liveRegistrationCount ?? campaign.registrationCount ?? 0;
+  const registrationCountByDay = liveRegistrationCountByDay ?? campaign.registrationCountByDay ?? {};
   const waitlistEnabled = liveWaitlistEnabled ?? campaign.waitlistEnabled ?? false;
   const waitlistCount = liveWaitlistCount ?? campaign.waitlistCount ?? 0;
   const spotsLeft = maxAttendees > 0 ? maxAttendees - registrationCount : 0;
@@ -296,6 +316,7 @@ export default function EventPageClient({ campaign }: Props) {
         setSubmitError(t.alreadyWaitlisted);
         return;
       }
+      setWaitlistedDays(Array.isArray(json.waitlistedDays) ? json.waitlistedDays : []);
       setSubmitted(true);
     } catch {
       setSubmitError(t.somethingWentWrong);
@@ -463,6 +484,11 @@ export default function EventPageClient({ campaign }: Props) {
       </div>
       <p className="font-black text-zinc-900 dark:text-white uppercase tracking-tight">{t.registrationReceived}</p>
       <p className="text-sm text-zinc-600 dark:text-zinc-300">{t.weWillBeInTouch}</p>
+      {waitlistedDays.length > 0 && (
+        <p className="text-sm font-bold text-amber-700 dark:text-amber-400">
+          {t.partiallyWaitlistedNotice(waitlistedDays.map(d => formatDateShort(d, locale)).join(', '))}
+        </p>
+      )}
     </div>
   ) : (
     <form onSubmit={handleSubmit}>
@@ -479,6 +505,9 @@ export default function EventPageClient({ campaign }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {schedule.map(day => {
                     const isSelected = effectiveSelectedDays.includes(day.date);
+                    // B105: en full dag blockeras INTE (man kan fortfarande välja
+                    // den, se splitAttendingDays), bara märkt så det syns innan man skickar.
+                    const isFull = maxAttendees > 0 && (registrationCountByDay[day.date] ?? 0) >= maxAttendees;
                     return (
                       <button
                         key={day.date}
@@ -495,7 +524,12 @@ export default function EventPageClient({ campaign }: Props) {
                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                           )}
                         </span>
-                        {formatDateShort(day.date, locale)} · {day.time}{day.endTime ? `–${day.endTime}` : ''}
+                        <span className="flex-grow">{formatDateShort(day.date, locale)} · {day.time}{day.endTime ? `–${day.endTime}` : ''}</span>
+                        {isFull && (
+                          <span className={`shrink-0 text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400'}`}>
+                            {t.dayFullWaitlistBadge}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -651,6 +685,8 @@ export default function EventPageClient({ campaign }: Props) {
           fewSpotsLeftLabel={t.fewSpotsLeft}
           spotsLeftLabel={t.spotsLeft}
           soldOutLabel={t.soldOut}
+          registrationCountByDay={registrationCountByDay}
+          dayFullWaitlistBadge={t.dayFullWaitlistBadge}
         />
       );
     }
@@ -704,6 +740,8 @@ export default function EventPageClient({ campaign }: Props) {
           fewSpotsLeftLabel={t.fewSpotsLeft}
           spotsLeftLabel={t.spotsLeft}
           soldOutLabel={t.soldOut}
+          registrationCountByDay={registrationCountByDay}
+          dayFullWaitlistBadge={t.dayFullWaitlistBadge}
         />
       )}
 

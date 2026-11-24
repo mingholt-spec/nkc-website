@@ -486,6 +486,10 @@ export interface Campaign {
   registrationCount?: number;
   waitlistEnabled?: boolean;
   waitlistCount?: number;
+  /** Per-dags-kapacitet för flerdagarsevent (B105) — mirrors bjj-premium's
+   *  types/core.ts Campaign.registrationCountByDay/waitlistCountByDay. */
+  registrationCountByDay?: Record<string, number>;
+  waitlistCountByDay?: Record<string, number>;
   pageConfig: {
     title: string; description: string;
     headerImage?: string; instructor?: string;
