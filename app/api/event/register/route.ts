@@ -38,12 +38,14 @@ export async function POST(req: NextRequest) {
     // Read campaign to get auto-tags, registration deadline, and (B105) per-day capacity state
     let campaignTags: string[] = [];
     let maxAttendees = 0;
+    let maxAttendeesByDay: Record<string, number> | undefined;
     let registrationCountByDay: Record<string, number> | undefined;
     try {
       const campSnap = await db.collection('campaigns').doc(campaignId).get();
       if (campSnap.exists) {
         campaignTags = campSnap.data()?.tags ?? [];
         maxAttendees = campSnap.data()?.eventDetails?.maxAttendees ?? 0;
+        maxAttendeesByDay = campSnap.data()?.eventDetails?.maxAttendeesByDay;
         registrationCountByDay = campSnap.data()?.registrationCountByDay;
         const closeDate = campSnap.data()?.eventDetails?.registrationCloseDate as string | undefined;
         if (closeDate && new Date(closeDate) < new Date()) {
@@ -59,7 +61,7 @@ export async function POST(req: NextRequest) {
     let confirmedDays = selectedDays;
     let waitlistedDays: string[] = [];
     if (selectedDays.length > 0) {
-      const split = splitAttendingDays(selectedDays, maxAttendees, registrationCountByDay);
+      const split = splitAttendingDays(selectedDays, maxAttendees, registrationCountByDay, maxAttendeesByDay);
       confirmedDays = split.confirmedDays;
       waitlistedDays = split.waitlistedDays;
     }

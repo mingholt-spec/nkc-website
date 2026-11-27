@@ -517,6 +517,9 @@ export interface Campaign {
     /** Pris per dagkombination för flerdagarsevent — mirrors
      *  bjj-premium's types/core.ts Campaign.eventDetails.dayComboPricing. */
     dayComboPricing?: { comboKey: string; price: number; memberPrice?: number }[];
+    /** Override av maxAttendees för EN specifik dag (B106) — mirrors
+     *  bjj-premium's types/core.ts Campaign.eventDetails.maxAttendeesByDay. */
+    maxAttendeesByDay?: Record<string, number>;
   };
   guestInstructorInviteId?: string;
   guestProducts?: string[];

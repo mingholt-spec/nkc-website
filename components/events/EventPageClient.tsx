@@ -9,6 +9,7 @@ import { useT } from '@/lib/translations';
 import { BlockRenderer } from '@/components/PageRenderer';
 import LeadFormBlock from '@/components/blocks/LeadFormBlock';
 import { resolveComboPrice } from '@/lib/dayCombos';
+import { effectiveMaxAttendeesForDay } from '@/lib/dayCapacity';
 
 
 interface Props {
@@ -88,11 +89,13 @@ interface QuickInfoBarProps {
    *  för bara en global "platser kvar"-siffra för hela eventet. */
   registrationCountByDay?: Record<string, number>;
   dayFullWaitlistBadge?: string;
+  /** B106: valfritt override av taket för en specifik dag. */
+  maxAttendeesByDay?: Record<string, number>;
 }
 function QuickInfoBar({
   hasSchedule, schedule, isPaid, price, maxAttendees, isSoldOut, isUrgent, spotsLeft,
   bookingPercent, accent, hasHtmlBlocks, locale, priceLabel, fewSpotsLeftLabel, spotsLeftLabel, soldOutLabel,
-  registrationCountByDay, dayFullWaitlistBadge,
+  registrationCountByDay, dayFullWaitlistBadge, maxAttendeesByDay,
 }: QuickInfoBarProps) {
   if (!hasSchedule && !isPaid && maxAttendees <= 0) return null;
   return (
@@ -101,10 +104,11 @@ function QuickInfoBar({
         {hasSchedule && schedule.map((day, i) => {
           const isMultiDay = schedule.length > 1;
           const dayCount = registrationCountByDay?.[day.date] ?? 0;
-          const dayFull = isMultiDay && maxAttendees > 0 && dayCount >= maxAttendees;
-          const daySpotsLeft = maxAttendees > 0 ? maxAttendees - dayCount : 0;
-          const dayBookingPercent = maxAttendees > 0 ? Math.round((dayCount / maxAttendees) * 100) : 0;
-          const dayIsUrgent = maxAttendees > 0 && dayBookingPercent >= 75;
+          const dayMax = effectiveMaxAttendeesForDay(day.date, maxAttendees, maxAttendeesByDay);
+          const dayFull = isMultiDay && dayMax > 0 && dayCount >= dayMax;
+          const daySpotsLeft = dayMax > 0 ? dayMax - dayCount : 0;
+          const dayBookingPercent = dayMax > 0 ? Math.round((dayCount / dayMax) * 100) : 0;
+          const dayIsUrgent = dayMax > 0 && dayBookingPercent >= 75;
           return (
           <div key={i} className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -118,7 +122,7 @@ function QuickInfoBar({
             {/* B105: per-dags-stapel, samma visuella mönster som den globala
                 stapeln nedan hade innan — en stapel per dag istället för en
                 delad siffra för hela eventet. */}
-            {isMultiDay && maxAttendees > 0 && (
+            {isMultiDay && dayMax > 0 && (
               dayFull ? (
                 <span className="text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">
                   {dayFullWaitlistBadge}
@@ -208,6 +212,9 @@ export default function EventPageClient({ campaign }: Props) {
   const [liveWaitlistCount, setLiveWaitlistCount] = useState<number | null>(null);
   /** B105: per-dags-kapacitet — driver dagväljarens "fullt/väntelista"-märkning per dag. */
   const [liveRegistrationCountByDay, setLiveRegistrationCountByDay] = useState<Record<string, number> | null>(null);
+  /** B106: live så en admin-justering ("släpp 4 platser till på lördag") syns
+   *  direkt för besökare som redan har sidan öppen, utan omladdning. */
+  const [liveMaxAttendeesByDay, setLiveMaxAttendeesByDay] = useState<Record<string, number> | null>(null);
 
   // Waitlist form state
   const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
@@ -224,6 +231,7 @@ export default function EventPageClient({ campaign }: Props) {
       setLiveWaitlistEnabled(Boolean(data.waitlistEnabled));
       if (typeof data.waitlistCount === 'number') setLiveWaitlistCount(data.waitlistCount);
       if (data.registrationCountByDay) setLiveRegistrationCountByDay(data.registrationCountByDay);
+      if (data.eventDetails?.maxAttendeesByDay) setLiveMaxAttendeesByDay(data.eventDetails.maxAttendeesByDay);
     });
     return () => unsubscribe();
   }, [campaign.id]);
@@ -287,6 +295,10 @@ export default function EventPageClient({ campaign }: Props) {
   const maxAttendees = eventDetails?.maxAttendees ?? 0;
   const registrationCount = liveRegistrationCount ?? campaign.registrationCount ?? 0;
   const registrationCountByDay = liveRegistrationCountByDay ?? campaign.registrationCountByDay ?? {};
+  // B106: valfritt override av taket för EN specifik dag (t.ex. "vi släpper
+  // 4 platser till på lördag"), satt av admin. Live, precis som
+  // registrationCountByDay ovan, så en redan öppen sida uppdateras direkt.
+  const maxAttendeesByDay = liveMaxAttendeesByDay ?? eventDetails?.maxAttendeesByDay;
   const waitlistEnabled = liveWaitlistEnabled ?? campaign.waitlistEnabled ?? false;
   const waitlistCount = liveWaitlistCount ?? campaign.waitlistCount ?? 0;
   const spotsLeft = maxAttendees > 0 ? maxAttendees - registrationCount : 0;
@@ -300,7 +312,10 @@ export default function EventPageClient({ campaign }: Props) {
   // bara sant om SAMTLIGA schemalagda dagar är fulla var för sig.
   const isSoldOut = maxAttendees > 0 && (
     schedule.length > 1
-      ? schedule.every(d => (registrationCountByDay[d.date] ?? 0) >= maxAttendees)
+      ? schedule.every(d => {
+          const effMax = effectiveMaxAttendeesForDay(d.date, maxAttendees, maxAttendeesByDay);
+          return effMax > 0 && (registrationCountByDay[d.date] ?? 0) >= effMax;
+        })
       : registrationCount >= maxAttendees
   );
   const closeDate = eventDetails?.registrationCloseDate;
@@ -379,10 +394,11 @@ export default function EventPageClient({ campaign }: Props) {
         </div>
         {schedule.map((day, i) => {
           const dayCount = registrationCountByDay[day.date] ?? 0;
-          const dayFull = isMultiDay && maxAttendees > 0 && dayCount >= maxAttendees;
-          const daySpotsLeft = maxAttendees > 0 ? maxAttendees - dayCount : 0;
-          const dayBookingPercent = maxAttendees > 0 ? Math.round((dayCount / maxAttendees) * 100) : 0;
-          const dayIsUrgent = maxAttendees > 0 && dayBookingPercent >= 75;
+          const dayMax = effectiveMaxAttendeesForDay(day.date, maxAttendees, maxAttendeesByDay);
+          const dayFull = isMultiDay && dayMax > 0 && dayCount >= dayMax;
+          const daySpotsLeft = dayMax > 0 ? dayMax - dayCount : 0;
+          const dayBookingPercent = dayMax > 0 ? Math.round((dayCount / dayMax) * 100) : 0;
+          const dayIsUrgent = dayMax > 0 && dayBookingPercent >= 75;
           return (
           <div key={i} className="bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-xl space-y-2">
             <div className="flex items-center justify-between">
@@ -391,7 +407,7 @@ export default function EventPageClient({ campaign }: Props) {
             </div>
             {/* B105: samma stapel-mönster som den globala SocialProofBar
                 tidigare visade — en per dag istället för en delad siffra. */}
-            {isMultiDay && maxAttendees > 0 && (
+            {isMultiDay && dayMax > 0 && (
               dayFull ? (
                 <span className="inline-block text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">{t.dayFullWaitlistBadge}</span>
               ) : (
@@ -577,7 +593,8 @@ export default function EventPageClient({ campaign }: Props) {
                     const isSelected = effectiveSelectedDays.includes(day.date);
                     // B105: en full dag blockeras INTE (man kan fortfarande välja
                     // den, se splitAttendingDays), bara märkt så det syns innan man skickar.
-                    const isFull = maxAttendees > 0 && (registrationCountByDay[day.date] ?? 0) >= maxAttendees;
+                    const dayMax = effectiveMaxAttendeesForDay(day.date, maxAttendees, maxAttendeesByDay);
+                    const isFull = dayMax > 0 && (registrationCountByDay[day.date] ?? 0) >= dayMax;
                     return (
                       <button
                         key={day.date}
@@ -757,6 +774,7 @@ export default function EventPageClient({ campaign }: Props) {
           soldOutLabel={t.soldOut}
           registrationCountByDay={registrationCountByDay}
           dayFullWaitlistBadge={t.dayFullWaitlistBadge}
+          maxAttendeesByDay={maxAttendeesByDay}
         />
       );
     }
@@ -812,6 +830,7 @@ export default function EventPageClient({ campaign }: Props) {
           soldOutLabel={t.soldOut}
           registrationCountByDay={registrationCountByDay}
           dayFullWaitlistBadge={t.dayFullWaitlistBadge}
+          maxAttendeesByDay={maxAttendeesByDay}
         />
       )}
 
